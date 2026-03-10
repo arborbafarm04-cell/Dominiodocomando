@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Image } from '@/components/ui/image';
+import SlotMachine from '@/components/SlotMachine';
 
 export default function GiroNoAsfaltoPage() {
   return (
@@ -15,9 +16,11 @@ export default function GiroNoAsfaltoPage() {
           height={1920}
           className="w-full h-full object-cover"
         />
-        {/* Empty container positioned inside the slot machine screen - TV display area */}
+        {/* Slot Machine Component positioned inside the slot machine screen - TV display area */}
         <div className="absolute" style={{ top: '55%', left: '50%', transform: 'translateX(-50%)' }}>
-          <div className="w-[308px] h-[198px] bg-transparent border-2 border-[#00eaff] rounded-lg" />
+          <div className="w-[308px] h-[198px] bg-transparent border-2 border-[#00eaff] rounded-lg overflow-hidden flex items-center justify-center">
+            <SlotMachine />
+          </div>
         </div>
       </div>
       <Footer />
