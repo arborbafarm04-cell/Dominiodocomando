@@ -36,19 +36,19 @@ export default function SlotMachine() {
     <div className="w-full max-w-[100rem] mx-auto px-4 py-12">
       <div className="flex flex-col items-center justify-center gap-8">
         {/* Slot Machine Container */}
-        <div className="bg-gradient-to-b from-gray-900 to-black border-4 border-primary rounded-lg p-8 shadow-2xl">
-          {/* Slot Display */}
-          <div className="flex gap-6 justify-center items-center">
+        <div className="bg-gradient-to-b from-gray-900 to-black border-4 border-primary rounded-lg p-6 shadow-2xl">
+          {/* Slot Display - 3 slots centered */}
+          <div className="flex gap-4 justify-center items-center">
             {slots.map((slotIndex, position) => (
               <div
                 key={position}
-                className="w-32 h-40 bg-gradient-to-b from-gray-800 to-black border-2 border-secondary rounded-lg flex items-center justify-center overflow-hidden shadow-inner"
+                className="w-28 h-36 bg-gradient-to-b from-gray-800 to-black border-2 border-secondary rounded-lg flex items-center justify-center overflow-hidden shadow-inner"
               >
                 <Image
                   src={SLOT_ITEMS[slotIndex].image}
                   alt={SLOT_ITEMS[slotIndex].name}
-                  width={120}
-                  height={120}
+                  width={100}
+                  height={100}
                   className="object-contain"
                 />
               </div>
@@ -56,9 +56,9 @@ export default function SlotMachine() {
           </div>
 
           {/* Slot Item Labels */}
-          <div className="flex gap-6 justify-center mt-6 text-secondary text-sm font-heading">
+          <div className="flex gap-4 justify-center mt-4 text-secondary text-xs font-heading">
             {slots.map((slotIndex, position) => (
-              <div key={position} className="w-32 text-center truncate">
+              <div key={position} className="w-28 text-center truncate">
                 {SLOT_ITEMS[slotIndex].name}
               </div>
             ))}
