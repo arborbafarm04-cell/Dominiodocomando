@@ -9,10 +9,10 @@ export default function GiroNoAsfaltoPage() {
       {/* Slot Machine Illustration Section */}
       <div className="flex-1 w-full relative overflow-hidden bg-gradient-to-b from-[#0a0d14] to-[#0f1419] flex items-center justify-center">
         <Image
-          src="https://static.wixstatic.com/media/50f4bf_658951abc0444fd48df152b6faef52a1~mv2.png?originWidth=1152&originHeight=1600"
-          alt="Ultra-realistic cinematic slot machine arcade cabinet viewed straight from the front, facing the player directly, in a Brazilian community bar with neon LED display showing GIRO NO ASFALTO"
-          width={1152}
-          height={1600}
+          src="https://static.wixstatic.com/media/50f4bf_f0f13bffd67f4487bbad4fec560e36e5~mv2.png?originWidth=1024&originHeight=1920"
+          alt="Ultra-realistic cinematic slot machine arcade cabinet viewed straight from the front, facing the player directly, with empty blank display panel, bright LED neon panel displaying GIRO NO ASFALTO with glowing neon effect, in a Brazilian community bar with immersive atmosphere"
+          width={1024}
+          height={1920}
           className="w-full h-full object-cover"
         />
       </div>
