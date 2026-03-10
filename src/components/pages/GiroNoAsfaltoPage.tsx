@@ -17,7 +17,7 @@ export default function GiroNoAsfaltoPage() {
         />
         {/* Empty container positioned inside the slot machine screen */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-[75%] h-[60%] bg-transparent border border-transparent" />
+          <div className="w-full h-full bg-transparent border border-transparent" />
         </div>
       </div>
       <Footer />
