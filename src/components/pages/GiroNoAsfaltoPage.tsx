@@ -16,7 +16,7 @@ export default function GiroNoAsfaltoPage() {
           className="w-full h-full object-cover"
         />
         {/* Empty container positioned inside the slot machine screen - TV display area */}
-        <div className="absolute" style={{ top: '26.5%', left: '50%', transform: 'translateX(-50%)' }}>
+        <div className="absolute" style={{ top: '32%', left: '50%', transform: 'translateX(-50%)' }}>
           <div className="w-[308px] h-[198px] bg-transparent border-2 border-[#00eaff] rounded-lg" />
         </div>
       </div>
