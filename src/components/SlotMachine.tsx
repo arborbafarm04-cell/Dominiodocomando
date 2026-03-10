@@ -158,13 +158,7 @@ export default function SlotMachine() {
             </motion.div>
           ))}
         </div>
-
         {/* Result Message */}
-        {resultMessage && (
-          <div className="text-center mt-3 text-secondary font-heading text-sm">
-            {resultMessage}
-          </div>
-        )}
 
         {/* Game Stats */}
         <div className="flex justify-center gap-8 mt-4 text-white font-paragraph text-sm">
