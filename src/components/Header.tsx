@@ -4,20 +4,28 @@ import { Image } from '@/components/ui/image';
 
 export default function Header() {
   const [playerName, setPlayerName] = useState('');
+  const [customPlayerName, setCustomPlayerName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('https://static.wixstatic.com/media/50f4bf_a888df3d639f415b853110e459edba8c~mv2.png?originWidth=128&originHeight=128');
   const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingCustomName, setIsEditingCustomName] = useState(false);
   const [tempName, setTempName] = useState('');
+  const [tempCustomName, setTempCustomName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load saved data from localStorage
   useEffect(() => {
     const savedName = localStorage.getItem('playerName');
+    const savedCustomName = localStorage.getItem('customPlayerName');
     const savedAvatar = localStorage.getItem('playerAvatar');
     
     if (savedName) {
       setPlayerName(savedName);
     } else {
       setPlayerName('COMANDANTE');
+    }
+    
+    if (savedCustomName) {
+      setCustomPlayerName(savedCustomName);
     }
     
     if (savedAvatar) {
@@ -63,6 +71,28 @@ export default function Header() {
       handleNameSave();
     } else if (e.key === 'Escape') {
       setIsEditingName(false);
+    }
+  };
+
+  // Handle custom name edit
+  const handleCustomNameClick = () => {
+    setIsEditingCustomName(true);
+    setTempCustomName(customPlayerName);
+  };
+
+  const handleCustomNameSave = () => {
+    if (tempCustomName.trim()) {
+      setCustomPlayerName(tempCustomName.trim());
+      localStorage.setItem('customPlayerName', tempCustomName.trim());
+    }
+    setIsEditingCustomName(false);
+  };
+
+  const handleCustomNameKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleCustomNameSave();
+    } else if (e.key === 'Escape') {
+      setIsEditingCustomName(false);
     }
   };
 
@@ -140,33 +170,66 @@ export default function Header() {
 
         {/* Right Area - Player Name & Icons */}
         <div className="flex items-center gap-6">
-          {/* Player Name */}
-          <div className="flex items-center">
-            {isEditingName ? (
-              <input
-                type="text"
-                value={tempName}
-                onChange={(e) => setTempName(e.target.value)}
-                onBlur={handleNameSave}
-                onKeyDown={handleNameKeyPress}
-                className="bg-transparent border-b-2 border-subtitle-neon-blue text-white font-paragraph text-lg md:text-xl font-medium uppercase tracking-wider outline-none px-2"
-                style={{
-                  textShadow: '0 0 10px rgba(0,234,255,0.8)'
-                }}
-                autoFocus
-                maxLength={20}
-              />
-            ) : (
-              <button
-                onClick={handleNameClick}
-                className="text-white font-paragraph text-lg md:text-xl font-medium uppercase tracking-wider hover:text-subtitle-neon-blue transition-colors duration-300"
-                style={{
-                  textShadow: '0 0 10px rgba(0,234,255,0.8)'
-                }}
-              >
-                {playerName}
-              </button>
-            )}
+          {/* Player Names */}
+          <div className="flex flex-col items-start gap-1">
+            {/* Main Player Name */}
+            <div className="flex items-center">
+              {isEditingName ? (
+                <input
+                  type="text"
+                  value={tempName}
+                  onChange={(e) => setTempName(e.target.value)}
+                  onBlur={handleNameSave}
+                  onKeyDown={handleNameKeyPress}
+                  className="bg-transparent border-b-2 border-subtitle-neon-blue text-white font-paragraph text-lg md:text-xl font-medium uppercase tracking-wider outline-none px-2"
+                  style={{
+                    textShadow: '0 0 10px rgba(0,234,255,0.8)'
+                  }}
+                  autoFocus
+                  maxLength={20}
+                />
+              ) : (
+                <button
+                  onClick={handleNameClick}
+                  className="text-white font-paragraph text-lg md:text-xl font-medium uppercase tracking-wider hover:text-subtitle-neon-blue transition-colors duration-300"
+                  style={{
+                    textShadow: '0 0 10px rgba(0,234,255,0.8)'
+                  }}
+                >
+                  {playerName}
+                </button>
+              )}
+            </div>
+
+            {/* Custom Player Name */}
+            <div className="flex items-center">
+              {isEditingCustomName ? (
+                <input
+                  type="text"
+                  value={tempCustomName}
+                  onChange={(e) => setTempCustomName(e.target.value)}
+                  onBlur={handleCustomNameSave}
+                  onKeyDown={handleCustomNameKeyPress}
+                  className="bg-transparent border-b-2 border-logo-gradient-start text-logo-gradient-start font-paragraph text-sm md:text-base font-medium tracking-wider outline-none px-2"
+                  style={{
+                    textShadow: '0 0 8px rgba(255,69,0,0.6)'
+                  }}
+                  autoFocus
+                  maxLength={30}
+                  placeholder="Nome personalizado..."
+                />
+              ) : (
+                <button
+                  onClick={handleCustomNameClick}
+                  className="text-logo-gradient-start font-paragraph text-sm md:text-base font-medium tracking-wider hover:brightness-150 transition-all duration-300"
+                  style={{
+                    textShadow: '0 0 8px rgba(255,69,0,0.6)'
+                  }}
+                >
+                  {customPlayerName || '+ Nome personalizado'}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Icons */}
