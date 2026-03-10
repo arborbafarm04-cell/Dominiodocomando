@@ -130,6 +130,31 @@ export default function SlotMachine() {
   return (
     <div className="flex flex-col items-center justify-center gap-2">
       {/* Slot Machine Container */}
+      <div className="w-full max-w-2xl pt-6 px-6 md:px-12 flex flex-col items-center bg-gradient-to-br from-gray-900/70 to-black/70 border-secondary rounded-3xl shadow-2xl overflow-hidden relative group transition-all duration-500 hover:scale-[1.01] hover:shadow-secondary/50 border border-none justify-start">
+        <div className="absolute inset-0 bg-secondary opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none rounded-3xl"></div>
+        <div className="relative z-10 w-full text-center">
+          <button
+            onClick={() => spinSlots(selectedMultiplier)}
+            disabled={isSpinning || spins <= 0}
+            className="w-full max-w-xs md:max-w-md px-8 py-4 bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end text-white font-heading text-xl md:text-2xl font-bold rounded-full hover:brightness-125 transition-all duration-500 ease-out disabled:opacity-40 disabled:cursor-not-allowed shadow-xl shadow-logo-gradient-start/40 transform hover:-translate-y-1 active:translate-y-0"
+            style={{
+              filter: 'drop-shadow(0 0 20px rgba(255,69,0,0.8))'
+            }}
+          >
+            {isSpinning ? 'GIRANDO...' : 'GIRAR'}
+          </button>
+        </div>
+
+        <div className="relative z-10 w-full mb-8 mt-4">
+
+        </div>
+
+        {spins <= 0 && (
+          <div className="relative z-10 text-center mt-6 text-red-500 font-heading font-bold text-lg md:text-xl animate-pulse">
+            SEM GIROS DISPONÍVEIS
+          </div>
+        )}
+      </div>
       <div className="from-gray-900 to-black border-secondary rounded-lg p-3 shadow-2xl border border-none bg-transparent">
         {/* Slot Display - 3 slots centered */}
         {/* Slot Item Labels */}
@@ -169,31 +194,6 @@ export default function SlotMachine() {
 
           </div>
         </div>
-      </div>
-      <div className="w-full max-w-2xl pt-6 px-6 md:px-12 flex flex-col items-center justify-center bg-gradient-to-br from-gray-900/70 to-black/70 border-secondary rounded-3xl shadow-2xl overflow-hidden relative group transition-all duration-500 hover:scale-[1.01] hover:shadow-secondary/50 border border-none">
-        <div className="absolute inset-0 bg-secondary opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none rounded-3xl"></div>
-        <div className="relative z-10 w-full text-center">
-          <button
-            onClick={() => spinSlots(selectedMultiplier)}
-            disabled={isSpinning || spins <= 0}
-            className="w-full max-w-xs md:max-w-md px-8 py-4 bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end text-white font-heading text-xl md:text-2xl font-bold rounded-full hover:brightness-125 transition-all duration-500 ease-out disabled:opacity-40 disabled:cursor-not-allowed shadow-xl shadow-logo-gradient-start/40 transform hover:-translate-y-1 active:translate-y-0"
-            style={{
-              filter: 'drop-shadow(0 0 20px rgba(255,69,0,0.8))'
-            }}
-          >
-            {isSpinning ? 'GIRANDO...' : 'GIRAR'}
-          </button>
-        </div>
-
-        <div className="relative z-10 w-full mb-8 mt-4">
-
-        </div>
-
-        {spins <= 0 && (
-          <div className="relative z-10 text-center mt-6 text-red-500 font-heading font-bold text-lg md:text-xl animate-pulse">
-            SEM GIROS DISPONÍVEIS
-          </div>
-        )}
       </div>
       {/* Controls Container */}
       {/* Prison Modal */}
