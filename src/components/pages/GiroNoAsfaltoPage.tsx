@@ -18,7 +18,7 @@ export default function GiroNoAsfaltoPage() {
         />
         {/* Slot Machine Component positioned inside the slot machine screen - TV display area */}
         <div className="absolute" style={{ top: '55%', left: '50%', transform: 'translateX(-50%)' }}>
-          <div className="w-[308px] h-[198px] bg-transparent border-2 border-[#00eaff] rounded-lg overflow-hidden flex items-center justify-center">
+          <div className="w-[308px] h-[198px] bg-transparent border-2 border-[#00eaff] rounded-lg overflow-hidden flex items-center justify-center shadow-[inset_100px_0px_4px_0px_#bfbfbf] opacity-[1]">
             <SlotMachine />
           </div>
         </div>
