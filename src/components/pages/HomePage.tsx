@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, Bell, Settings, Edit2, Check, ShieldAlert, X } from 'lucide-react';
 import { Image } from '@/components/ui/image';
-import PositioningCanvas from '@/components/PositioningCanvas';
 
 // --- Types & Interfaces ---
 interface PlayerData {
@@ -141,7 +140,7 @@ const GameHeader: React.FC = () => {
             ...prev,
             [id]: {
               ...prev[id],
-              position: { x: Math.max(0, newX), y: Math.max(0, newY) }
+              position: { x: newX, y: newY }
             }
           }));
         }
@@ -158,6 +157,33 @@ const GameHeader: React.FC = () => {
       }), {})
     }));
   };
+
+  // Save positions to localStorage
+  useEffect(() => {
+    const toSave = Object.entries(containers).reduce((acc, [id, container]) => {
+      acc[id] = { position: container.position };
+      return acc;
+    }, {} as Record<string, any>);
+    localStorage.setItem('header-container-positions', JSON.stringify(toSave));
+  }, [containers]);
+
+  // Load positions from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('header-container-positions');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setContainers(prev => ({
+          ...prev,
+          left: { ...prev.left, position: parsed.left?.position || { x: 0, y: 0 } },
+          center: { ...prev.center, position: parsed.center?.position || { x: 0, y: 0 } },
+          right: { ...prev.right, position: parsed.right?.position || { x: 0, y: 0 } },
+        }));
+      } catch (e) {
+        console.error('Failed to load positions:', e);
+      }
+    }
+  }, []);
 
   const handleInputChange = (containerId: string, axis: 'x' | 'y', value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -198,16 +224,15 @@ const GameHeader: React.FC = () => {
         <div className="absolute bottom-0 right-0 w-48 h-[2px] bg-gradient-to-l from-[#00eaff] to-transparent" />
       </div>
       {/* Main Content Container */}
-      <PositioningCanvas isInspectorMode={showInspector}>
-        <div className="relative h-full w-full max-w-[120rem] mx-auto px-4 md:px-8 flex items-center justify-between">
+      <div className="relative h-full w-full max-w-[120rem] mx-auto px-4 md:px-8 flex items-center justify-between">
 
           {/* LEFT AREA: Logo & Title */}
           <div 
             ref={(el) => { if (el) containerRefs.current['left'] = el; }}
             onMouseDown={(e) => handleMouseDown(e, 'left')}
-            data-positionable="left-container"
             className={`flex items-center gap-4 z-10 w-1/3 min-w-[250px] ${showInspector ? 'cursor-move border-2 border-yellow-400' : ''} ${selectedContainer === 'left' && showInspector ? 'ring-2 ring-yellow-300' : ''}`}
             style={{
+              transform: `translate(${containers.left.position.x}px, ${containers.left.position.y}px)`,
               transition: containers.left.isDragging ? 'none' : 'none'
             }}
           >
@@ -245,9 +270,9 @@ const GameHeader: React.FC = () => {
         <div 
           ref={(el) => { if (el) containerRefs.current['center'] = el; }}
           onMouseDown={(e) => handleMouseDown(e, 'center')}
-          data-positionable="center-container"
           className={`flex flex-col items-center justify-center z-20 ${showInspector ? 'cursor-move border-2 border-yellow-400' : ''} ${selectedContainer === 'center' && showInspector ? 'ring-2 ring-yellow-300' : ''}`}
           style={{
+            transform: `translate(${containers.center.position.x}px, ${containers.center.position.y}px)`,
             transition: containers.center.isDragging ? 'none' : 'none'
           }}
         >
@@ -296,9 +321,9 @@ const GameHeader: React.FC = () => {
         <div 
           ref={(el) => { if (el) containerRefs.current['right'] = el; }}
           onMouseDown={(e) => handleMouseDown(e, 'right')}
-          data-positionable="right-container"
           className={`flex items-center justify-end gap-4 sm:gap-6 z-10 w-1/3 min-w-[200px] ${showInspector ? 'cursor-move border-2 border-yellow-400' : ''} ${selectedContainer === 'right' && showInspector ? 'ring-2 ring-yellow-300' : ''}`}
           style={{
+            transform: `translate(${containers.right.position.x}px, ${containers.right.position.y}px)`,
             transition: containers.right.isDragging ? 'none' : 'none'
           }}
         >
@@ -372,9 +397,7 @@ const GameHeader: React.FC = () => {
             </motion.button>
           </div>
         </div>
-        </div>
-
-      </PositioningCanvas>
+      </div>
 
       {/* Inspector Panel */}
       {showInspector && (
