@@ -21,6 +21,19 @@ export default function GiroNoAsfaltoPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50"></div>
       </section>
 
+      {/* Slot Machine Illustration Section */}
+      <section className="w-full py-16 px-4 bg-black">
+        <div className="max-w-[100rem] mx-auto flex justify-center">
+          <Image
+            src="https://static.wixstatic.com/media/50f4bf_9b1dcf790380438d9e86d081b1fd03d4~mv2.png"
+            alt="Ultra realistic cinematic slot machine in Brazilian community bar with empty screen"
+            width={1200}
+            height={800}
+            className="w-full max-w-4xl h-auto object-contain rounded-lg"
+          />
+        </div>
+      </section>
+
       <Footer />
     </div>
   );
