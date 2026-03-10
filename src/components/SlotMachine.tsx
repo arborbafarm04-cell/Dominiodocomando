@@ -196,7 +196,7 @@ export default function SlotMachine() {
 
         <div className="relative z-10 w-full mb-8 mt-4">
 
-          <div className="grid grid-cols-3 md:grid-cols-7 gap-3 md:gap-4 p-2 bg-black/30 rounded-xl border border-secondary/30 backdrop-blur-sm">
+          <div className="grid grid-cols-3 md:grid-cols-7 gap-3 md:gap-4 p-2 rounded-xl border-secondary/30 backdrop-blur-sm border border-none bg-destructive-foreground">
             {MULTIPLIERS.map((mult) => (
               <button
                 key={mult}
