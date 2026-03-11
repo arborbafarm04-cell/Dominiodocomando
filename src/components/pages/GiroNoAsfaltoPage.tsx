@@ -97,7 +97,7 @@ export default function GiroNoAsfaltoPage() {
               alt="Ultra-realistic cinematic slot machine arcade cabinet viewed straight from the front, facing the player directly, with empty blank display panel, bright LED neon panel displaying GIRO NO ASFALTO with glowing neon effect, in a Brazilian community bar with immersive atmosphere"
               width={1024}
               height={1920}
-              className="w-full h-full object-cover fixed top-0 left-0"
+              className="w-full h-full object-cover fixed top-0 left-0 brightness-125 contrast-110"
             />
             {/* Slot Machine Component positioned inside the slot machine screen - TV display area */}
             <div className="absolute inset-0 flex flex-col items-center justify-end pb-20 relative z-10">

@@ -61,7 +61,7 @@ function SpinButton() {
       <button
         onClick={handleSpin}
         disabled={isSpinning || spins <= 0}
-        className="w-full max-w-xs md:max-w-md px-8 py-4 bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end text-white font-heading text-xl md:text-2xl font-bold rounded-full hover:brightness-125 transition-all duration-500 ease-out disabled:opacity-40 disabled:cursor-not-allowed shadow-xl shadow-logo-gradient-start/40 transform hover:-translate-y-1 active:translate-y-0"
+        className="w-full max-w-sm md:max-w-lg px-12 py-6 bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end text-white font-heading text-2xl md:text-3xl font-bold rounded-full hover:brightness-125 transition-all duration-500 ease-out disabled:opacity-40 disabled:cursor-not-allowed shadow-xl shadow-logo-gradient-start/40 transform hover:-translate-y-1 active:translate-y-0"
         style={{
           filter: 'drop-shadow(0 0 20px rgba(255,69,0,0.8))'
         }}
@@ -161,29 +161,29 @@ function SlotsDisplay() {
   return (
     <div className="from-gray-900 to-black border-secondary rounded-lg p-3 shadow-2xl border border-none bg-transparent">
       {/* Slot Item Labels */}
-      <div className="flex gap-2 justify-center mt-2 text-secondary text-xs font-heading">
+      <div className="flex gap-3 justify-center mt-4 text-secondary text-sm font-heading">
         {slots.map((slotIndex, position) => (
-          <div key={position} className="w-20 text-center truncate text-[10px]">
+          <div key={position} className="w-28 text-center truncate text-xs">
             {SLOT_ITEMS[slotIndex].name}
           </div>
         ))}
       </div>
       
       {/* Slot Display */}
-      <div className="flex gap-2 justify-center items-center">
+      <div className="flex gap-3 justify-center items-center">
         {slots.map((slotIndex, position) => (
           <motion.div
             key={position}
-            className="w-20 h-24 bg-gradient-to-b from-gray-800 to-black border-2 border-secondary rounded-lg flex items-center justify-center overflow-hidden shadow-inner"
+            className="w-32 h-40 bg-gradient-to-b from-gray-800 to-black border-2 border-secondary rounded-lg flex items-center justify-center overflow-hidden shadow-inner"
             animate={spinningIndices[position] ? { y: [0, -10, 0] } : {}}
             transition={spinningIndices[position] ? { duration: 0.1, repeat: Infinity } : {}}
           >
             <Image
               src={SLOT_ITEMS[slotIndex].image}
               alt={SLOT_ITEMS[slotIndex].name}
-              width={60}
-              height={60}
-              className="object-contain mix-blend-hard-light shadow-[inset_10px_10px_4px_0px_#bfbfbf] opacity-[1] border-[#0f141ed9] rounded-none border border-none m-0"
+              width={100}
+              height={100}
+              className="object-contain brightness-125 contrast-125 shadow-[inset_10px_10px_4px_0px_#bfbfbf] opacity-[1] border-[#0f141ed9] rounded-none border border-none m-0"
             />
           </motion.div>
         ))}
@@ -247,7 +247,7 @@ export default function SlotMachine() {
   return (
     <div className="flex flex-col items-center justify-center gap-6">
       {/* Spin Button - Independent */}
-      <div className="w-full max-w-2xl pt-6 px-6 md:px-12 flex flex-col items-center bg-gradient-to-br from-gray-900/70 to-black/70 border-secondary rounded-3xl shadow-2xl overflow-hidden relative group transition-all duration-500 hover:scale-[1.01] hover:shadow-secondary/50 border border-none justify-start">
+      <div className="w-full max-w-3xl pt-8 px-6 md:px-12 flex flex-col items-center bg-gradient-to-br from-gray-900/70 to-black/70 border-secondary rounded-3xl shadow-2xl overflow-hidden relative group transition-all duration-500 hover:scale-[1.01] hover:shadow-secondary/50 border border-none justify-start">
         <div className="absolute inset-0 bg-secondary opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none rounded-3xl"></div>
         <div className="relative z-10 w-full text-center">
           <SpinButton />
