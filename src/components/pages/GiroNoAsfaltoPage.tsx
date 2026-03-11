@@ -34,17 +34,7 @@ export default function GiroNoAsfaltoPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0d14] flex flex-col relative">
-      {/* Edit Mode Controls */}
-      <div className="fixed top-4 right-4 z-[100] flex items-center gap-2 bg-black/80 border border-[#00eaff]/50 rounded px-4 py-2 backdrop-blur-sm">
-        <button
-          onClick={resetPositions}
-          className="flex items-center gap-2 px-3 py-1 bg-[#FF4500]/20 hover:bg-[#FF4500]/40 border border-[#FF4500]/50 rounded text-white/80 hover:text-white transition-all text-sm font-paragraph"
-          title="Reset all container positions"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Reset Positions
-        </button>
-      </div>
+
 
       {/* Edit Title Modal */}
       {editingId && (
@@ -153,18 +143,6 @@ export default function GiroNoAsfaltoPage() {
                       className="rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 object-cover w-full h-auto"
                     />
                   </div>
-                </div>
-
-                {/* Action Button */}
-                <div className="flex justify-center">
-                  <button
-                    className="px-12 py-4 bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end text-white font-heading text-xl font-bold rounded-full hover:brightness-125 transition-all duration-500 ease-out shadow-xl shadow-logo-gradient-start/40 transform hover:-translate-y-1 active:translate-y-0"
-                    style={{
-                      filter: 'drop-shadow(0 0 20px rgba(255,69,0,0.8))'
-                    }}
-                  >
-                    EXPLORAR MAIS
-                  </button>
                 </div>
               </div>
             </div>
