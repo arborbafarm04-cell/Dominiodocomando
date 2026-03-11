@@ -7,8 +7,8 @@ export default function CasaPage() {
       className="min-h-screen w-full flex flex-col"
       style={{
         backgroundImage: 'url(https://static.wixstatic.com/media/50f4bf_c6c96e5e7b0c4b8b963f4138fdc7a35c~mv2.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundSize: '120%',
+        backgroundPosition: 'center 40%',
         backgroundAttachment: 'fixed',
       }}
     >
