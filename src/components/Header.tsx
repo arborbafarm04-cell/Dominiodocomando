@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, Crown } from 'lucide-react';
+import { Bell, Settings, Crown, Vault } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
 
@@ -171,7 +171,6 @@ export default function Header() {
 
         {/* Right Area - Player Name & Icons */}
         <div className="flex items-center gap-6">
-          {/* Dirty Money Display */}
           {/* Player Names */}
           <div className="flex flex-col items-start gap-1">
             {/* Main Player Name */}
@@ -210,6 +209,20 @@ export default function Header() {
             </div>
           </div>
 
+          {/* Clean Money Vault */}
+          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-subtitle-neon-blue/20 to-subtitle-neon-blue/10 rounded-lg border-2 border-subtitle-neon-blue" style={{
+            filter: 'drop-shadow(0 0 10px rgba(0,234,255,0.5))'
+          }}>
+            <Vault className="w-6 h-6 text-subtitle-neon-blue" style={{
+              filter: 'drop-shadow(0 0 8px rgba(0,234,255,0.8))'
+            }} />
+            <div className="flex flex-col">
+              <span className="text-xs text-subtitle-neon-blue font-heading">COFRE LIMPO</span>
+              <span className="text-lg font-bold text-white font-heading">R$ {(100000000).toLocaleString('pt-BR')}</span>
+            </div>
+          </div>
+
+          {/* Dirty Money Display */}
           <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-logo-gradient-start/20 to-logo-gradient-end/20 rounded-lg border-2 border-logo-gradient-start" style={{
             filter: 'drop-shadow(0 0 10px rgba(255,69,0,0.5))'
           }}>
