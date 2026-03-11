@@ -93,8 +93,8 @@ export default function GiroNoAsfaltoPage() {
         {containers.find(c => c.id === 'slot-machine')?.isVisible && (
           <div className="w-full relative overflow-hidden bg-gradient-to-b from-[#0a0d14] to-[#0f1419] flex items-center justify-center min-h-screen bg-fixed">
             <Image
-              src="https://static.wixstatic.com/media/50f4bf_f0f13bffd67f4487bbad4fec560e36e5~mv2.png?originWidth=1024&originHeight=1920"
-              alt="Ultra-realistic cinematic slot machine arcade cabinet viewed straight from the front, facing the player directly, with empty blank display panel, bright LED neon panel displaying GIRO NO ASFALTO with glowing neon effect, in a Brazilian community bar with immersive atmosphere"
+              src="https://static.wixstatic.com/media/50f4bf_6b4eb0fd32be42dc85143a0226956f62~mv2.png?originWidth=1024&originHeight=1920"
+              alt="Ultra-realistic cinematic image of a large ornate golden safe vault with glowing neon lights, representing wealth and earnings, in a Brazilian bar atmosphere with immersive lighting and neon effects"
               width={1024}
               height={1920}
               className="w-full h-full object-cover fixed top-0 left-0 brightness-125 contrast-110"
