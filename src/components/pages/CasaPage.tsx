@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { usePlayerStore } from '@/store/playerStore';
 import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
 
@@ -22,6 +23,7 @@ export default function CasaPage() {
   const { level, setLevel } = usePlayerStore();
   const { removeDirtyMoney, dirtyMoney } = useDirtyMoneyStore();
   const [backgroundImage, setBackgroundImage] = useState('https://static.wixstatic.com/media/50f4bf_33be6b8d7dcf42169f78328d168a8ec4~mv2.png');
+  const [inputLevel, setInputLevel] = useState(level.toString());
 
   const getMoneyForLevel = (playerLevel: number): number => {
     // Find the appropriate amount based on player level
@@ -48,10 +50,12 @@ export default function CasaPage() {
         // If player is level 9, upgrade to level 10 and change background
         if (level === 9) {
           setLevel(10);
+          setInputLevel('10');
           setBackgroundImage('https://static.wixstatic.com/media/50f4bf_d78defb80b9247beb0e9c91a333507bc~mv2.png');
           alert(`Parabéns! Você atingiu o nível 10! R$ ${moneyToRemove.toLocaleString('pt-BR')} retirado do cofre!`);
         } else if (level === 19) {
           setLevel(20);
+          setInputLevel('20');
           setBackgroundImage('https://static.wixstatic.com/media/50f4bf_2feb9c93a34a4b849f52b5461ea4f2cb~mv2.png');
           alert(`Parabéns! Você atingiu o nível 20! R$ ${moneyToRemove.toLocaleString('pt-BR')} retirado do cofre!`);
         } else {
@@ -62,6 +66,16 @@ export default function CasaPage() {
       }
     } else {
       alert(`Nível ${level}: Você precisa atingir o nível 9 para retirar dinheiro sujo.`);
+    }
+  };
+
+  const handleLevelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputLevel(value);
+    
+    const newLevel = parseInt(value, 10);
+    if (!isNaN(newLevel) && newLevel >= 0) {
+      setLevel(newLevel);
     }
   };
 
@@ -76,7 +90,15 @@ export default function CasaPage() {
       }}
     >
       <Header />
-      <div className="w-full flex justify-center pt-32">
+      <div className="w-full flex justify-center items-center gap-4 pt-32">
+        <Input
+          type="number"
+          value={inputLevel}
+          onChange={handleLevelChange}
+          placeholder="Nível"
+          className="w-24 px-4 py-2 text-lg text-center"
+          min="0"
+        />
         <Button onClick={handleButtonClick} className="px-8 py-3 text-lg">
           Clique aqui
         </Button>
