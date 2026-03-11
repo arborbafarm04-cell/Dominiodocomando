@@ -6,7 +6,7 @@ export default function CasaPage() {
     <div
       className="min-h-screen w-full flex flex-col"
       style={{
-        backgroundImage: 'url(https://static.wixstatic.com/media/50f4bf_1d60319a33de4073a9af182dd1efea4d~mv2.png)',
+        backgroundImage: 'url(https://static.wixstatic.com/media/50f4bf_c6c96e5e7b0c4b8b963f4138fdc7a35c~mv2.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
