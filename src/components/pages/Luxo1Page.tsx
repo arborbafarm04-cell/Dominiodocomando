@@ -57,7 +57,7 @@ export default function Luxo1Page() {
       <div className="relative w-full flex-1 overflow-hidden">
         {/* Background Image - Changes based on player level */}
         <Image
-          src={playerLevel === 2 ? "https://static.wixstatic.com/media/50f4bf_71a570651cb443828086ee0c7c5a437e~mv2.png?originWidth=1920&originHeight=1024" : "https://static.wixstatic.com/media/50f4bf_ee701d9f8c20484698e5df1171cc5c37~mv2.png"}
+          src={playerLevel === 2 ? "https://static.wixstatic.com/media/50f4bf_abc9173766674c0b9c7fd9f67b9aab9b~mv2.png" : "https://static.wixstatic.com/media/50f4bf_ee701d9f8c20484698e5df1171cc5c37~mv2.png"}
           alt="Luxo 1 Background"
           className="absolute inset-0 w-full h-full object-cover"
           width={1920}
