@@ -75,16 +75,13 @@ export default function Luxo1Page() {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="font-heading text-6xl md:text-7xl font-bold text-white mb-4">
-              Luxo 1
-            </h1>
             <p className="font-paragraph text-xl md:text-2xl text-secondary mb-12">
               Adquira este item exclusivo
             </p>
 
-            {/* Buy Button and Player Level Box Container */}
             <div className="flex flex-col md:flex-row items-center justify-center gap-6">
               {/* Buy Button */}
+              {/* Player Level Box */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -95,7 +92,6 @@ export default function Luxo1Page() {
                 Comprar por R$150,00
               </motion.button>
 
-              {/* Player Level Box */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -116,6 +112,7 @@ export default function Luxo1Page() {
                 </div>
               </motion.div>
             </div>
+            {/* Buy Button and Player Level Box Container */}
           </motion.div>
         </div>
 
