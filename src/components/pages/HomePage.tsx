@@ -2,10 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Image } from '@/components/ui/image';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { usePlayerStore } from '@/store/playerStore';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [playerName, setPlayerName] = useState('');
+  const [showNameInput, setShowNameInput] = useState(false);
+  const setStoredPlayerName = usePlayerStore((state) => state.setPlayerName);
 
   // Check if user is already logged in on mount
   useEffect(() => {
@@ -13,7 +17,22 @@ export default function HomePage() {
     if (isLoggedIn === 'true') {
       navigate('/game', { replace: true });
     }
+    
+    // Load saved player name
+    const savedName = localStorage.getItem('playerName');
+    if (savedName) {
+      setPlayerName(savedName);
+    }
   }, [navigate]);
+
+  const handleSavePlayerName = () => {
+    if (playerName.trim()) {
+      const name = playerName.trim().toUpperCase();
+      localStorage.setItem('playerName', name);
+      setStoredPlayerName(name);
+      setShowNameInput(false);
+    }
+  };
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -104,6 +123,50 @@ export default function HomePage() {
           <LoadingSpinner />
         ) : (
           <div className="flex flex-col gap-4 w-full max-w-sm shadow-[inset_0px_0px_4px_0px_#bfbfbf]">
+            {/* Player Name Setup Section */}
+            {!showNameInput ? (
+              <div className="text-center mb-4">
+                <p className="text-subtitle-neon-blue font-paragraph text-sm mb-2">
+                  {playerName ? `Bem-vindo, ${playerName}!` : 'Configure seu nome de jogador'}
+                </p>
+                <button
+                  onClick={() => setShowNameInput(true)}
+                  className="px-4 py-2 rounded-lg border-2 border-logo-gradient-start text-logo-gradient-start font-heading font-bold text-sm hover:bg-logo-gradient-start/10 transition-all duration-300"
+                  style={{
+                    textShadow: '0 0 8px rgba(255,69,0,0.6)'
+                  }}
+                >
+                  {playerName ? 'Alterar Nome' : 'Definir Nome'}
+                </button>
+              </div>
+            ) : (
+              <div className="mb-4 flex flex-col gap-2">
+                <input
+                  type="text"
+                  value={playerName}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  placeholder="Digite seu nome de jogador..."
+                  className="w-full px-4 py-2 rounded-lg bg-black/50 border-2 border-logo-gradient-start text-white font-paragraph placeholder-white/50 focus:outline-none focus:border-subtitle-neon-blue"
+                  maxLength={30}
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSavePlayerName}
+                    className="flex-1 px-4 py-2 rounded-lg bg-logo-gradient-start text-white font-heading font-bold text-sm hover:bg-logo-gradient-start/80 transition-all duration-300"
+                  >
+                    Salvar
+                  </button>
+                  <button
+                    onClick={() => setShowNameInput(false)}
+                    className="flex-1 px-4 py-2 rounded-lg border-2 border-white/50 text-white font-heading font-bold text-sm hover:border-white transition-all duration-300"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Google Login Button */}
             <button
               onClick={handleGoogleLogin}
