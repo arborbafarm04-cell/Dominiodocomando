@@ -256,8 +256,8 @@ export default function BarracoPage() {
                 <Image
                   src={barraco_image}
                   alt={`Barraco Level ${currentLevel}`}
-                  width={440}
-                  height={440}
+                  width={484}
+                  height={484}
                   className="relative z-10 drop-shadow-2xl"
                 />
               </div>
