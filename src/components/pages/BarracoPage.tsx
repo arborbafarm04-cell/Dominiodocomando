@@ -32,10 +32,18 @@ export default function BarracoPage() {
   const loadPlayerData = async () => {
     try {
       setLoading(true);
-      const playerId = getPlayerId();
+      let playerId = getPlayerId();
+      
+      // If no player ID, try to get the first player from the collection
       if (!playerId) {
-        setError('Player not found');
-        return;
+        const result = await BaseCrudService.getAll<Players>('players', [], { limit: 1 });
+        if (result.items && result.items.length > 0) {
+          playerId = result.items[0]._id;
+          localStorage.setItem('currentPlayerId', playerId);
+        } else {
+          setError('Nenhum jogador encontrado');
+          return;
+        }
       }
 
       const playerData = await BaseCrudService.getById<Players>('players', playerId);
@@ -44,7 +52,7 @@ export default function BarracoPage() {
       // Check if all items are at the same level
       checkAllItemsAtLevel(playerData?.level || 1);
     } catch (err) {
-      setError('Failed to load player data');
+      setError('Falha ao carregar dados do jogador');
       console.error(err);
     } finally {
       setLoading(false);
@@ -115,7 +123,15 @@ export default function BarracoPage() {
       <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950">
         <Header />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <p className="text-foreground text-xl">Jogador não encontrado</p>
+          <div className="text-center">
+            <p className="text-foreground text-xl mb-4">{error || 'Jogador não encontrado'}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-logo-gradient-end transition-colors"
+            >
+              Tentar Novamente
+            </button>
+          </div>
         </div>
         <Footer />
       </div>
