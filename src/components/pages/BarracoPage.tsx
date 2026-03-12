@@ -5,7 +5,7 @@ import { Image } from '@/components/ui/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
-import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
+import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
 
 const BARRACO_LEVELS = [
   { level: 10, milestone: 'Casa de Alvenaria' },
@@ -28,7 +28,7 @@ export default function BarracoPage() {
   const [evolving, setEvolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [allItemsAtLevel, setAllItemsAtLevel] = useState(false);
-  const { dirtyMoney, removeDirtyMoney } = useDirtyMoneyStore();
+  const { cleanMoney, removeCleanMoney } = useCleanMoneyStore();
 
   // Get player ID from localStorage or URL
   const getPlayerId = () => {
@@ -108,9 +108,9 @@ export default function BarracoPage() {
 
     const evolutionCost = calculateEvolutionCost(player.level || 1);
 
-    // Check if player has enough dirty money
-    if (dirtyMoney < evolutionCost) {
-      setError(`Dinheiro limpo insuficiente. Necessário: R$ ${evolutionCost.toLocaleString('pt-BR')}, Disponível: R$ ${dirtyMoney.toLocaleString('pt-BR')}`);
+    // Check if player has enough clean money
+    if (cleanMoney < evolutionCost) {
+      setError(`Dinheiro limpo insuficiente. Necessário: R$ ${evolutionCost.toLocaleString('pt-BR')}, Disponível: R$ ${cleanMoney.toLocaleString('pt-BR')}`);
       return;
     }
 
@@ -118,8 +118,8 @@ export default function BarracoPage() {
       setEvolving(true);
       setError(null);
 
-      // Deduct the cost from dirty money vault
-      removeDirtyMoney(evolutionCost);
+      // Deduct the cost from clean money vault
+      removeCleanMoney(evolutionCost);
 
       // Update player level
       await BaseCrudService.update<Players>('players', {
@@ -277,8 +277,8 @@ export default function BarracoPage() {
                   </div>
                   <div className="flex justify-between text-foreground">
                     <span>Dinheiro Limpo Disponível:</span>
-                    <span className={`font-bold ${dirtyMoney >= evolutionCost ? 'text-green-400' : 'text-red-400'}`}>
-                      R$ {dirtyMoney.toLocaleString('pt-BR')}
+                    <span className={`font-bold ${cleanMoney >= evolutionCost ? 'text-green-400' : 'text-red-400'}`}>
+                      R$ {cleanMoney.toLocaleString('pt-BR')}
                     </span>
                   </div>
                   {!allItemsAtLevel && (

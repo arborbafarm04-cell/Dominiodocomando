@@ -3,11 +3,13 @@ import { Bell, Settings, Crown, Vault, Zap } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
 import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
+import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
 import { usePlayerStore } from '@/store/playerStore';
 
 export default function Header() {
   const { dirtMoney } = useGameStore();
   const { dirtyMoney } = useDirtyMoneyStore();
+  const { cleanMoney } = useCleanMoneyStore();
   const { playerName, level, setPlayerName, setLevel } = usePlayerStore();
   const [customPlayerName, setCustomPlayerName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('https://static.wixstatic.com/media/50f4bf_a888df3d639f415b853110e459edba8c~mv2.png?originWidth=128&originHeight=128');
@@ -215,7 +217,7 @@ export default function Header() {
             }} />
             <div className="flex flex-col">
               <span className="text-xs text-subtitle-neon-blue font-heading">COFRE LIMPO</span>
-              <span className="text-lg font-bold text-white font-heading">R$ {(100000000).toLocaleString('pt-BR')}</span>
+              <span className="text-lg font-bold text-white font-heading">R$ {cleanMoney.toLocaleString('pt-BR')}</span>
             </div>
           </div>
           {/* Dirty Money Vault - Updated from Giro no Asfalto */}
