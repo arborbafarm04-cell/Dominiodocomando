@@ -13,7 +13,7 @@ const BARRACO_LEVELS = [
   { level: 20, milestone: 'Sobrado' },
   { level: 30, milestone: 'Sobrado com Piscina' },
   { level: 40, milestone: 'Sobrado de Luxo' },
-  { level: 50, milestone: null },
+  { level: 50, milestone: 'Triplex alto padrão' },
   { level: 60, milestone: null },
   { level: 70, milestone: null },
   { level: 80, milestone: null },
@@ -92,6 +92,10 @@ export default function BarracoPage() {
   };
 
   const getBarracoImage = (level: number): string => {
+    // Return the Triplex alto padrão image for level 50 and above
+    if (level >= 50) {
+      return 'https://static.wixstatic.com/media/50f4bf_f363ec9d5ca846c4990f7730c5bf479c~mv2.png';
+    }
     // Return the Sobrado de Luxo image for level 40 and above
     if (level >= 40) {
       return 'https://static.wixstatic.com/media/50f4bf_86c3183c0550490fab41c5a8a8f6184b~mv2.png';
