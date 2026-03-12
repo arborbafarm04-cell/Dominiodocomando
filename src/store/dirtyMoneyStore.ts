@@ -9,7 +9,7 @@ interface DirtyMoneyStore {
 }
 
 export const useDirtyMoneyStore = create<DirtyMoneyStore>((set) => ({
-  dirtyMoney: 100000000,
+  dirtyMoney: 1000000000,
   addDirtyMoney: (amount: number) => set((state) => ({ dirtyMoney: state.dirtyMoney + amount })),
   removeDirtyMoney: (amount: number) => set((state) => ({ dirtyMoney: Math.max(0, state.dirtyMoney - amount) })),
   resetDirtyMoney: () => set({ dirtyMoney: 0 }),
