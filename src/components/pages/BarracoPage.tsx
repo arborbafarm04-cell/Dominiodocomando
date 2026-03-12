@@ -83,6 +83,10 @@ export default function BarracoPage() {
   };
 
   const getBarracoImage = (level: number): string => {
+    // Return the Sobrado image for level 20 and above
+    if (level >= 20) {
+      return 'https://static.wixstatic.com/media/50f4bf_b23aee963b00465fa534f7705505b5b9~mv2.png';
+    }
     // Return the Casa de alvenaria image for level 10 and above
     if (level >= 10) {
       return 'https://static.wixstatic.com/media/50f4bf_6527240d26e94ca782357743f0ddddd7~mv2.png';
