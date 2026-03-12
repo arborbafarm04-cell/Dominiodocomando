@@ -72,8 +72,11 @@ export default function BarracoPage() {
   };
 
   const getBarracoImage = (level: number): string => {
-    // Return the provided image for all levels
-    // In a full implementation, you'd have different images for each milestone
+    // Return the Casa de alvenaria image for level 10 and above
+    if (level >= 10) {
+      return 'https://static.wixstatic.com/media/50f4bf_6527240d26e94ca782357743f0ddddd7~mv2.png';
+    }
+    // Return the default barraco image for levels below 10
     return 'https://static.wixstatic.com/media/50f4bf_99aa35fbb009493a96d4ede6c1af056b~mv2.png';
   };
 
