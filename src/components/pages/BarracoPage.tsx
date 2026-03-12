@@ -31,6 +31,9 @@ export default function BarracoPage() {
   const [error, setError] = useState<string | null>(null);
   const [allItemsAtLevel, setAllItemsAtLevel] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
+  const [imageKey, setImageKey] = useState(0);
+  const [levelUpAnimation, setLevelUpAnimation] = useState(false);
+  const [previousLevel, setPreviousLevel] = useState<number | null>(null);
   const { cleanMoney, removeCleanMoney } = useCleanMoneyStore();
   const { setLevel } = usePlayerStore();
 
@@ -64,7 +67,16 @@ export default function BarracoPage() {
       }
 
       const playerData = await BaseCrudService.getById<Players>('players', playerId);
+      
+      // Check if level increased and trigger level up animation
+      if (previousLevel !== null && playerData?.level && playerData.level > previousLevel) {
+        setLevelUpAnimation(true);
+        setTimeout(() => setLevelUpAnimation(false), 1500);
+      }
+      
+      setPreviousLevel(playerData?.level || 1);
       setPlayer(playerData);
+      setImageKey(prev => prev + 1); // Trigger image change animation
       
       // Update the player store with the level from database
       if (playerData?.level) {
@@ -234,10 +246,54 @@ export default function BarracoPage() {
             <h1 className="font-heading text-6xl font-bold text-primary mb-2">
               BARRACO
             </h1>
-            <p className="text-subtitle-neon-blue text-lg">
+            <motion.p 
+              className="text-subtitle-neon-blue text-lg"
+              animate={levelUpAnimation ? { scale: [1, 1.3, 1], color: ['#00eaff', '#FFD700', '#00eaff'] } : {}}
+              transition={{ duration: 1.5 }}
+            >
               Nível Global: <span className="font-bold">{currentLevel}</span>
-            </p>
+            </motion.p>
           </div>
+
+          {/* Level Up Celebration Effect */}
+          {levelUpAnimation && (
+            <>
+              <motion.div
+                initial={{ opacity: 1, scale: 0 }}
+                animate={{ opacity: 0, scale: 2 }}
+                transition={{ duration: 1.5 }}
+                className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
+              >
+                <div className="text-6xl font-bold text-yellow-400 drop-shadow-lg">
+                  ⭐ LEVEL UP! ⭐
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 0, y: -100 }}
+                transition={{ duration: 1.5 }}
+                className="fixed top-1/3 left-1/2 transform -translate-x-1/2 pointer-events-none z-50"
+              >
+                <div className="text-4xl">✨</div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 0, y: -100 }}
+                transition={{ duration: 1.5, delay: 0.1 }}
+                className="fixed top-1/3 right-1/4 pointer-events-none z-50"
+              >
+                <div className="text-4xl">✨</div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 0, y: -100 }}
+                transition={{ duration: 1.5, delay: 0.2 }}
+                className="fixed top-1/3 left-1/4 pointer-events-none z-50"
+              >
+                <div className="text-4xl">✨</div>
+              </motion.div>
+            </>
+          )}
 
           {/* Error Message */}
           {error && (
@@ -261,13 +317,22 @@ export default function BarracoPage() {
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-logo-gradient-end opacity-20 blur-2xl rounded-full"></div>
-                <Image
-                  src={barraco_image}
-                  alt={`Barraco Level ${currentLevel}`}
-                  width={484}
-                  height={484}
-                  className="relative z-10 drop-shadow-2xl"
-                />
+                <motion.div
+                  key={imageKey}
+                  initial={{ opacity: 0, rotateY: 90 }}
+                  animate={{ opacity: 1, rotateY: 0 }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  className="relative z-10"
+                  style={{ perspective: "1000px" }}
+                >
+                  <Image
+                    src={barraco_image}
+                    alt={`Barraco Level ${currentLevel}`}
+                    width={484}
+                    height={484}
+                    className="drop-shadow-2xl"
+                  />
+                </motion.div>
               </div>
             </motion.div>
 
