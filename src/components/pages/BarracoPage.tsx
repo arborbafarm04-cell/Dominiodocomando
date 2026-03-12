@@ -14,7 +14,7 @@ const BARRACO_LEVELS = [
   { level: 30, milestone: 'Sobrado com Piscina' },
   { level: 40, milestone: 'Sobrado de Luxo' },
   { level: 50, milestone: 'Triplex alto padrão' },
-  { level: 60, milestone: null },
+  { level: 60, milestone: 'Triplex com piscina borda infinita no rooftop' },
   { level: 70, milestone: null },
   { level: 80, milestone: null },
   { level: 90, milestone: null },
@@ -92,6 +92,10 @@ export default function BarracoPage() {
   };
 
   const getBarracoImage = (level: number): string => {
+    // Return the Triplex com piscina borda infinita no rooftop image for level 60 and above
+    if (level >= 60) {
+      return 'https://static.wixstatic.com/media/50f4bf_f36ccf79521242ab8518cf871e9f6a16~mv2.png';
+    }
     // Return the Triplex alto padrão image for level 50 and above
     if (level >= 50) {
       return 'https://static.wixstatic.com/media/50f4bf_f363ec9d5ca846c4990f7730c5bf479c~mv2.png';
