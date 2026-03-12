@@ -6,8 +6,10 @@ import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
 import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
 import { usePlayerStore } from '@/store/playerStore';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export default function Header() {
+  const navigate = useNavigate();
   const { dirtMoney } = useGameStore();
   const { dirtyMoney } = useDirtyMoneyStore();
   const { cleanMoney } = useCleanMoneyStore();
@@ -22,6 +24,8 @@ export default function Header() {
   const [isEditingCustomName, setIsEditingCustomName] = useState(false);
   const [tempName, setTempName] = useState('');
   const [tempCustomName, setTempCustomName] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load saved data from localStorage on mount
@@ -270,22 +274,51 @@ export default function Header() {
           {/* Icons */}
           <div className="flex items-center gap-4">
             <button
-              className="text-white hover:text-subtitle-neon-blue transition-all duration-300 hover:brightness-150"
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="text-white hover:text-subtitle-neon-blue transition-all duration-300 hover:brightness-150 relative"
               style={{
                 filter: 'drop-shadow(0 0 8px rgba(0,234,255,0.6))'
               }}
               aria-label="Notificações"
             >
               <Bell className="w-5 h-5" />
+              {showNotifications && (
+                <div className="absolute top-full right-0 mt-2 w-64 bg-black/95 border border-subtitle-neon-blue/50 rounded-lg p-4 shadow-lg z-50">
+                  <h3 className="text-subtitle-neon-blue font-heading text-sm mb-3">Notificações</h3>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <p className="text-white/70 font-paragraph text-xs">Nenhuma notificação no momento</p>
+                  </div>
+                </div>
+              )}
             </button>
             <button
-              className="text-white hover:text-subtitle-neon-blue transition-all duration-300 hover:brightness-150"
+              onClick={() => setShowSettings(!showSettings)}
+              className="text-white hover:text-subtitle-neon-blue transition-all duration-300 hover:brightness-150 relative"
               style={{
                 filter: 'drop-shadow(0 0 8px rgba(0,234,255,0.6))'
               }}
               aria-label="Configurações"
             >
               <Settings className="w-5 h-5" />
+              {showSettings && (
+                <div className="absolute top-full right-0 mt-2 w-64 bg-black/95 border border-subtitle-neon-blue/50 rounded-lg p-4 shadow-lg z-50">
+                  <h3 className="text-subtitle-neon-blue font-heading text-sm mb-3">Configurações</h3>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => navigate('/game')}
+                      className="w-full text-left px-3 py-2 text-white/70 hover:text-white hover:bg-subtitle-neon-blue/10 rounded font-paragraph text-sm transition-all"
+                    >
+                      Voltar ao Mapa
+                    </button>
+                    <button
+                      onClick={() => navigate('/')}
+                      className="w-full text-left px-3 py-2 text-white/70 hover:text-white hover:bg-subtitle-neon-blue/10 rounded font-paragraph text-sm transition-all"
+                    >
+                      Sair do Jogo
+                    </button>
+                  </div>
+                </div>
+              )}
             </button>
           </div>
         </div>

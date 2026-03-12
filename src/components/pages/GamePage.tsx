@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -27,8 +28,15 @@ const initialPoints: Point[] = [
 ];
 
 export default function GamePage() {
+  const navigate = useNavigate();
   const [points] = useState<Point[]>(initialPoints);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const handlePointClick = (point: Point) => {
+    if (point.link) {
+      navigate(point.link);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -46,7 +54,7 @@ export default function GamePage() {
 
         <div
           ref={containerRef}
-          className="relative w-full bg-cover bg-center rounded-lg overflow-hidden shadow-2xl"
+          className="relative w-full bg-cover bg-center rounded-lg overflow-hidden shadow-2xl cursor-pointer group"
           style={{
             backgroundImage: 'url(https://static.wixstatic.com/media/50f4bf_9bfebb56113d4108b67a172447ef9e47~mv2.png)',
             backgroundSize: 'cover',
@@ -56,7 +64,40 @@ export default function GamePage() {
           }}
         >
           {/* Overlay for better visibility */}
-          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-300" />
+          
+          {/* Interactive Points */}
+          {points.map((point) => (
+            <button
+              key={point.id}
+              onClick={() => handlePointClick(point)}
+              className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+                point.link 
+                  ? 'hover:scale-125 cursor-pointer' 
+                  : 'cursor-default'
+              }`}
+              style={{
+                left: `${point.x}%`,
+                top: `${point.y}%`,
+              }}
+              title={point.name}
+              disabled={!point.link}
+            >
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                point.link
+                  ? 'bg-subtitle-neon-blue/60 hover:bg-subtitle-neon-blue/100 border-2 border-subtitle-neon-blue hover:shadow-lg hover:shadow-subtitle-neon-blue/50'
+                  : 'bg-white/30 border-2 border-white/50'
+              }`} style={{
+                boxShadow: point.link ? '0 0 15px rgba(0,234,255,0.6)' : 'none'
+              }}>
+                <span className="text-white text-xs font-bold">•</span>
+              </div>
+              {/* Tooltip on hover */}
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black/90 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                {point.name}
+              </div>
+            </button>
+          ))}
         </div>
 
         {/* Instructions */}
@@ -68,7 +109,16 @@ export default function GamePage() {
             {points.map((point) => (
               <li key={point.id} className="flex items-start">
                 <span className="text-secondary mr-3">•</span>
-                <span>{point.name}</span>
+                <button
+                  onClick={() => handlePointClick(point)}
+                  className={`text-left transition-all duration-300 ${
+                    point.link
+                      ? 'text-secondary hover:text-subtitle-neon-blue hover:underline cursor-pointer'
+                      : 'text-foreground cursor-default'
+                  }`}
+                >
+                  {point.name}
+                </button>
               </li>
             ))}
           </ul>

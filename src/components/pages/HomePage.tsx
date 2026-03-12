@@ -67,22 +67,33 @@ export default function HomePage() {
     }}>
       {/* Logo Section - First 1/4 of screen */}
       <div className="w-full h-1/4 flex items-center justify-center bg-gradient-to-b from-black/40 to-transparent">
-        <Image
-          src="https://static.wixstatic.com/media/50f4bf_f2a8c161a4404b8a90919814997ac5b2~mv2.png"
-          alt="Dominio do Comando Logo"
-          width={200}
-          height={200}
-          className="object-contain"
-        />
+        <button
+          onClick={handleAnonymousLogin}
+          className="hover:scale-110 transition-transform duration-300 cursor-pointer"
+          aria-label="Jogar Anônimo"
+        >
+          <Image
+            src="https://static.wixstatic.com/media/50f4bf_f2a8c161a4404b8a90919814997ac5b2~mv2.png"
+            alt="Dominio do Comando Logo"
+            width={200}
+            height={200}
+            className="object-contain"
+          />
+        </button>
       </div>
       {/* Login Section - Center of screen */}
       <div className="w-full flex-1 flex flex-col items-center justify-center gap-8 px-6">
         <div className="text-center mb-4">
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-2" style={{
-            textShadow: '0 0 20px rgba(255,69,0,0.8)'
-          }}>
-            DOMÍNIO DO COMANDO
-          </h1>
+          <button
+            onClick={handleAnonymousLogin}
+            className="hover:brightness-110 transition-all duration-300 w-full"
+          >
+            <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-2 cursor-pointer" style={{
+              textShadow: '0 0 20px rgba(255,69,0,0.8)'
+            }}>
+              DOMÍNIO DO COMANDO
+            </h1>
+          </button>
           <p className="text-lg text-subtitle-neon-blue font-paragraph" style={{
             textShadow: '0 0 10px rgba(0,234,255,0.6)'
           }}>
