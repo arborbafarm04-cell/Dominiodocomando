@@ -106,6 +106,10 @@ export default function BarracoPage() {
   };
 
   const getBarracoImage = (level: number): string => {
+    // Return the level 100 image for level 100
+    if (level >= 100) {
+      return 'https://static.wixstatic.com/media/50f4bf_9683cd5787de47bf883c2453384fd2ae~mv2.png';
+    }
     // Return the Mansão Blindada com Heliporto image for level 90 and above
     if (level >= 90) {
       return 'https://static.wixstatic.com/media/50f4bf_dacc94520dfa449384a529f15de074f6~mv2.png';
