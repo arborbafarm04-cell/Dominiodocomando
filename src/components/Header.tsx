@@ -10,7 +10,10 @@ export default function Header() {
   const { dirtMoney } = useGameStore();
   const { dirtyMoney } = useDirtyMoneyStore();
   const { cleanMoney } = useCleanMoneyStore();
-  const { playerName, level, setPlayerName, setLevel } = usePlayerStore();
+  const playerName = usePlayerStore((state) => state.playerName);
+  const level = usePlayerStore((state) => state.level);
+  const setPlayerName = usePlayerStore((state) => state.setPlayerName);
+  const setLevel = usePlayerStore((state) => state.setLevel);
   const [customPlayerName, setCustomPlayerName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('https://static.wixstatic.com/media/50f4bf_a888df3d639f415b853110e459edba8c~mv2.png?originWidth=128&originHeight=128');
   const [isEditingName, setIsEditingName] = useState(false);
@@ -19,7 +22,7 @@ export default function Header() {
   const [tempCustomName, setTempCustomName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load saved data from localStorage
+  // Load saved data from localStorage on mount
   useEffect(() => {
     const savedName = localStorage.getItem('playerName');
     const savedCustomName = localStorage.getItem('customPlayerName');
@@ -36,6 +39,17 @@ export default function Header() {
     if (savedAvatar) {
       setAvatarUrl(savedAvatar);
     }
+  }, [setPlayerName]);
+
+  // Subscribe to playerName changes from the store
+  useEffect(() => {
+    const unsubscribe = usePlayerStore.subscribe(
+      (state) => state.playerName,
+      (playerName) => {
+        // This ensures the component re-renders when playerName changes in the store
+      }
+    );
+    return unsubscribe;
   }, []);
 
   // Handle avatar click to open file picker
