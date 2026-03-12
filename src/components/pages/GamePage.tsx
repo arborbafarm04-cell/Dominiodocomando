@@ -13,7 +13,7 @@ interface Point {
 }
 
 const initialPoints: Point[] = [
-  { id: '1', name: 'Casa', x: 15, y: 20, link: '/barraco' },
+  { id: '1', name: 'Casa', x: 15, y: 20, link: '/casa' },
   { id: '2', name: 'Loja de Luxo', x: 85, y: 25, link: '/luxury-showroom' },
   { id: '3', name: 'Barracão da quadrilha', x: 25, y: 60 },
   { id: '4', name: 'Arsenal', x: 75, y: 55 },
