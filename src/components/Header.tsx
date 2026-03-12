@@ -118,10 +118,13 @@ export default function Header() {
         {/* Left Area - Logo */}
         <div className="flex items-center gap-3">
           <div className="relative">
-
+            <div className="text-2xl font-bold font-heading bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end bg-clip-text text-transparent">
+              DC
+            </div>
           </div>
           <div className="flex flex-col">
-
+            <span className="text-xs text-logo-gradient-start font-heading tracking-widest">DOMÍNIO</span>
+            <span className="text-xs text-subtitle-neon-blue font-heading tracking-widest">DO COMANDO</span>
           </div>
         </div>
 
@@ -164,7 +167,12 @@ export default function Header() {
           <div className="flex flex-col items-start gap-1">
             {/* Main Player Name */}
             <div className="flex items-center gap-2">
-
+              <Crown className="w-5 h-5 text-logo-gradient-start" style={{
+                filter: 'drop-shadow(0 0 8px rgba(255,69,0,0.8))'
+              }} />
+              <span className="text-white font-heading text-sm md:text-base font-bold tracking-wider">
+                {playerName}
+              </span>
             </div>
 
             {/* Custom Player Name */}
@@ -244,7 +252,7 @@ export default function Header() {
               }}
               aria-label="Notificações"
             >
-
+              <Bell className="w-5 h-5" />
             </button>
             <button
               className="text-white hover:text-subtitle-neon-blue transition-all duration-300 hover:brightness-150"
@@ -253,7 +261,7 @@ export default function Header() {
               }}
               aria-label="Configurações"
             >
-
+              <Settings className="w-5 h-5" />
             </button>
           </div>
         </div>
