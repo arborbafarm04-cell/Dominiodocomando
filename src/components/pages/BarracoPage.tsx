@@ -6,7 +6,18 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 
-const BARRACO_LEVELS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+const BARRACO_LEVELS = [
+  { level: 10, milestone: 'Casa de Alvenaria' },
+  { level: 20, milestone: null },
+  { level: 30, milestone: null },
+  { level: 40, milestone: null },
+  { level: 50, milestone: null },
+  { level: 60, milestone: null },
+  { level: 70, milestone: null },
+  { level: 80, milestone: null },
+  { level: 90, milestone: null },
+  { level: 100, milestone: null },
+];
 const BASE_EVOLUTION_COST = 500;
 const COST_MULTIPLIER = 1.5;
 
@@ -296,7 +307,7 @@ export default function BarracoPage() {
               Marcos de Evolução
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              {BARRACO_LEVELS.map((level) => (
+              {BARRACO_LEVELS.map(({ level, milestone }) => (
                 <div
                   key={level}
                   className={`p-3 rounded-lg text-center font-bold transition-all ${
@@ -305,7 +316,12 @@ export default function BarracoPage() {
                       : 'bg-slate-700/50 border border-slate-600 text-slate-400'
                   }`}
                 >
-                  Nível {level}
+                  <div>Nível {level}</div>
+                  {milestone && (
+                    <div className="text-xs mt-1 text-subtitle-neon-blue">
+                      {milestone}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
