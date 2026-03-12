@@ -19,7 +19,7 @@ const BARRACO_LEVELS = [
   { level: 100, milestone: null },
 ];
 const BASE_EVOLUTION_COST = 500;
-const COST_MULTIPLIER = 1.1;
+const COST_MULTIPLIER = 1.2;
 
 export default function BarracoPage() {
   const [player, setPlayer] = useState<Players | null>(null);
