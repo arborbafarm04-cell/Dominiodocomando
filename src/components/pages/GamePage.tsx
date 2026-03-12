@@ -1,6 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useMember } from '@/integrations';
+import { useState, useRef } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -31,34 +29,19 @@ const initialPoints: Point[] = [
 export default function GamePage() {
   const [points] = useState<Point[]>(initialPoints);
   const containerRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  const { actions } = useMember();
-
-  const handleLogout = async () => {
-    await actions.logout();
-    navigate('/');
-  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
-      <main className="flex-1 w-full max-w-[120rem] mx-auto px-4 py-8">
-        <div className="mb-6 flex justify-between items-start">
-          <div>
-            <h1 className="font-heading text-5xl font-bold text-foreground mb-2">
-              Mapa da Cidade
-            </h1>
-            <p className="font-paragraph text-lg text-secondary">
-              Explore o mapa da cidade
-            </p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="bg-destructive hover:bg-red-700 text-destructive-foreground font-bold py-3 px-6 rounded-lg transition-colors duration-200 font-heading text-lg"
-          >
-            Sair
-          </button>
+      <main className="flex-1 w-full max-w-[120rem] mx-auto px-4 py-8 pt-32">
+        <div className="mb-6">
+          <h1 className="font-heading text-5xl font-bold text-foreground mb-2">
+            Mapa da Cidade
+          </h1>
+          <p className="font-paragraph text-lg text-secondary">
+            Explore o mapa da cidade
+          </p>
         </div>
 
         <div
