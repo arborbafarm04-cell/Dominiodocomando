@@ -456,12 +456,56 @@ const GameHeader: React.FC = () => {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen" style={{
-      backgroundImage: 'url(https://static.wixstatic.com/media/50f4bf_1e5ca7c3774d48e6b010a1a723fd4c9f~mv2.png)',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundAttachment: 'fixed'
-    }}>
+    <div className="min-h-screen bg-[#0a0d14] text-white overflow-x-hidden font-paragraph selection:bg-[#00eaff] selection:text-black">
+
+      <GameHeader />
+
+      {/* Main content area - Kept minimal as requested, acting as a canvas to showcase the header */}
+      <main className="pt-[110px] relative min-h-screen flex flex-col items-center justify-center">
+
+        {/* Atmospheric Background Elements */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#FF4500]/5 rounded-full blur-[120px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#00eaff]/5 rounded-full blur-[150px]" />
+
+          {/* Grid Overlay */}
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: `linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)`,
+              backgroundSize: '50px 50px'
+            }}
+          />
+        </div>
+
+        <div className="container mx-auto px-4 py-16 relative z-10 flex flex-col items-center text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h2
+              className="text-5xl md:text-7xl font-heading font-black mb-6 tracking-tighter uppercase"
+              style={{
+                background: 'linear-gradient(135deg, #ffffff 0%, #a0a5b0 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              A CIDADE AGUARDA
+            </h2>
+            <p className="text-xl md:text-2xl font-paragraph text-[#00eaff] max-w-2xl mx-auto font-light tracking-wide drop-shadow-[0_0_10px_rgba(0,234,255,0.3)]">
+              O painel de comando está ativo. Suas ordens definem o futuro das ruas.
+            </p>
+
+            <div className="mt-12 flex items-center justify-center gap-4">
+              <div className="h-[1px] w-16 bg-gradient-to-r from-transparent to-[#FF4500]" />
+              <span className="text-xs font-heading tracking-[0.3em] text-white/50 uppercase">Sistema Online</span>
+              <div className="h-[1px] w-16 bg-gradient-to-l from-transparent to-[#FF4500]" />
+            </div>
+          </motion.div>
+        </div>
+      </main>
     </div>
   );
 }
