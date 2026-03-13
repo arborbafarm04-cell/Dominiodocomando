@@ -16,6 +16,7 @@ const CasaPage = lazy(() => import('@/components/pages/CasaPage'));
 const BarracoPage = lazy(() => import('@/components/pages/BarracoPage'));
 const AboutPage = lazy(() => import('@/components/pages/AboutPage'));
 const ContactPage = lazy(() => import('@/components/pages/ContactPage'));
+const BriberyPage = lazy(() => import('@/components/pages/BriberyPage'));
 
 // Fallback component for lazy loading
 function PageLoader() {
@@ -140,6 +141,17 @@ const router = createBrowserRouter([
         ),
         routeMetadata: {
           pageIdentifier: 'contact',
+        },
+      },
+      {
+        path: "bribery",
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <BriberyPage />
+          </Suspense>
+        ),
+        routeMetadata: {
+          pageIdentifier: 'bribery',
         },
       },
       {
