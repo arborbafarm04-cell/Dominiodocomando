@@ -1,29 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, Crown, Vault, Zap, User, LogOut, Upload } from 'lucide-react';
+import { Bell, Settings, Crown, Vault, Zap } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
 import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
 import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
 import { usePlayerStore } from '@/store/playerStore';
-import { useMember } from '@/integrations';
-import { useNavigate } from 'react-router-dom';
 
 export default function Header() {
   const { dirtMoney } = useGameStore();
   const { dirtyMoney } = useDirtyMoneyStore();
   const { cleanMoney } = useCleanMoneyStore();
   const { playerName, level, setPlayerName, setLevel } = usePlayerStore();
-  const { member, isAuthenticated, actions: memberActions } = useMember();
-  const navigate = useNavigate();
   const [customPlayerName, setCustomPlayerName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('https://static.wixstatic.com/media/50f4bf_a888df3d639f415b853110e459edba8c~mv2.png?originWidth=128&originHeight=128');
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingCustomName, setIsEditingCustomName] = useState(false);
   const [tempName, setTempName] = useState('');
   const [tempCustomName, setTempCustomName] = useState('');
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const profileMenuRef = useRef<HTMLDivElement>(null);
 
   // Load saved data from localStorage
   useEffect(() => {
@@ -44,39 +38,9 @@ export default function Header() {
     }
   }, []);
 
-  // Close profile menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
-        setIsProfileMenuOpen(false);
-      }
-    };
-
-    if (isProfileMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [isProfileMenuOpen]);
-
-  // Handle avatar click to open file picker or profile menu
+  // Handle avatar click to open file picker
   const handleAvatarClick = () => {
-    if (isAuthenticated) {
-      setIsProfileMenuOpen(!isProfileMenuOpen);
-    } else {
-      fileInputRef.current?.click();
-    }
-  };
-
-  // Handle profile navigation
-  const handleProfileClick = () => {
-    navigate('/profile');
-    setIsProfileMenuOpen(false);
-  };
-
-  // Handle logout
-  const handleLogout = async () => {
-    await memberActions.logout();
-    setIsProfileMenuOpen(false);
+    fileInputRef.current?.click();
   };
 
   // Handle avatar image selection
@@ -162,72 +126,28 @@ export default function Header() {
         </div>
 
         {/* Center Area - Avatar */}
-        <div className="flex items-center justify-center relative" ref={profileMenuRef}>
+        <div className="flex items-center justify-center">
           <button
             onClick={handleAvatarClick}
             className="relative group cursor-pointer transition-transform duration-300 hover:scale-110"
-            aria-label={isAuthenticated ? "Abrir menu de perfil" : "Alterar avatar"}
+            aria-label="Alterar avatar"
           >
             <div className="w-[70px] h-[70px] rounded-full overflow-hidden border-[3px] border-subtitle-neon-blue relative" style={{
               boxShadow: '0 0 20px rgba(0,234,255,0.8), inset 0 0 10px rgba(0,234,255,0.3)'
             }}>
               <Image
-                src={isAuthenticated && member?.profile?.photo?.url ? member.profile.photo.url : avatarUrl}
+                src={avatarUrl}
                 alt="Avatar do jogador"
                 width={70}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-subtitle-neon-blue/0 group-hover:bg-subtitle-neon-blue/20 transition-colors duration-300 flex items-center justify-center">
                 <span className="text-white text-xs font-paragraph opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  {isAuthenticated ? 'MENU' : 'TROCAR'}
+                  TROCAR
                 </span>
               </div>
             </div>
           </button>
-
-          {/* Profile Dropdown Menu */}
-          {isProfileMenuOpen && isAuthenticated && (
-            <div className="absolute top-[90px] right-0 bg-background/95 backdrop-blur-sm border-2 border-subtitle-neon-blue rounded-lg shadow-lg overflow-hidden z-50" style={{
-              boxShadow: '0 0 20px rgba(0,234,255,0.5)',
-              minWidth: '200px'
-            }}>
-              {/* User Info */}
-              <div className="px-4 py-3 border-b border-subtitle-neon-blue/30">
-                <p className="text-foreground font-heading text-sm font-bold">
-                  {member?.contact?.firstName || member?.profile?.nickname || 'Jogador'}
-                </p>
-                <p className="text-foreground/60 font-paragraph text-xs truncate">
-                  {member?.loginEmail}
-                </p>
-              </div>
-
-              {/* Menu Items */}
-              <div className="py-2">
-                <button
-                  onClick={handleProfileClick}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-foreground hover:bg-subtitle-neon-blue/10 transition-colors duration-200 font-paragraph text-sm"
-                >
-                  <User className="w-4 h-4 text-subtitle-neon-blue" />
-                  Ver Perfil
-                </button>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-foreground hover:bg-subtitle-neon-blue/10 transition-colors duration-200 font-paragraph text-sm"
-                >
-                  <Upload className="w-4 h-4 text-subtitle-neon-blue" />
-                  Trocar Avatar
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-logo-gradient-start hover:bg-logo-gradient-start/10 transition-colors duration-200 font-paragraph text-sm border-t border-subtitle-neon-blue/30"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Sair
-                </button>
-              </div>
-            </div>
-          )}
-
           <input
             ref={fileInputRef}
             type="file"
