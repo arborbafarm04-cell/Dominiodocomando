@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Image } from '@/components/ui/image';
-import { useGameStore } from '@/store/gameStore';
-import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import Header from '@/components/Header';
 import { useBackgroundImage } from '@/config/backgroundImages';
+import { useGameStore } from '@/store/gameStore';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 export default function Luxo9Page() {
   const [showPaymentAnimation, setShowPaymentAnimation] = useState(false);
@@ -14,7 +13,7 @@ export default function Luxo9Page() {
   const playerName = useGameStore((state) => state.playerName);
   const playerLevel = useGameStore((state) => state.playerLevel);
   const setPlayerLevel = useGameStore((state) => state.setPlayerLevel);
-  const { backgroundImage } = useBackgroundImage('luxo9');
+  const { backgroundImage } = useBackgroundImage(backgroundImageundImageundImage);
 
   const luxo9Price = 2744.86;
 
@@ -56,7 +55,7 @@ export default function Luxo9Page() {
   };
 
   return (
-    <div 
+    <div
       className="flex flex-col min-h-screen"
       style={{
         backgroundImage: `url('${backgroundImage}')`,
