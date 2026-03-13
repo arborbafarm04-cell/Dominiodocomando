@@ -2,6 +2,7 @@ import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import { useBackgroundImage } from '@/config/backgroundImages';
 import { useGameStore } from '@/store/gameStore';
+import { usePlayerStore } from '@/store/playerStore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
@@ -10,10 +11,10 @@ export default function Luxo9Page() {
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [isEditingLevel, setIsEditingLevel] = useState(false);
   const [editLevelValue, setEditLevelValue] = useState('');
-  const playerName = useGameStore((state) => state.playerName);
+  const playerName = usePlayerStore((state) => state.playerName);
   const playerLevel = useGameStore((state) => state.playerLevel);
   const setPlayerLevel = useGameStore((state) => state.setPlayerLevel);
-  const { backgroundImage } = useBackgroundImage('Luxo 9');
+  const { backgroundImage } = useBackgroundImage('luxo9');
 
   const luxo9Price = 2744.86;
 

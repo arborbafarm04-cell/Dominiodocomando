@@ -2,17 +2,20 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
+import { usePlayerStore } from '@/store/playerStore';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useBackgroundImage } from '@/config/backgroundImages';
 
 export default function Luxo12Page() {
   const [showPaymentAnimation, setShowPaymentAnimation] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [isEditingLevel, setIsEditingLevel] = useState(false);
   const [editLevelValue, setEditLevelValue] = useState('');
-  const playerName = useGameStore((state) => state.playerName);
+  const playerName = usePlayerStore((state) => state.playerName);
   const playerLevel = useGameStore((state) => state.playerLevel);
   const setPlayerLevel = useGameStore((state) => state.setPlayerLevel);
+  const { backgroundImage } = useBackgroundImage('luxo12');
 
   const luxo12Price = 4354.04;
 
