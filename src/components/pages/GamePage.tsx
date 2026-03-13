@@ -77,7 +77,7 @@ export default function GamePage() {
   const handlePointClick = (point: Point) => {
     if (point.link) {
       navigate(point.link);
-    } else if (point.id === '8' && level >= 10) {
+    } else if (point.id === '8' && level >= 1) {
       // Policial - Bribery Guard
       navigate('/bribery-guard');
     }
