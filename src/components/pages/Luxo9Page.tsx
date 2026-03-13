@@ -13,7 +13,7 @@ export default function Luxo9Page() {
   const playerName = useGameStore((state) => state.playerName);
   const playerLevel = useGameStore((state) => state.playerLevel);
   const setPlayerLevel = useGameStore((state) => state.setPlayerLevel);
-  const { backgroundImageundImageundImageage } = useBackgroundImageconst { backgroundImage } = useBackgroundImage('Luxo4');
+  const { backgroundImageundImageundImageage } = useBackgroundImageconst { backgroundImage } = useBackgroundImage('Luxo 4');
   (backgroundImageundImageundImage);
 
   const luxo9Price = 2744.86;
