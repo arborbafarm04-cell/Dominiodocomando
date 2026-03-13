@@ -68,15 +68,6 @@ export default function Luxo2Page() {
     >
       <Header />
       <div className="relative w-full flex-1 overflow-hidden">
-        {/* Background Image */}
-        <Image
-          src="https://static.wixstatic.com/media/50f4bf_8f13e063f80c434797dfbd9745ffb8f0~mv2.png"
-          alt="Luxo 2 Background"
-          className="absolute inset-0 w-full h-full object-cover"
-          width={1920}
-          height={1080}
-        />
-
         {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black/30" />
 

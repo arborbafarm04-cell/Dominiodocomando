@@ -68,15 +68,6 @@ export default function Luxo3Page() {
     >
       <Header />
       <div className="relative w-full flex-1 overflow-hidden">
-        {/* Background Image */}
-        <Image
-          src="https://static.wixstatic.com/media/50f4bf_6076c7c6b44b48e3b734df2f4d9cbaf2~mv2.png?originWidth=1920&originHeight=1024"
-          alt="Luxo 3 Background"
-          className="absolute inset-0 w-full h-full object-cover"
-          width={1920}
-          height={1080}
-        />
-
         {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black/30" />
 

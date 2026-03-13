@@ -67,15 +67,6 @@ export default function Luxo5Page() {
     >
       <Header />
       <div className="relative w-full flex-1 overflow-hidden">
-        {/* Background Image */}
-        <Image
-          src="https://static.wixstatic.com/media/50f4bf_7d8907b7077048ed9ad8fe121f50dd93~mv2.png"
-          alt="Luxo 5 Background"
-          className="absolute inset-0 w-full h-full object-cover"
-          width={1920}
-          height={1080}
-        />
-
         {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black/30" />
 
