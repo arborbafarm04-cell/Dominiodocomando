@@ -1,11 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, Crown, Vault, Zap } from 'lucide-react';
+import { Bell, Settings, Crown, Vault, Zap, Menu, X } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
 import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
 import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
 import { usePlayerStore } from '@/store/playerStore';
 import { Link } from 'react-router-dom';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 
 export default function Header() {
   const { dirtMoney } = useGameStore();
@@ -18,6 +24,7 @@ export default function Header() {
   const [isEditingCustomName, setIsEditingCustomName] = useState(false);
   const [tempName, setTempName] = useState('');
   const [tempCustomName, setTempCustomName] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load saved data from localStorage
@@ -129,6 +136,36 @@ export default function Header() {
               Jogar
             </Link>
           </nav>
+
+          {/* Mobile Menu */}
+          <div className="md:hidden">
+            <DropdownMenu open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="text-foreground hover:text-secondary transition-colors duration-300"
+                  aria-label="Menu"
+                >
+                  {isMobileMenuOpen ? (
+                    <X className="w-6 h-6" />
+                  ) : (
+                    <Menu className="w-6 h-6" />
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link to="/projects" className="cursor-pointer">
+                    Projetos
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/game" className="cursor-pointer">
+                    Jogar
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         {/* Center Area - Avatar */}
