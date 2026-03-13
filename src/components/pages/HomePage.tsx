@@ -404,7 +404,16 @@ const GameHeader: React.FC = () => {
         <div className="fixed bottom-4 right-4 bg-black/95 border-2 border-yellow-400 rounded-lg p-4 w-80 max-h-96 overflow-y-auto z-[100] shadow-[0_0_20px_rgba(255,193,7,0.3)]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-heading font-bold text-yellow-400 text-sm">HEADER POSITIONING</h3>
-            <button onClick={() => setShowInspector(false)} className="text-yellow-400 hover:text-white">
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowInspector(false);
+              }} 
+              className="text-yellow-400 hover:text-white transition-colors cursor-pointer flex-shrink-0 p-1 hover:bg-yellow-400/10 rounded"
+              type="button"
+              aria-label="Close inspector panel"
+            >
               <X className="w-4 h-4" />
             </button>
           </div>
