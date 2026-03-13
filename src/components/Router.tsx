@@ -10,6 +10,7 @@ import GamePage from '@/components/pages/GamePage';
 import CasaPage from '@/components/pages/CasaPage';
 import BarracoPage from '@/components/pages/BarracoPage';
 import ProjectsPage from '@/components/pages/ProjectsPage';
+import BriberyGuardPage from '@/components/pages/BriberyGuardPage';
 
 // Layout component that includes ScrollToTop
 function Layout() {
@@ -81,6 +82,13 @@ const router = createBrowserRouter([
         element: <ProjectsPage />,
         routeMetadata: {
           pageIdentifier: 'projects',
+        },
+      },
+      {
+        path: "bribery-guard",
+        element: <BriberyGuardPage />,
+        routeMetadata: {
+          pageIdentifier: 'bribery-guard',
         },
       },
       {
