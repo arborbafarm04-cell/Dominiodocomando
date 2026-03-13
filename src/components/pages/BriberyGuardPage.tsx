@@ -9,6 +9,8 @@ import { Image } from '@/components/ui/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
+const CHARACTER_IMAGE = 'https://static.wixstatic.com/media/50f4bf_3949fc256fce456eab1e7dcbc75cdc40~mv2.png';
+
 type DialogState = 'initial' | 'accepting' | 'denying' | 'consequence' | 'whistleblower';
 
 interface CharacterConfig {
@@ -182,8 +184,15 @@ export default function BriberyGuardPage() {
     // Debit dirty money
     removeDirtyMoney(briberyAmount);
 
-    // Update level if not at max
-    if (playerLevel < 100) {
+    // Update level - progression from 1-9, then jump to 10
+    if (playerLevel < 9) {
+      // Levels 1-8: increment by 1
+      setPlayerLevel(playerLevel + 1);
+    } else if (playerLevel === 9) {
+      // Level 9: jump to level 10
+      setPlayerLevel(10);
+    } else if (playerLevel < 100) {
+      // Levels 10+: increment by 1
       setPlayerLevel(playerLevel + 1);
     }
 
@@ -267,9 +276,12 @@ export default function BriberyGuardPage() {
                   <div className="flex-shrink-0 w-full md:w-auto">
                     <div className="relative w-48 h-48 mx-auto md:mx-0">
                       <div className="absolute inset-0 bg-gradient-to-br from-[#FF4500]/30 to-[#00eaff]/30 rounded-lg blur-xl" />
-                      <div className="relative w-full h-full object-cover rounded-lg border-2 border-[#FF4500] flex items-center justify-center bg-gradient-to-br from-[#FF4500]/20 to-[#00eaff]/20">
-                        <span className="text-8xl">{character.emoji}</span>
-                      </div>
+                      <Image
+                        src={CHARACTER_IMAGE}
+                        alt={character.name}
+                        width={192}
+                        className="relative w-full h-full object-cover rounded-lg border-2 border-[#FF4500]"
+                      />
                     </div>
                   </div>
 
