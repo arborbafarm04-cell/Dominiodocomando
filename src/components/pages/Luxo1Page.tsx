@@ -55,9 +55,9 @@ export default function Luxo1Page() {
     <div className="flex flex-col min-h-screen">
       <Header />
       <div className="relative w-full flex-1 overflow-hidden">
-        {/* Background Image - Changes based on player level */}
+        {/* Background Image */}
         <Image
-          src={playerLevel === 2 ? "https://static.wixstatic.com/media/50f4bf_abc9173766674c0b9c7fd9f67b9aab9b~mv2.png" : "https://static.wixstatic.com/media/50f4bf_ee701d9f8c20484698e5df1171cc5c37~mv2.png"}
+          src="https://static.wixstatic.com/media/50f4bf_7d8907b7077048ed9ad8fe121f50dd93~mv2.png"
           alt="Luxo 1 Background"
           className="absolute inset-0 w-full h-full object-cover"
           width={1920}
