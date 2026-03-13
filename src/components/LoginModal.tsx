@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, LogIn } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Image } from '@/components/ui/image';
 import { usePlayerStore } from '@/store/playerStore';
 import { BaseCrudService } from '@/integrations';
 
@@ -13,7 +11,6 @@ interface LoginModalProps {
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const { setPlayerId, setPlayerName, setLevel, setIsGuest, setProgress } = usePlayerStore();
-  const navigate = useNavigate();
   const [playerName, setInputPlayerName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -53,47 +50,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       localStorage.setItem('isGuest', 'true');
 
       onClose();
-      navigate('/game');
     } catch (err) {
       setError('Erro ao criar conta de visitante. Tente novamente.');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleFacebookLogin = async () => {
-    setIsLoading(true);
-    try {
-      // This would typically integrate with Facebook OAuth
-      // For now, we'll create a mock authenticated player
-      const facebookId = `facebook_${Date.now()}`;
-      
-      const newPlayer = await BaseCrudService.create('players', {
-        _id: facebookId,
-        playerName: 'JOGADOR_FACEBOOK',
-        level: 1,
-        progress: 0,
-        isGuest: false,
-        externalPlayerId: facebookId,
-        lastUpdated: new Date().toISOString(),
-        profilePicture: null,
-      });
-
-      setPlayerId(facebookId);
-      setPlayerName('JOGADOR_FACEBOOK');
-      setLevel(1);
-      setProgress(0);
-      setIsGuest(false);
-
-      localStorage.setItem('playerId', facebookId);
-      localStorage.setItem('playerName', 'JOGADOR_FACEBOOK');
-      localStorage.setItem('isGuest', 'false');
-
-      onClose();
-      navigate('/game');
-    } catch (err) {
-      setError('Erro ao fazer login com Facebook. Tente novamente.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -129,7 +87,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       localStorage.setItem('isGuest', 'false');
 
       onClose();
-      navigate('/game');
     } catch (err) {
       setError('Erro ao fazer login com Google. Tente novamente.');
       console.error(err);
@@ -156,10 +113,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[60%] max-w-4xl"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
           >
             <div
-              className="relative bg-transparent p-8"
+              className="relative bg-gradient-to-b from-[rgba(15,20,30,0.95)] to-[rgba(15,20,30,0.85)] border-2 border-[#00eaff] rounded-lg p-8 shadow-[0_0_30px_rgba(0,234,255,0.3)]"
               style={{
                 backdropFilter: 'blur(10px)',
               }}
@@ -172,28 +129,15 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <X className="w-6 h-6" />
               </button>
 
-              {/* Header with Logo */}
+              {/* Header */}
               <div className="mb-8 text-center">
-                {/* Logo */}
-                <div className="flex justify-center mb-6">
-                  <Image 
-                    src="https://static.wixstatic.com/media/50f4bf_790d6b649d31464f9a47a276dea5fc13~mv2.png" 
-                    alt="Domínio do Comando Logo" 
-                    width={200}
-                    className="h-auto"
-                  />
-                </div>
-                
-                <h2 className="font-heading text-2xl font-black tracking-[2px] uppercase mb-2" style={{
+                <h2 className="font-heading text-3xl font-black tracking-[2px] uppercase mb-2" style={{
                   background: 'linear-gradient(to right, #FF4500, #FF0000)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                 }}>
-                  Domine o Comando
+                  DOMÍNIO DO COMANDO
                 </h2>
-                <p className="text-[#FF4500] font-heading text-lg font-bold tracking-wide mb-4">
-                  e seja o Rei do Crime
-                </p>
                 <p className="text-[#00eaff] font-paragraph text-sm tracking-wide">
                   Escolha como deseja entrar no jogo
                 </p>
@@ -261,19 +205,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               >
                 <LogIn className="w-5 h-5" />
                 {isLoading ? 'Conectando...' : 'Login com Google'}
-              </button>
-
-              {/* Facebook Login */}
-              <button
-                onClick={handleFacebookLogin}
-                disabled={isLoading}
-                className="w-full py-3 bg-gradient-to-r from-[#1877F2]/20 to-[#0A66C2]/20 border-2 border-[#1877F2] rounded font-heading font-bold text-[#1877F2] tracking-wider uppercase hover:from-[#1877F2]/30 hover:to-[#0A66C2]/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-3"
-                style={{
-                  filter: 'drop-shadow(0 0 8px rgba(24,119,242,0.3))'
-                }}
-              >
-                <LogIn className="w-5 h-5" />
-                {isLoading ? 'Conectando...' : 'Login com Facebook'}
               </button>
 
               {/* Info Text */}
