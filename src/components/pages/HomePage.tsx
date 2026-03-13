@@ -6,6 +6,7 @@ import { Image } from '@/components/ui/image';
 import { useMember } from '@/integrations';
 import { useGameStore } from '@/store/gameStore';
 import { usePlayerStore } from '@/store/playerStore';
+import { getBackgroundStyle } from '@/config/backgroundImages';
 import { motion } from 'framer-motion';
 import { Chrome, Crosshair, Facebook, RotateCcw, ShieldAlert, Terminal, UserCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -53,7 +54,10 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen relative bg-background overflow-clip selection:bg-primary selection:text-primary-foreground">
+    <div 
+      className="min-h-screen relative overflow-clip selection:bg-primary selection:text-primary-foreground"
+      style={getBackgroundStyle('home')}
+    >
       <style>
         {`
           .crt-scanlines {

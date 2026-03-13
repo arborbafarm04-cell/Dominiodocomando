@@ -4,6 +4,7 @@ import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { getBackgroundStyle } from '@/config/backgroundImages';
 
 export default function Luxo2Page() {
   const [showPaymentAnimation, setShowPaymentAnimation] = useState(false);

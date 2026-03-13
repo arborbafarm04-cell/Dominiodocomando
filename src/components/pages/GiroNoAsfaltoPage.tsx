@@ -5,6 +5,7 @@ import { Image } from '@/components/ui/image';
 import SlotMachine from '@/components/SlotMachine';
 import DraggableContainer from '@/components/DraggableContainer';
 import { useDraggableContainers } from '@/hooks/useDraggableContainers';
+import { getBackgroundStyle } from '@/config/backgroundImages';
 import { RotateCcw } from 'lucide-react';
 
 export default function GiroNoAsfaltoPage() {

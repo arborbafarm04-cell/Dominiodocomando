@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 import { usePlayerStore } from '@/store/playerStore';
+import { getBackgroundStyle } from '@/config/backgroundImages';
 
 interface Point {
   id: string;
@@ -95,7 +96,10 @@ export default function GamePage() {
   }, [draggingId, points, dragOffset]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div 
+      className="min-h-screen flex flex-col"
+      style={getBackgroundStyle('game')}
+    >
       <Header />
       
       <main className="flex-1 w-full max-w-[120rem] mx-auto px-4 py-8">
