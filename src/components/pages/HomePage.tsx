@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { LogIn, Gamepad2, Users, Trophy, Zap } from 'lucide-react';
+import { Gamepad2, Users, Trophy, Zap } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 import { usePlayerStore } from '@/store/playerStore';
 import { BaseCrudService } from '@/integrations';
@@ -13,58 +13,33 @@ const LOGO_URL = "https://static.wixstatic.com/media/50f4bf_fda705d9cabd430cb14b
 export default function HomePage() {
   const navigate = useNavigate();
   const { setPlayerId, setPlayerName, setLevel, setIsGuest, setProgress } = usePlayerStore();
-  const [playerName, setInputPlayerName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [isMounted, setIsMounted] = useState(false);
-  const [showLoginForm, setShowLoginForm] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const handleLogin = async (loginType: 'guest' | 'google' | 'facebook') => {
-    if (loginType === 'guest' && !playerName.trim()) {
-      setError('Por favor, digite um nome para continuar como visitante');
-      return;
-    }
-
+  const handleStartGame = async () => {
     setIsLoading(true);
-    setError('');
     
     try {
-      let playerId: string;
-      let displayName: string;
-      let isGuest: boolean;
-
-      if (loginType === 'guest') {
-        playerId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        displayName = playerName.trim().toUpperCase();
-        isGuest = true;
-      } else if (loginType === 'google') {
-        playerId = `google_${Date.now()}`;
-        displayName = 'JOGADOR_GOOGLE';
-        isGuest = false;
-      } else {
-        playerId = `facebook_${Date.now()}`;
-        displayName = 'JOGADOR_FACEBOOK';
-        isGuest = false;
-      }
+      const playerId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const displayName = 'JOGADOR';
 
       // Update store immediately for instant UI feedback
       setPlayerId(playerId);
       setPlayerName(displayName);
       setLevel(1);
       setProgress(0);
-      setIsGuest(isGuest);
+      setIsGuest(true);
 
       // Save to localStorage immediately
       localStorage.setItem('playerId', playerId);
       localStorage.setItem('playerName', displayName);
-      localStorage.setItem('isGuest', isGuest.toString());
+      localStorage.setItem('isGuest', 'true');
 
-      // Close modal and navigate
-      setShowLoginForm(false);
+      // Navigate to game
       navigate('/game');
 
       // Create player in database in background
@@ -73,15 +48,14 @@ export default function HomePage() {
         playerName: displayName,
         level: 1,
         progress: 0,
-        isGuest: isGuest,
-        externalPlayerId: loginType !== 'guest' ? playerId : null,
+        isGuest: true,
+        externalPlayerId: null,
         lastUpdated: new Date().toISOString(),
         profilePicture: null,
       }).catch((err) => {
         console.error('Error saving player to database:', err);
       });
     } catch (err) {
-      setError('Erro ao fazer login. Tente novamente.');
       console.error(err);
       setIsLoading(false);
     }
@@ -139,14 +113,15 @@ export default function HomePage() {
             className="flex justify-center"
           >
             <button
-              onClick={() => setShowLoginForm(true)}
-              className="px-8 md:px-12 py-3 md:py-4 bg-gradient-to-r from-[#FF4500] to-[#FF0000] text-white font-heading font-bold text-lg md:text-xl tracking-wider uppercase rounded-lg hover:shadow-[0_0_20px_rgba(255,69,0,0.8)] transition-all duration-300 flex items-center gap-3"
+              onClick={handleStartGame}
+              disabled={isLoading}
+              className="px-8 md:px-12 py-3 md:py-4 bg-gradient-to-r from-[#FF4500] to-[#FF0000] text-white font-heading font-bold text-lg md:text-xl tracking-wider uppercase rounded-lg hover:shadow-[0_0_20px_rgba(255,69,0,0.8)] transition-all duration-300 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 filter: 'drop-shadow(0 0 10px rgba(255,69,0,0.5))'
               }}
             >
               <Gamepad2 className="w-6 h-6" />
-              Começar a Jogar
+              {isLoading ? 'Carregando...' : 'Começar a Jogar'}
             </button>
           </motion.div>
         </section>
@@ -183,77 +158,6 @@ export default function HomePage() {
             ))}
           </div>
         </section>
-
-        {/* Login Form Modal */}
-        {showLoginForm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
-            onClick={() => setShowLoginForm(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              className="bg-gradient-to-b from-[rgba(15,20,30,0.95)] to-[rgba(15,20,30,0.85)] border-2 border-[#00eaff] rounded-lg p-6 md:p-8 shadow-[0_0_30px_rgba(0,234,255,0.3)] max-w-md w-full"
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-6 text-center">
-                Começar a Jogar
-              </h2>
-
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded text-red-300 text-sm font-paragraph"
-                >
-                  {error}
-                </motion.div>
-              )}
-
-              <div className="mb-6">
-                <label className="block text-[#00eaff] font-heading text-sm tracking-wider uppercase mb-3">
-                  Seu Nome de Jogador
-                </label>
-                <input
-                  type="text"
-                  value={playerName}
-                  onChange={(e) => {
-                    setInputPlayerName(e.target.value);
-                    setError('');
-                  }}
-                  placeholder="Digite seu nome..."
-                  maxLength={20}
-                  className="w-full bg-black/40 border-2 border-[#00eaff]/30 rounded px-4 py-3 text-white font-paragraph placeholder-white/40 focus:outline-none focus:border-[#00eaff] transition-colors text-base"
-                />
-              </div>
-
-              <button
-                onClick={() => handleLogin('guest')}
-                disabled={isLoading}
-                className="w-full py-3 bg-gradient-to-r from-[#00eaff]/20 to-[#00eaff]/10 border-2 border-[#00eaff] rounded font-heading font-bold text-[#00eaff] tracking-wider uppercase hover:from-[#00eaff]/30 hover:to-[#00eaff]/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  filter: 'drop-shadow(0 0 8px rgba(0,234,255,0.3))'
-                }}
-              >
-                {isLoading ? 'Carregando...' : 'Entrar como Visitante'}
-              </button>
-
-              <button
-                onClick={() => setShowLoginForm(false)}
-                className="w-full mt-3 py-3 bg-transparent border-2 border-white/30 rounded font-heading font-bold text-white tracking-wider uppercase hover:border-white/60 transition-all duration-300"
-              >
-                Cancelar
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
       </main>
 
       <Footer />

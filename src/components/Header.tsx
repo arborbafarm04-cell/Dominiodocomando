@@ -1,20 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, Crown, Vault, Zap, LogOut } from 'lucide-react';
+import { Vault, Zap } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
 import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
 import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
 import { usePlayerStore } from '@/store/playerStore';
-import { useMember } from '@/integrations';
-import { useNavigate } from 'react-router-dom';
 
 export default function Header() {
   const { dirtMoney } = useGameStore();
   const { dirtyMoney } = useDirtyMoneyStore();
   const { cleanMoney } = useCleanMoneyStore();
   const { playerName, level, setPlayerName, setLevel } = usePlayerStore();
-  const { member, isAuthenticated, actions } = useMember();
-  const navigate = useNavigate();
   const [customPlayerName, setCustomPlayerName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('https://static.wixstatic.com/media/50f4bf_a888df3d639f415b853110e459edba8c~mv2.png?originWidth=128&originHeight=128');
   const [isEditingName, setIsEditingName] = useState(false);
@@ -22,15 +18,6 @@ export default function Header() {
   const [tempName, setTempName] = useState('');
   const [tempCustomName, setTempCustomName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleLogout = async () => {
-    try {
-      await actions.logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
 
   // Load saved data from localStorage
   useEffect(() => {
@@ -284,35 +271,7 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Icons */}
-          <div className="flex items-center gap-2 md:gap-4">
-            {isAuthenticated && (
-              <>
-                <button
-                  onClick={() => navigate('/profile')}
-                  className="text-white hover:text-secondary transition-all duration-300 hover:brightness-150 p-2 rounded-lg hover:bg-secondary/10"
-                  style={{
-                    filter: 'drop-shadow(0 0 8px rgba(0,234,255,0.6))'
-                  }}
-                  aria-label="Perfil"
-                  title="Ir para perfil"
-                >
-                  <span className="font-heading text-sm">👤</span>
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="text-white hover:text-logo-gradient-start transition-all duration-300 hover:brightness-150 p-2 rounded-lg hover:bg-logo-gradient-start/10"
-                  style={{
-                    filter: 'drop-shadow(0 0 8px rgba(255,69,0,0.6))'
-                  }}
-                  aria-label="Sair"
-                  title="Sair da conta"
-                >
-                  <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-                </button>
-              </>
-            )}
-          </div>
+
         </div>
       </div>
     </header>
