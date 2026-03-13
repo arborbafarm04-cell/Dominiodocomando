@@ -16,7 +16,7 @@ export default function Luxo5Page() {
   const setPlayerLevel = useGameStore((state) => state.setPlayerLevel);
   const { backgroundImage } = useBackgroundImage('luxo 5');
 
-  const luxo5Price = 1203.51;
+  const luxo 5Price = 1203.51;
 
   const handleBuyClick = () => {
     setShowPaymentAnimation(true);
