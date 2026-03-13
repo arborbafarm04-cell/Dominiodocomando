@@ -66,12 +66,7 @@ const GameHeader: React.FC = () => {
       const { setPlayerName } = usePlayerStore.getState();
       setPlayerName(savedName);
     }
-    
-    // Show login modal if no player ID exists
-    if (!savedPlayerId && !playerId) {
-      setShowLoginModal(true);
-    }
-  }, [playerId]);
+  }, []);
 
   // Focus input when editing starts
   useEffect(() => {
@@ -189,15 +184,6 @@ const GameHeader: React.FC = () => {
 
   // Prevent hydration mismatch rendering
   if (!isMounted) return null;
-
-  // Show login modal if not authenticated
-  if (!playerId) {
-    return (
-      <div className="min-h-screen bg-[#0a0d14] text-white overflow-x-hidden font-paragraph selection:bg-[#00eaff] selection:text-black flex items-center justify-center">
-        <LoginModal isOpen={true} onClose={() => {}} />
-      </div>
-    );
-  }
 
   return (
     <header 

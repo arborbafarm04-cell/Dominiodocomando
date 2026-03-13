@@ -26,3 +26,24 @@ export interface Players {
   /** @wixFieldType boolean */
   isGuest?: boolean;
 }
+
+
+/**
+ * Collection ID: playerslogados
+ * Interface for LoggedInPlayers
+ */
+export interface LoggedInPlayers {
+  _id: string;
+  _createdDate?: Date;
+  _updatedDate?: Date;
+  /** @wixFieldType text */
+  memberId?: string;
+  /** @wixFieldType text */
+  playerName?: string;
+  /** @wixFieldType text */
+  nickname?: string;
+  /** @wixFieldType datetime */
+  lastSeen?: Date | string;
+  /** @wixFieldType boolean */
+  isOnline?: boolean;
+}
