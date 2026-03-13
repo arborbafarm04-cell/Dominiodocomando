@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 import { usePlayerStore } from '@/store/playerStore';
-import { getBackgroundStyle } from '@/config/backgroundImages';
+import { useBackgroundImage } from '@/config/backgroundImages';
 
 interface Point {
   id: string;
@@ -37,6 +37,7 @@ export default function GamePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { level } = usePlayerStore();
+  const { backgroundImage } = useBackgroundImage('game');
 
   const handleMouseDown = (e: React.MouseEvent, pointId: string) => {
     e.preventDefault();
@@ -98,7 +99,12 @@ export default function GamePage() {
   return (
     <div 
       className="min-h-screen flex flex-col"
-      style={getBackgroundStyle('game')}
+      style={{
+        backgroundImage: `url('${backgroundImage}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
     >
       <Header />
       

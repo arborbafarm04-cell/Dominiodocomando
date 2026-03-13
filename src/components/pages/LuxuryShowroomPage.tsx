@@ -4,12 +4,22 @@ import CharacterDialog from '@/components/CharacterDialog';
 import { motion } from 'framer-motion';
 import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
+import { useBackgroundImage } from '@/config/backgroundImages';
 
 export default function LuxuryShowroomPage() {
   const { playerLevel } = useGameStore();
+  const { backgroundImage } = useBackgroundImage('luxuryShowroom');
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div 
+      className="min-h-screen flex flex-col"
+      style={{
+        backgroundImage: `url('${backgroundImage}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       <Header />
       <CharacterDialog />
 

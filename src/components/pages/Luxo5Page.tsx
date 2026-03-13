@@ -4,6 +4,7 @@ import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useBackgroundImage } from '@/config/backgroundImages';
 
 export default function Luxo5Page() {
   const [showPaymentAnimation, setShowPaymentAnimation] = useState(false);
@@ -13,6 +14,7 @@ export default function Luxo5Page() {
   const playerName = useGameStore((state) => state.playerName);
   const playerLevel = useGameStore((state) => state.playerLevel);
   const setPlayerLevel = useGameStore((state) => state.setPlayerLevel);
+  const { backgroundImage } = useBackgroundImage('luxo5');
 
   const luxo5Price = 1203.51;
 
@@ -54,7 +56,15 @@ export default function Luxo5Page() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div 
+      className="flex flex-col min-h-screen"
+      style={{
+        backgroundImage: `url('${backgroundImage}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       <Header />
       <div className="relative w-full flex-1 overflow-hidden">
         {/* Background Image */}

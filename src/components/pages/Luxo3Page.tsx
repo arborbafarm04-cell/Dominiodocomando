@@ -4,6 +4,7 @@ import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useBackgroundImage } from '@/config/backgroundImages';
 
 export default function Luxo3Page() {
   const [showPaymentAnimation, setShowPaymentAnimation] = useState(false);
@@ -13,6 +14,7 @@ export default function Luxo3Page() {
   const playerName = useGameStore((state) => state.playerName);
   const playerLevel = useGameStore((state) => state.playerLevel);
   const setPlayerLevel = useGameStore((state) => state.setPlayerLevel);
+  const { backgroundImage } = useBackgroundImage('luxo3');
 
   // Calculate price: (167.00 * 1.1) + 2 = 185.70
   const luxo3Price = 185.70;
@@ -55,7 +57,15 @@ export default function Luxo3Page() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div 
+      className="flex flex-col min-h-screen"
+      style={{
+        backgroundImage: `url('${backgroundImage}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       <Header />
       <div className="relative w-full flex-1 overflow-hidden">
         {/* Background Image */}

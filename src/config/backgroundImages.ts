@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react';
+import { backgroundService } from '@/services/backgroundService';
+
 /**
  * Background Images Configuration
  * Centralized configuration for background images used across all pages
@@ -67,3 +70,42 @@ export const getBackgroundStyle = (imageName: keyof typeof backgroundImages) => 
   backgroundPosition: 'center',
   backgroundAttachment: 'fixed',
 });
+
+/**
+ * Hook to get background image from CMS
+ * Falls back to static config if CMS image is not available
+ * @param pageName - The name of the page
+ * @returns Object with backgroundImage URL and isLoading state
+ */
+export const useBackgroundImage = (pageName: keyof typeof backgroundImages) => {
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBackground = async () => {
+      setIsLoading(true);
+      try {
+        const cmsImage = await backgroundService.getBackgroundImageUrl(pageName);
+        if (cmsImage) {
+          setBackgroundImage(cmsImage);
+        } else {
+          // Fallback to static config
+          setBackgroundImage(backgroundImages[pageName]);
+        }
+      } catch (error) {
+        console.error(`Error fetching background for ${pageName}:`, error);
+        // Fallback to static config
+        setBackgroundImage(backgroundImages[pageName]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBackground();
+  }, [pageName]);
+
+  return {
+    backgroundImage: backgroundImage || backgroundImages[pageName],
+    isLoading,
+  };
+};

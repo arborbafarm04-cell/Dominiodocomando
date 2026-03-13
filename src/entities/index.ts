@@ -4,6 +4,23 @@
  */
 
 /**
+ * Collection ID: BackgroundPages
+ * Interface for Background
+ */
+export interface Background {
+  _id: string;
+  _createdDate?: Date;
+  _updatedDate?: Date;
+  /** @wixFieldType text */
+  pageName?: string;
+  /** @wixFieldType image - Contains image URL, render with <Image> component, NOT as text */
+  backgroundImage?: string;
+  /** @wixFieldType image - Contains image URL, render with <Image> component, NOT as text */
+  image?: string;
+}
+
+
+/**
  * Collection ID: personagens
  * Interface for Characters
  */
