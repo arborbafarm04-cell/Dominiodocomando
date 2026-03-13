@@ -10,13 +10,6 @@ export default function LoginPage() {
   const { member, isAuthenticated } = useMember();
   const navigate = useNavigate();
 
-  // Redirect to game if already logged in
-  useEffect(() => {
-    if (isAuthenticated && member) {
-      navigate('/game');
-    }
-  }, [isAuthenticated, member, navigate]);
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
