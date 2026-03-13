@@ -4,17 +4,136 @@ import { useNavigate } from 'react-router-dom';
 import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
 import { useBriberyStore, type BriberyConsequence } from '@/store/briberyStore';
 import { useGameStore } from '@/store/gameStore';
+import { usePlayerStore } from '@/store/playerStore';
 import { Image } from '@/components/ui/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-type DialogState = 'initial' | 'accepting' | 'denying' | 'consequence';
+type DialogState = 'initial' | 'accepting' | 'denying' | 'consequence' | 'whistleblower';
+
+interface CharacterConfig {
+  name: string;
+  emoji: string;
+  levelRange: string;
+  initialDialog: string;
+  acceptDialog: string;
+  denyDialog: string;
+  denyResponse: string;
+}
+
+const characterConfigs: Record<number, CharacterConfig> = {
+  10: {
+    name: 'Investigador',
+    emoji: '🔍',
+    levelRange: '10 a 19',
+    initialDialog: 'Tenho alguns relatórios aqui com seu nome aparecendo em lugares… curiosos. Mas relatórios também desaparecem quando a motivação certa aparece.',
+    acceptDialog: 'Perfeito. Esses papéis acabaram de ficar… invisíveis. ...nos veremos em breve.',
+    denyDialog: 'Denunciar? Que atitude nobre… espero que seus negócios sejam tão limpos quanto sua consciência.',
+    denyResponse: 'Interessante… resolveu bancar o cidadão exemplar? Vamos ver se a cidade gosta de gente assim.',
+  },
+  20: {
+    name: 'Delegado',
+    emoji: '👮',
+    levelRange: '20 a 29',
+    initialDialog: 'Minha delegacia anda muito ocupada… mas certas ocorrências podem simplesmente não entrar no sistema. Depende da colaboração.',
+    acceptDialog: 'Assim gosto. A burocracia pode ser bem… seletiva. ...nos veremos em breve.',
+    denyDialog: 'Corajoso da sua parte. Vamos ver quanto tempo dura essa coragem.',
+    denyResponse: 'Interessante… resolveu bancar o cidadão exemplar? Vamos ver se a cidade gosta de gente assim.',
+  },
+  30: {
+    name: 'Vereador',
+    emoji: '🎩',
+    levelRange: '30 a 39',
+    initialDialog: 'Estou votando uns projetos de fiscalização novos… sabe como é. Mas apoio político também pode vir em forma de incentivo.',
+    acceptDialog: 'Excelente. Sempre bom trabalhar com parceiros da comunidade. ...nos veremos em breve.',
+    denyDialog: 'Denunciar um vereador? Que espírito cívico… tomara que sua reputação aguente a atenção.',
+    denyResponse: 'Interessante… resolveu bancar o cidadão exemplar? Vamos ver se a cidade gosta de gente assim.',
+  },
+  40: {
+    name: 'Prefeito',
+    emoji: '🏛️',
+    levelRange: '40 a 49',
+    initialDialog: 'A cidade cresce… e algumas áreas precisam de menos fiscalização pra prosperar. Tudo depende de quem colabora com o desenvolvimento.',
+    acceptDialog: 'Ótimo. Vamos manter a cidade funcionando do jeito certo. ...nos veremos em breve.',
+    denyDialog: 'Ah… o justiceiro urbano. Vamos ver como seus empreendimentos lidam com a prefeitura agora.',
+    denyResponse: 'Interessante… resolveu bancar o cidadão exemplar? Vamos ver se a cidade gosta de gente assim.',
+  },
+  50: {
+    name: 'Promotor',
+    emoji: '⚖️',
+    levelRange: '50 a 59',
+    initialDialog: 'Curioso… seu nome apareceu em alguns inquéritos. Mas processos podem demorar muito… ou simplesmente não avançar.',
+    acceptDialog: 'Perfeito. Às vezes a justiça precisa de… paciência. ...nos veremos em breve.',
+    denyDialog: 'Interessante… decidiu confiar no sistema. Espero que ele confie em você também.',
+    denyResponse: 'Interessante… resolveu bancar o cidadão exemplar? Vamos ver se a cidade gosta de gente assim.',
+  },
+  60: {
+    name: 'Juiz',
+    emoji: '⚔️',
+    levelRange: '60 a 69',
+    initialDialog: 'Alguns casos chegam até mim… e as decisões podem ser… muito flexíveis dependendo das circunstâncias.',
+    acceptDialog: 'Compreendido. A balança da justiça pode se equilibrar melhor assim. ...nos veremos em breve.',
+    denyDialog: 'Denunciar um juiz… isso vai render uma história curiosa nos corredores.',
+    denyResponse: 'Interessante… resolveu bancar o cidadão exemplar? Vamos ver se a cidade gosta de gente assim.',
+  },
+  70: {
+    name: 'Secretário',
+    emoji: '📋',
+    levelRange: '70 a 79',
+    initialDialog: 'Os órgãos da cidade estão revisando algumas licenças… inclusive as que envolvem seus negócios.',
+    acceptDialog: 'Pronto. Seus documentos continuam perfeitamente… regulares. ...nos veremos em breve.',
+    denyDialog: 'Interessante… alguém decidiu jogar pelas regras. Vamos ver quanto isso ajuda.',
+    denyResponse: 'Interessante… resolveu bancar o cidadão exemplar? Vamos ver se a cidade gosta de gente assim.',
+  },
+  80: {
+    name: 'Governador',
+    emoji: '👑',
+    levelRange: '80 a 89',
+    initialDialog: 'O estado está reforçando algumas operações… mas sempre há prioridades diferentes dependendo das parcerias.',
+    acceptDialog: 'Ótimo. O estado sabe reconhecer quem coopera. ...nos veremos em breve.',
+    denyDialog: 'Ah… o herói da moralidade. Tomara que o estado seja gentil com seus empreendimentos.',
+    denyResponse: 'Interessante… resolveu bancar o cidadão exemplar? Vamos ver se a cidade gosta de gente assim.',
+  },
+  90: {
+    name: 'Ministro',
+    emoji: '🎖️',
+    levelRange: '90 a 99',
+    initialDialog: 'Alguns relatórios federais chegaram até minha mesa. Mas certas coisas podem simplesmente… não seguir adiante.',
+    acceptDialog: 'Excelente escolha. Alguns assuntos ficam melhor resolvidos assim. ...nos veremos em breve.',
+    denyDialog: 'Denunciar? Admirável… veremos como o sistema reage a tanta honestidade.',
+    denyResponse: 'Interessante… resolveu bancar o cidadão exemplar? Vamos ver se a cidade gosta de gente assim.',
+  },
+  100: {
+    name: 'Presidente',
+    emoji: '🇧🇷',
+    levelRange: '100',
+    initialDialog: 'Meu amigo… que bom falar com você. Estava justamente vendo os números das nossas empreiteiras… estão faturando bonito. Obras aqui, contratos ali… quando amigos trabalham juntos, o país até parece que anda mais rápido. Agora, pra continuar tudo fluindo sem curiosos demais olhando… você sabe como funciona.',
+    acceptDialog: 'Sabia que podia contar com você. Parcerias assim movem montanhas… e constroem muitas obras. ...nos veremos em breve.',
+    denyDialog: 'Então você resolveu abrir o jogo… impressionante.',
+    denyResponse: 'Interessante… resolveu bancar o cidadão exemplar? Vamos ver se a cidade gosta de gente assim.',
+  },
+};
+
+function getCharacterConfig(level: number): CharacterConfig {
+  if (level >= 100) return characterConfigs[100];
+  if (level >= 90) return characterConfigs[90];
+  if (level >= 80) return characterConfigs[80];
+  if (level >= 70) return characterConfigs[70];
+  if (level >= 60) return characterConfigs[60];
+  if (level >= 50) return characterConfigs[50];
+  if (level >= 40) return characterConfigs[40];
+  if (level >= 30) return characterConfigs[30];
+  if (level >= 20) return characterConfigs[20];
+  if (level >= 10) return characterConfigs[10];
+  return characterConfigs[10];
+}
 
 export default function BriberyGuardPage() {
   const navigate = useNavigate();
   const { dirtyMoney, removeDirtyMoney } = useDirtyMoneyStore();
   const { playerLevel, setPlayerLevel } = useGameStore();
-  const { getBriberyAmount, getNextBriberyAmount, addConsequence, hasConsequence } = useBriberyStore();
+  const { setLevel } = usePlayerStore();
+  const { getBriberyAmount, getNextBriberyAmount, addConsequence } = useBriberyStore();
   
   const [dialogState, setDialogState] = useState<DialogState>('initial');
   const [consequence, setConsequence] = useState<BriberyConsequence | null>(null);
@@ -27,6 +146,7 @@ export default function BriberyGuardPage() {
 
   const briberyAmount = getBriberyAmount(playerLevel);
   const nextBriberyAmount = getNextBriberyAmount(playerLevel);
+  const character = getCharacterConfig(playerLevel);
 
   const getRandomConsequence = (): BriberyConsequence => {
     const consequences: BriberyConsequence[] = [
@@ -63,7 +183,7 @@ export default function BriberyGuardPage() {
     removeDirtyMoney(briberyAmount);
 
     // Update level if not at max
-    if (playerLevel < 9) {
+    if (playerLevel < 100) {
       setPlayerLevel(playerLevel + 1);
     }
 
@@ -79,6 +199,13 @@ export default function BriberyGuardPage() {
 
   const handleDeny = async () => {
     setIsProcessing(true);
+    
+    // Special case for level 100 (President) - Whistleblower
+    if (playerLevel === 100) {
+      setDialogState('whistleblower');
+      return;
+    }
+    
     const randomConsequence = getRandomConsequence();
     setConsequence(randomConsequence);
     
@@ -95,6 +222,20 @@ export default function BriberyGuardPage() {
 
   const handleCloseConsequence = () => {
     navigate('/');
+  };
+
+  const handleWhistleblowerConfirm = () => {
+    // Reset player to level 1
+    setPlayerLevel(1);
+    setLevel(1);
+    setDialogState('accepting');
+    
+    setTimeout(() => {
+      setIsProcessing(false);
+      setTimeout(() => {
+        navigate('/');
+      }, 3000);
+    }, 2000);
   };
 
   if (!isMounted) return null;
@@ -122,16 +263,13 @@ export default function BriberyGuardPage() {
 
                 {/* Content */}
                 <div className="relative z-10 p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center">
-                  {/* Guard Image */}
+                  {/* Character Avatar */}
                   <div className="flex-shrink-0 w-full md:w-auto">
                     <div className="relative w-48 h-48 mx-auto md:mx-0">
                       <div className="absolute inset-0 bg-gradient-to-br from-[#FF4500]/30 to-[#00eaff]/30 rounded-lg blur-xl" />
-                      <Image
-                        src="https://static.wixstatic.com/media/50f4bf_d7566da71ac74a66b1cc396cffeedfde~mv2.png?originWidth=192&originHeight=192"
-                        alt="Guarda da Polícia"
-                        width={192}
-                        className="relative w-full h-full object-cover rounded-lg border-2 border-[#FF4500]"
-                      />
+                      <div className="relative w-full h-full object-cover rounded-lg border-2 border-[#FF4500] flex items-center justify-center bg-gradient-to-br from-[#FF4500]/20 to-[#00eaff]/20">
+                        <span className="text-8xl">{character.emoji}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -143,17 +281,17 @@ export default function BriberyGuardPage() {
                       transition={{ duration: 0.5, delay: 0.2 }}
                     >
                       <h2 className="font-heading text-2xl md:text-3xl font-bold text-[#FF4500] mb-4">
-                        Proposta do Guarda
+                        {character.name}
                       </h2>
 
                       <p className="font-paragraph text-base md:text-lg text-white/90 mb-8 leading-relaxed">
-                        "Olha só… achei meio suspeito esse movimento aí no seu território. Mas relaxa… a rua é cheia de buracos e eu posso acabar olhando pro lado errado se alguém ajudar a lubrificar a engrenagem."
+                        "{character.initialDialog}"
                       </p>
 
                       {/* Bribery Info */}
                       <div className="mb-8 p-4 bg-[#FF4500]/10 border border-[#FF4500]/50 rounded-lg">
                         <p className="font-paragraph text-sm text-white/80 mb-2">
-                          <span className="text-[#00eaff] font-bold">Nível {playerLevel}</span> de <span className="text-[#00eaff] font-bold">9</span>
+                          <span className="text-[#00eaff] font-bold">Nível {playerLevel}</span> ({character.levelRange})
                         </p>
                         <p className="font-paragraph text-lg text-white/90">
                           Valor do Suborno: <span className="text-[#FF4500] font-bold">R$ {briberyAmount.toLocaleString('pt-BR')}</span>
@@ -185,7 +323,7 @@ export default function BriberyGuardPage() {
                           disabled={isProcessing}
                           className="flex-1 px-8 py-3 bg-gradient-to-r from-[#00eaff] to-[#0099cc] text-black font-heading font-bold text-lg tracking-wider rounded-lg border-2 border-[#00eaff] hover:shadow-[0_0_20px_rgba(0,234,255,0.8)] transition-all duration-300 uppercase disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {isProcessing ? 'Processando...' : 'Denunciar'}
+                          {isProcessing ? 'Processando...' : playerLevel === 100 ? 'Delação Premiada' : 'Denunciar'}
                         </motion.button>
                       </div>
                     </motion.div>
@@ -220,7 +358,7 @@ export default function BriberyGuardPage() {
                     </h2>
 
                     <p className="font-paragraph text-lg md:text-xl text-white/90 mb-8 leading-relaxed">
-                      "Boa decisão. A rua continua tranquila… e eu continuo distraído. ...nos veremos em breve."
+                      "{character.acceptDialog}"
                     </p>
 
                     <div className="space-y-4 mb-8">
@@ -235,7 +373,7 @@ export default function BriberyGuardPage() {
                         </p>
                       </motion.div>
 
-                      {playerLevel < 9 && (
+                      {playerLevel < 100 && (
                         <motion.div
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
@@ -243,7 +381,7 @@ export default function BriberyGuardPage() {
                           className="p-4 bg-[#00eaff]/10 border border-[#00eaff]/50 rounded-lg"
                         >
                           <p className="font-paragraph text-white/90">
-                            <span className="text-[#00eaff] font-bold">Nível Aumentado</span> para {playerLevel + 1}/9
+                            <span className="text-[#00eaff] font-bold">Nível Aumentado</span> para {playerLevel + 1}/100
                           </p>
                         </motion.div>
                       )}
@@ -337,6 +475,64 @@ export default function BriberyGuardPage() {
                         className="px-8 py-3 bg-gradient-to-r from-[#FF4500] to-[#FF0000] text-white font-heading font-bold text-lg tracking-wider rounded-lg border-2 border-[#FF4500] hover:shadow-[0_0_20px_rgba(255,69,0,0.8)] transition-all duration-300 uppercase"
                       >
                         Voltar ao Menu
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {dialogState === 'whistleblower' && (
+            <motion.div
+              key="whistleblower"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              className="w-full max-w-4xl"
+            >
+              <div className="relative bg-gradient-to-b from-[#1a1f2e] to-[#0f1419] border-2 border-[#FF0000] rounded-lg overflow-hidden shadow-[0_0_40px_rgba(255,0,0,0.5)]">
+                <div className="absolute inset-0 opacity-20 pointer-events-none">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-[#FF0000]/20 rounded-full blur-3xl" />
+                </div>
+
+                <div className="relative z-10 p-8 md:p-12">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <h2 className="font-heading text-3xl md:text-4xl font-bold text-[#FF0000] mb-8 text-center">
+                      Delação Premiada
+                    </h2>
+
+                    <div className="mb-8 p-6 bg-[#FF0000]/10 border-2 border-[#FF0000]/50 rounded-lg">
+                      <p className="font-paragraph text-lg text-white/90 text-center leading-relaxed mb-6">
+                        "{character.denyDialog}"
+                      </p>
+                      <p className="font-paragraph text-base text-white/80 text-center leading-relaxed">
+                        "Só tem um detalhe: quando a máquina começa a girar, ela limpa tudo no caminho. Seus cofres, seus contatos, suas rotas de fuga, seus luxos, sua quadrilha, seu barraco, seus negócios de lavagem, seu arsenal… tudo volta ao começo."
+                      </p>
+                    </div>
+
+                    <div className="mb-8 p-6 bg-destructive/20 border-2 border-destructive rounded-lg">
+                      <p className="font-heading text-2xl text-destructive text-center font-bold mb-4">
+                        ⚠️ RESET TOTAL
+                      </p>
+                      <p className="font-paragraph text-white/90 text-center">
+                        Parabéns pela honestidade. Você acaba de voltar ao <span className="text-destructive font-bold">nível 1</span>.
+                      </p>
+                    </div>
+
+                    <div className="text-center">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleWhistleblowerConfirm}
+                        className="px-8 py-3 bg-gradient-to-r from-[#FF4500] to-[#FF0000] text-white font-heading font-bold text-lg tracking-wider rounded-lg border-2 border-[#FF4500] hover:shadow-[0_0_20px_rgba(255,69,0,0.8)] transition-all duration-300 uppercase"
+                      >
+                        Aceitar Consequências
                       </motion.button>
                     </div>
                   </motion.div>

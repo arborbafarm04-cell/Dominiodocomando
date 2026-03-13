@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
+import { usePlayerStore } from '@/store/playerStore';
 
 interface Point {
   id: string;
@@ -34,6 +35,7 @@ export default function GamePage() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { level } = usePlayerStore();
 
   const handleMouseDown = (e: React.MouseEvent, pointId: string) => {
     e.preventDefault();
@@ -75,6 +77,9 @@ export default function GamePage() {
   const handlePointClick = (point: Point) => {
     if (point.link) {
       navigate(point.link);
+    } else if (point.id === '8' && level >= 10) {
+      // Policial - Bribery Guard
+      navigate('/bribery-guard');
     }
   };
 
