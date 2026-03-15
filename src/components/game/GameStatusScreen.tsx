@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 
-export default function GameStatusScreen() {
+function GameStatusScreen() {
   const setScreen = useGameScreenStore((state) => state.setScreen);
 
   const playerStats = {
@@ -151,3 +151,5 @@ export default function GameStatusScreen() {
     </div>
   );
 }
+
+export default GameStatusScreen;

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 
-export default function GameLocationScreen() {
+function GameLocationScreen() {
   const setScreen = useGameScreenStore((state) => state.setScreen);
   const selectedLocation = useGameScreenStore((state) => state.selectedLocation);
 
@@ -97,3 +97,5 @@ export default function GameLocationScreen() {
     </div>
   );
 }
+
+export default GameLocationScreen;

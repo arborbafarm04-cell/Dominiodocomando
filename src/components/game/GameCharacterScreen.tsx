@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 
-export default function GameCharacterScreen() {
+function GameCharacterScreen() {
   const setScreen = useGameScreenStore((state) => state.setScreen);
 
   const characters = [
@@ -94,3 +94,5 @@ export default function GameCharacterScreen() {
     </div>
   );
 }
+
+export default GameCharacterScreen;

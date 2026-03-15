@@ -4,7 +4,7 @@ import MapButtons from '@/components/MapButtons';
 import { useMapButtonsStore } from '@/store/mapButtonsStore';
 import { Trash2, Plus } from 'lucide-react';
 
-export default function GameMap() {
+function GameMap() {
   const mapContainer = useRef(null);
   const mapInstance = useRef(null);
   const navigate = useNavigate();
@@ -329,3 +329,5 @@ export default function GameMap() {
     </div>
   );
 }
+
+export default GameMap;

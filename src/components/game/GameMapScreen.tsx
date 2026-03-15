@@ -2,7 +2,7 @@ import GameMap from './GameMap';
 import { useState } from 'react';
 import { Plus, Minus } from 'lucide-react';
 
-export default function GameMapScreen() {
+function GameMapScreen() {
   const [zoom, setZoom] = useState(1);
 
   const handleZoomIn = () => {
@@ -53,3 +53,5 @@ export default function GameMapScreen() {
     </div>
   );
 }
+
+export default GameMapScreen;

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 
-export default function GameInventoryScreen() {
+function GameInventoryScreen() {
   const setScreen = useGameScreenStore((state) => state.setScreen);
 
   const inventoryItems = [
@@ -119,3 +119,5 @@ export default function GameInventoryScreen() {
     </div>
   );
 }
+
+export default GameInventoryScreen;
