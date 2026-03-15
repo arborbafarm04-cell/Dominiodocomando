@@ -54,7 +54,7 @@ export default function BarracoPage() {
     try {
       setLoading(true);
       let playerId = getPlayerId();
-      
+
       // If no player ID, try to get the first player from the collection
       if (!playerId) {
         const result = await BaseCrudService.getAll<Players>('players', [], { limit: 1 });
@@ -68,22 +68,22 @@ export default function BarracoPage() {
       }
 
       const playerData = await BaseCrudService.getById<Players>('players', playerId);
-      
+
       // Check if level increased and trigger level up animation
       if (previousLevel !== null && playerData?.level && playerData.level > previousLevel) {
         setLevelUpAnimation(true);
         setTimeout(() => setLevelUpAnimation(false), 1500);
       }
-      
+
       setPreviousLevel(playerData?.level || 1);
       setPlayer(playerData);
       setImageKey(prev => prev + 1); // Trigger image change animation
-      
+
       // Update the player store with the level from database
       if (playerData?.level) {
         setLevel(playerData.level);
       }
-      
+
       // Check if all items are at the same level
       checkAllItemsAtLevel(playerData?.level || 1);
     } catch (err) {
@@ -195,7 +195,7 @@ export default function BarracoPage() {
         />
       )}
       <Header />
-      
+
       <main className="max-w-[100rem] mx-auto px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -208,7 +208,7 @@ export default function BarracoPage() {
             <h1 className="font-heading text-6xl font-bold text-primary mb-2">
               BARRACO
             </h1>
-            <motion.p 
+            <motion.p
               className="text-subtitle-neon-blue text-lg"
               animate={levelUpAnimation ? { scale: [1, 1.3, 1], color: ['#00eaff', '#FFD700', '#00eaff'] } : {}}
               transition={{ duration: 1.5 }}
