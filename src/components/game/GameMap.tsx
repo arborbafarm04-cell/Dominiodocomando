@@ -85,7 +85,7 @@ export default function GameMap() {
 
         // Viatura na entrada da favela (x, y, largura, altura)
         // Aumente/Diminua largura e altura para o tamanho desejado
-        addElemento('https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png', 380, 420, 60, 40, 'giroflex');
+        addElemento('https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png', 280, 420, 60, 40, 'giroflex');
 
         // Seu QG (Barraco inicial)
         addElemento('https://static.wixstatic.com/media/50f4bf_1776337cd2dc4ff1982d01b0079a48d2~mv2.png', 200, 300, 80, 80);
