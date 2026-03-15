@@ -87,7 +87,7 @@ export default function GameMap() {
       addElemento('https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png', 130, 430, 80, 54, classeBlitz, 'BLITZ', () => {
         navigate('/bribery-guard');
       });
-      addElemento(imagemDoQG, 180, 210, 300, 320, '', 'MEU QG', () => {
+      addElemento(imagemDoQG, 160, 230, 300, 320, '', 'MEU QG', () => {
         navigate('/barraco');
       });
     };
