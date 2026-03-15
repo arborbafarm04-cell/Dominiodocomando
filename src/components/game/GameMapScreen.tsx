@@ -1,16 +1,24 @@
 import GameMap from './GameMap';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Plus, Minus } from 'lucide-react';
+import { useMapStateStore } from '@/store/mapStateStore';
 
 export default function GameMapScreen() {
-  const [zoom, setZoom] = useState(1);
+  const zoom = useMapStateStore((state) => state.zoom);
+  const setZoom = useMapStateStore((state) => state.setZoom);
+  const resetToDefault = useMapStateStore((state) => state.resetToDefault);
+
+  // Reset map to default state when component mounts
+  useEffect(() => {
+    resetToDefault();
+  }, [resetToDefault]);
 
   const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.2, 2));
+    setZoom(Math.min(zoom + 0.2, 2));
   };
 
   const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 0.2, 0.5));
+    setZoom(Math.max(zoom - 0.2, 0.5));
   };
 
   return (
