@@ -10,7 +10,7 @@ export default function GameLocationScreen() {
 
   const handleLocationAction = (locationId: string) => {
     if (locationId === 'bribery') {
-      window.location.href = '/bribery';
+      window.location.href = '/bribery-guard';
     }
   };
 
