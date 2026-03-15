@@ -10,6 +10,30 @@ export default function GameMap() {
     link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
     document.head.appendChild(link);
 
+    // Add styles for neon tooltips and giroflex animation
+    const style = document.createElement('style');
+    style.innerHTML = `
+      body, html { margin: 0; padding: 0; overflow: hidden; }
+      .tooltip-neon {
+        background: rgba(10, 10, 15, 0.9) !important;
+        border: 1px solid #0ff !important;
+        color: #fff !important;
+        font-family: sans-serif;
+        text-align: center;
+      }
+      .btn-entrar {
+        display: inline-block; margin-top: 5px; padding: 3px 10px;
+        border: 1px solid #0ff; color: #0ff; border-radius: 10px; font-weight: bold;
+      }
+      @keyframes giroflex {
+        0% { filter: drop-shadow(0 0 5px red); }
+        50% { filter: drop-shadow(0 0 10px blue); }
+        100% { filter: drop-shadow(0 0 5px red); }
+      }
+      .animacao-policia { animation: giroflex 0.6s infinite; }
+    `;
+    document.head.appendChild(style);
+
     // Dynamically load Leaflet JS
     const script = document.createElement('script');
     script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
@@ -29,6 +53,42 @@ export default function GameMap() {
         const bounds = [[0, 0], [1000, 1000]];
         L.imageOverlay(urlMapaFundo, bounds).addTo(map);
         map.fitBounds(bounds);
+
+        // Helper function to add locations
+        function addLocal(nome: string, img: string, x: number, y: number, size: number, css = '') {
+          const icon = L.icon({
+            iconUrl: img,
+            iconSize: [size, size],
+            iconAnchor: [size / 2, size],
+            className: css,
+          });
+          L.marker([y, x], { icon: icon })
+            .addTo(map)
+            .bindTooltip(`<b>${nome}</b><br><div class="btn-entrar">ENTRAR</div>`, {
+              direction: 'top',
+              className: 'tooltip-neon',
+              interactive: true,
+            });
+        }
+
+        // 1. Police Vehicle (in the middle of the avenue) with giroflex animation
+        addLocal(
+          'VIATURA PM',
+          'https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png',
+          500,
+          520,
+          90,
+          'animacao-policia'
+        );
+
+        // 2. Your Initial QG (in the favela)
+        addLocal(
+          'SEU QG',
+          'https://static.wixstatic.com/media/50f4bf_1776337cd2dc4ff1982d01b0079a48d2~mv2.png',
+          320,
+          280,
+          120
+        );
       }
     };
     document.body.appendChild(script);
