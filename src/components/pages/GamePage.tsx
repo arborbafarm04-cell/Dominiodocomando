@@ -10,16 +10,20 @@ import CinematicSignboard from '@/components/CinematicSignboard';
 
 export default function GamePage() {
   const currentScreen = useGameScreenStore((state) => state.currentScreen);
+  const setScreen = useGameScreenStore((state) => state.setScreen);
   const [showCinematic, setShowCinematic] = useState(true);
 
   useEffect(() => {
+    // Reset to menu screen when page loads
+    setScreen('menu');
+    
     // Show cinematic for 5 seconds on page load
     const timer = setTimeout(() => {
       setShowCinematic(false);
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [setScreen]);
 
   if (showCinematic) {
     return (
