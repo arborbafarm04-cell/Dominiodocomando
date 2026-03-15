@@ -1,121 +1,105 @@
-import { useEffect, useRef } from 'react';
+import { useRef, useEffect } from 'react';
 
 export default function GameMap() {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<any>(null);
+  const mapContainer = useRef(null);
+  const mapInstance = useRef(null);
 
   useEffect(() => {
-    // Dynamically load Leaflet CSS
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link');
+      link.id = 'leaflet-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
 
-    // Add styles for giroflex animation and interactive elements
-    const style = document.createElement('style');
-    style.innerHTML = `
-      body, html { margin: 0; padding: 0; overflow: hidden; background: #000; }
-      #map { margin: 0; padding: 0; }
-      .leaflet-container { background: #000 !important; }
+    const styleId = 'map-styles';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.innerHTML = `
+        #map { background: #000; width: 100%; height: 100vh; }
+        .giroflex { animation: light 0.6s infinite; pointer-events: auto !important; }
+        @keyframes light {
+          0% { filter: drop-shadow(0 0 5px red); }
+          50% { filter: drop-shadow(0 0 10px blue); }
+          100% { filter: drop-shadow(0 0 5px red); }
+        }
+        /* Classe para o NPC de Trânsito com luzes */
+        .npc-transito {
+          transition: transform 0.5s linear;
+          pointer-events: none;
+          z-index: 600;
+          filter: drop-shadow(0 0 15px rgba(255, 255, 200, 0.6)); /* Brilho extra nos faróis */
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
-      /* Efeito Giroflex */
-      .giroflex {
-        animation: light 0.6s infinite;
-        pointer-events: none;
-      }
-      @keyframes light {
-        0% { filter: drop-shadow(0 0 5px red); }
-        50% { filter: drop-shadow(0 0 10px blue); }
-        100% { filter: drop-shadow(0 0 5px red); }
-      }
-
-      .leaflet-image-layer {
-        cursor: pointer;
-      }
-      .leaflet-image-layer:hover {
-        opacity: 0.9;
-      }
-    `;
-    document.head.appendChild(style);
-
-    // Dynamically load Leaflet JS
     const script = document.createElement('script');
     script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
     script.async = true;
     script.onload = () => {
-      if (mapContainer.current && (window as any).L) {
-        const L = (window as any).L;
+      const L = window.L;
+      if (!L || !mapContainer.current) return;
 
-        // Destroy existing map if it exists
-        if (mapInstance.current) {
-          mapInstance.current.remove();
-        }
+      if (mapInstance.current) mapInstance.current.remove();
 
-        // Setup do Mapa
-        const map = L.map(mapContainer.current, {
-          crs: L.CRS.Simple,
-          minZoom: -1,
-          maxZoom: 2,
-          zoomControl: false,
-          attributionControl: false
-        });
+      const map = L.map(mapContainer.current, {
+        crs: L.CRS.Simple,
+        minZoom: -1,
+        maxZoom: 2,
+        zoomControl: false,
+        attributionControl: false
+      });
 
-        const bounds = [[0, 0], [1000, 600]];
-        L.imageOverlay('https://static.wixstatic.com/media/50f4bf_9dbf16b020134b02adc81709d1e774b9~mv2.png', bounds).addTo(map);
-        map.fitBounds(bounds);
+      // 1. FUNDO ORIGINAL (A CIDADE)
+      const bounds = [[0, 0], [1000, 600]];
+      L.imageOverlay('https://static.wixstatic.com/media/50f4bf_9dbf16b020134b02adc81709d1e774b9~mv2.png', bounds).addTo(map);
+      map.fitBounds(bounds);
+      mapInstance.current = map;
 
-        mapInstance.current = map;
+      // --- CAMINHO DO NPC DE TRÂNSITO ---
+      const rotaTransito = [
+        [900, 480], [700, 460], [500, 440], [300, 420], [100, 410]
+      ];
 
-        // Função para Criar Elementos que acompanham o Zoom
-        // Usamos ImageOverlay em vez de Markers para eles "grudarem" na escala do mapa
-        function addElemento(url: string, x: number, y: number, largura: number, altura: number, cssClass = '') {
-          const area = [[y, x], [y + altura, x + largura]];
-          const img = L.imageOverlay(url, area, {
-            interactive: true,
-            className: cssClass
-          }).addTo(map);
+      // 2. ADICIONANDO O NPC DE TRÂNSITO (A imagem com faróis que você enviou)
+      const larguraFila = 250;
+      const alturaFila = 450;
+      let step = 0;
 
-          // Adiciona o Tooltip (opcional)
-          img.bindTooltip("ENTRAR", { direction: 'top', sticky: true });
+      const npcTransito = L.imageOverlay(
+        'https://static.wixstatic.com/media/50f4bf_5f510ad4c3724b18817da9394dd05936~mv2.png',
+        [[rotaTransito[0][0], rotaTransito[0][1]], [rotaTransito[0][0] + alturaFila, rotaTransito[0][1] + larguraFila]],
+        { className: 'npc-transito' }
+      ).addTo(map);
 
-          return img;
-        }
-
-        // POSICIONAMENTO MANUAL (Ajuste os números para o lugar exato)
-
-        // Viatura na entrada da favela (x, y, largura, altura)
-        // Aumente/Diminua largura e altura para o tamanho desejado
-        addElemento('https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png', 110, 405, 90, 90, 'giroflex');
-
-        // Seu QG (Barraco inicial)
-        addElemento('https://static.wixstatic.com/media/50f4bf_1776337cd2dc4ff1982d01b0079a48d2~mv2.png', 200, 300, 180, 180);
+      // Função de movimento do NPC
+      function moverNPC() {
+        if (step >= rotaTransito.length) step = 0;
+        const pos = rotaTransito[step];
+        npcTransito.setBounds([[pos[0], pos[1]], [pos[0] + alturaFila, pos[1] + larguraFila]]);
+        step++;
+        setTimeout(moverNPC, 2000); // Velocidade do movimento
       }
+      moverNPC();
+
+      // 3. RESTANTE DO CÓDIGO IGUAL (OBJETOS FIXOS)
+      function addElemento(url, x, y, largura, altura, cssClass = '', label = '') {
+        const area = [[y, x], [y + altura, x + largura]];
+        const img = L.imageOverlay(url, area, { interactive: true, className: cssClass }).addTo(map);
+        if (label) img.bindTooltip(label, { direction: 'top', sticky: true });
+      }
+
+      // Blitz e QG permanecem nos mesmos lugares
+      addElemento('https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png', 370, 420, 70, 45, 'giroflex', 'BLITZ');
+      addElemento('https://static.wixstatic.com/media/50f4bf_1776337cd2dc4ff1982d01b0079a48d2~mv2.png', 210, 290, 100, 100, '', 'MEU QG');
     };
+
     document.body.appendChild(script);
-
-    return () => {
-      // Cleanup
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
+    return () => { if (mapInstance.current) mapInstance.current.remove(); };
   }, []);
 
-  return (
-    <div
-      ref={mapContainer}
-      id="map"
-      style={{
-        width: '100%',
-        height: '100%',
-        background: '#000',
-        margin: 0,
-        padding: 0,
-      }}
-    />
-  );
+  return <div ref={mapContainer} id="map" />;
 }
