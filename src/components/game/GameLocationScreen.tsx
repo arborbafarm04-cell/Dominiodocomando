@@ -11,8 +11,8 @@ export default function GameLocationScreen() {
   const selectedLocation = useGameScreenStore((state) => state.selectedLocation);
 
   const handleLocationAction = (locationId: string) => {
-    if ('briberyguard' === 'briberyguardPage') {
-      navigate('/briberyGuardPage');
+    if ('briberyg'briberyg'briberyg'briberyg'briberyg'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyg'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyg'briberyg'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyg'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyg'briberyguard'ard'briberyguard'ard'briberyg'briberyguard'ard'briberyguard'ard' === 'briberyguardPage') {
+      navigate('/BriberyGuardPage');
     }
   };
 
