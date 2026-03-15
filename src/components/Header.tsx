@@ -44,7 +44,7 @@ export default function Header() {
     if (savedAvatar) {
       setAvatarUrl(savedAvatar);
     }
-  }, [setPlayerName, setCustomPlayerName]);
+  }, []);
 
   // Handle avatar click to open file picker
   const handleAvatarClick = () => {

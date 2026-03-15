@@ -69,10 +69,10 @@ export default function Footer() {
           <motion.div variants={itemVariants} className="flex flex-col gap-4">
             <h4 className="font-heading text-sm font-bold text-white uppercase tracking-widest">Redes</h4>
             <div className="flex gap-4">
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-secondary transition-colors duration-300">
+              <a href="#" className="text-slate-400 hover:text-secondary transition-colors duration-300">
                 Twitter
               </a>
-              <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-secondary transition-colors duration-300">
+              <a href="#" className="text-slate-400 hover:text-secondary transition-colors duration-300">
                 Discord
               </a>
             </div>
@@ -94,12 +94,12 @@ export default function Footer() {
             © 2026 Domínio do Comando. Todos os direitos reservados.
           </p>
           <div className="flex gap-6">
-            <Link to="/" className="font-paragraph text-sm text-slate-500 hover:text-slate-300 transition-colors duration-300">
+            <a href="#" className="font-paragraph text-sm text-slate-500 hover:text-slate-300 transition-colors duration-300">
               Privacidade
-            </Link>
-            <Link to="/" className="font-paragraph text-sm text-slate-500 hover:text-slate-300 transition-colors duration-300">
+            </a>
+            <a href="#" className="font-paragraph text-sm text-slate-500 hover:text-slate-300 transition-colors duration-300">
               Termos
-            </Link>
+            </a>
           </div>
         </motion.div>
       </div>

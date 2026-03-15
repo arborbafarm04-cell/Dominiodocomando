@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 
-function GameStatusScreen() {
+export default function GameStatusScreen() {
   const setScreen = useGameScreenStore((state) => state.setScreen);
 
   const playerStats = {
@@ -20,7 +20,7 @@ function GameStatusScreen() {
     money: 7000,
   };
 
-  const StatBar = ({ label, current, max, color, bgColor }: any) => (
+  const StatBar = ({ label, current, max, color }: any) => (
     <div className="mb-4">
       <div className="flex justify-between mb-2">
         <span className="font-paragraph text-gray-300">{label}</span>
@@ -33,7 +33,7 @@ function GameStatusScreen() {
           initial={{ width: 0 }}
           animate={{ width: `${(current / max) * 100}%` }}
           transition={{ duration: 1, ease: 'easeOut' }}
-          className={`h-full rounded-full ${bgColor}`}
+          className={`h-full rounded-full ${color.replace('text', 'bg')}`}
         ></motion.div>
       </div>
     </div>
@@ -74,7 +74,6 @@ function GameStatusScreen() {
             current={playerStats.experience}
             max={playerStats.maxExperience}
             color="text-blue-400"
-            bgColor="bg-blue-400"
           />
 
           {/* Health */}
@@ -83,7 +82,6 @@ function GameStatusScreen() {
             current={playerStats.health}
             max={playerStats.maxHealth}
             color="text-red-400"
-            bgColor="bg-red-400"
           />
 
           {/* Reputation */}
@@ -92,7 +90,6 @@ function GameStatusScreen() {
             current={playerStats.reputation}
             max={playerStats.maxReputation}
             color="text-purple-400"
-            bgColor="bg-purple-400"
           />
 
           {/* Influence */}
@@ -101,7 +98,6 @@ function GameStatusScreen() {
             current={playerStats.influence}
             max={playerStats.maxInfluence}
             color="text-orange-400"
-            bgColor="bg-orange-400"
           />
 
           {/* Money */}
@@ -151,5 +147,3 @@ function GameStatusScreen() {
     </div>
   );
 }
-
-export default GameStatusScreen;

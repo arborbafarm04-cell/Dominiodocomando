@@ -2,7 +2,7 @@ import { useGameScreenStore } from '@/store/gameScreenStore';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
-function GameMenuScreen() {
+export default function GameMenuScreen() {
   const setScreen = useGameScreenStore((state) => state.setScreen);
 
   return (
@@ -70,5 +70,3 @@ function GameMenuScreen() {
     </div>
   );
 }
-
-export default GameMenuScreen;
