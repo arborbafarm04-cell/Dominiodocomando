@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 
 export default function GameMap() {
   const mapContainer = useRef(null);
@@ -11,10 +8,6 @@ export default function GameMap() {
   const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
   const [clickedCoordinates, setClickedCoordinates] = useState(null);
   const [showCursor, setShowCursor] = useState(false);
-  const [showButtonDialog, setShowButtonDialog] = useState(false);
-  const [buttonName, setButtonName] = useState('');
-  const [pendingButtonCoords, setPendingButtonCoords] = useState(null);
-  const [customButtons, setCustomButtons] = useState([]);
 
   useEffect(() => {
     if (!document.getElementById('leaflet-css')) {
@@ -163,9 +156,6 @@ export default function GameMap() {
       addElemento('https://static.wixstatic.com/media/50f4bf_1776337cd2dc4ff1982d01b0079a48d2~mv2.png', 200, 290, 200, 220, '', 'MEU QG', () => {
         navigate('/barraco');
       });
-      addElemento('https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png', 350, 120, 100, 80, 'giroflex', 'GIRO NO ASFALTO', () => {
-        navigate('/giro-no-asfalto');
-      });
 
       // Adicionar listeners para coordenadas
       if (mapContainer.current) {
@@ -181,11 +171,6 @@ export default function GameMap() {
           const x = Math.round(e.clientX - rect.left);
           const y = Math.round(e.clientY - rect.top);
           setClickedCoordinates({ x, y, timestamp: new Date().toLocaleTimeString() });
-          
-          // Open dialog to create button
-          setPendingButtonCoords({ x, y });
-          setShowButtonDialog(true);
-          setButtonName('');
         };
 
         const handleMouseEnter = () => setShowCursor(true);
@@ -213,25 +198,6 @@ export default function GameMap() {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-  };
-
-  const handleCreateButton = () => {
-    if (buttonName.trim() && pendingButtonCoords) {
-      const newButton = {
-        id: crypto.randomUUID(),
-        name: buttonName,
-        x: pendingButtonCoords.x,
-        y: pendingButtonCoords.y,
-      };
-      setCustomButtons([...customButtons, newButton]);
-      setShowButtonDialog(false);
-      setButtonName('');
-      setPendingButtonCoords(null);
-    }
-  };
-
-  const handleDeleteButton = (id) => {
-    setCustomButtons(customButtons.filter(btn => btn.id !== id));
   };
 
   return (
@@ -268,80 +234,6 @@ export default function GameMap() {
           }}
         />
       )}
-
-      {/* Botões Customizados */}
-      {customButtons.map((btn) => (
-        <div
-          key={btn.id}
-          className="absolute group"
-          style={{
-            left: `${btn.x}px`,
-            top: `${btn.y}px`,
-            transform: 'translate(-50%, -50%)',
-            zIndex: 500,
-          }}
-        >
-          <button
-            className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-lg hover:shadow-lg hover:shadow-orange-500/50 transition-all duration-200 border border-orange-400"
-            title={btn.name}
-          >
-            {btn.name}
-          </button>
-          <button
-            onClick={() => handleDeleteButton(btn.id)}
-            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
-            title="Deletar botão"
-          >
-            ✕
-          </button>
-        </div>
-      ))}
-
-      {/* Dialog para criar novo botão */}
-      <Dialog open={showButtonDialog} onOpenChange={setShowButtonDialog}>
-        <DialogContent className="bg-gray-900 border border-cyan-400">
-          <DialogHeader>
-            <DialogTitle className="text-cyan-400">Criar Novo Botão</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-white text-sm mb-2 block">Nome do Botão</label>
-              <Input
-                value={buttonName}
-                onChange={(e) => setButtonName(e.target.value)}
-                placeholder="Digite o nome do botão..."
-                className="bg-gray-800 border-cyan-400 text-white placeholder-gray-500"
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleCreateButton();
-                  }
-                }}
-                autoFocus
-              />
-            </div>
-            {pendingButtonCoords && (
-              <div className="text-gray-400 text-sm">
-                Posição: X: {pendingButtonCoords.x}, Y: {pendingButtonCoords.y}
-              </div>
-            )}
-            <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => setShowButtonDialog(false)}
-                className="border-gray-600 text-gray-300 hover:bg-gray-800"
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleCreateButton}
-                className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:shadow-lg hover:shadow-orange-500/50"
-              >
-                Criar Botão
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

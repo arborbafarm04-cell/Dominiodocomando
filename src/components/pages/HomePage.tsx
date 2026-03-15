@@ -270,19 +270,6 @@ export default function HomePage() {
                     )}
                   </Button>
 
-                  {/* Giro no Asfalto Button */}
-                  <div className="relative group">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-secondary to-cyan-400 rounded opacity-0 group-hover:opacity-100 transition duration-300 blur" />
-                    <Button
-                      onClick={() => navigate('/giro-no-asfalto')}
-                      className="relative w-full h-14 bg-secondary/20 hover:bg-secondary/30 text-secondary border border-secondary/50 hover:border-secondary font-heading text-base uppercase tracking-widest rounded-none transition-all duration-300"
-                    >
-                      <span className="flex items-center justify-center gap-3">
-                        Giro no Asfalto
-                      </span>
-                    </Button>
-                  </div>
-
                   {/* Reset Bribery Level Button */}
                   {playerLevel > 1 && (
                     <div className="relative group">
