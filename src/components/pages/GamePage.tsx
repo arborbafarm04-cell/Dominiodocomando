@@ -97,127 +97,16 @@ export default function GamePage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      
       <main className="flex-1 w-full max-w-[120rem] mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="font-heading text-5xl font-bold text-foreground mb-2">
             Mapa da Cidade
           </h1>
-          <p className="font-paragraph text-lg text-secondary">
-            Clique e arraste os pontos para explorar diferentes locais
-          </p>
+
         </div>
-
-        <div
-          ref={containerRef}
-          className="relative w-full bg-cover bg-center rounded-lg overflow-hidden shadow-2xl"
-          style={{
-            backgroundImage: 'url(https://static.wixstatic.com/media/50f4bf_9bfebb56113d4108b67a172447ef9e47~mv2.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            aspectRatio: '16 / 9',
-            minHeight: '500px',
-          }}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
-          {/* Overlay for better visibility */}
-          <div className="absolute inset-0 bg-black/20" />
-
-          {/* Interactive Points */}
-          {points.map((point) => (
-            <motion.div
-              key={point.id}
-              className="absolute"
-              style={{
-                left: `${point.x}%`,
-                top: `${point.y}%`,
-                transform: 'translate(-50%, -50%)',
-              }}
-              whileHover={{ scale: 1.15 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <button
-                onMouseDown={(e) => handleMouseDown(e, point.id)}
-                onClick={() => handlePointClick(point)}
-                className={`
-                  relative w-12 h-12 rounded-full flex items-center justify-center
-                  transition-all duration-200 cursor-grab active:cursor-grabbing
-                  ${draggingId === point.id ? 'cursor-grabbing' : 'cursor-grab'}
-                  ${point.link 
-                    ? 'bg-gradient-to-br from-primary to-logo-gradient-end hover:shadow-lg hover:shadow-primary' 
-                    : 'bg-gradient-to-br from-secondary to-subtitle-neon-blue hover:shadow-lg hover:shadow-secondary'
-                  }
-                  shadow-md border-2 border-foreground/30
-                  group
-                `}
-                title={point.name}
-              >
-                {/* Pulsing glow effect */}
-                <div className={`
-                  absolute inset-0 rounded-full opacity-0 group-hover:opacity-100
-                  transition-opacity duration-300
-                  ${point.link 
-                    ? 'bg-primary/30' 
-                    : 'bg-secondary/30'
-                  }
-                  animate-pulse
-                `} />
-                
-                {/* Icon indicator */}
-                <div className="relative z-10 text-foreground font-bold text-xs text-center px-1">
-                  {point.id}
-                </div>
-              </button>
-
-              {/* Tooltip */}
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                whileHover={{ opacity: 1, y: 0 }}
-                className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 whitespace-nowrap
-                  bg-background/95 backdrop-blur-sm px-3 py-2 rounded-lg
-                  border border-secondary/50 shadow-lg pointer-events-none z-50"
-              >
-                <p className="font-paragraph text-sm text-foreground font-medium">
-                  {point.name}
-                </p>
-                {point.link && (
-                  <p className="font-paragraph text-xs text-secondary">
-                    Clique para visitar
-                  </p>
-                )}
-              </motion.div>
-            </motion.div>
-          ))}
-        </div>
-
         {/* Instructions */}
-        <div className="mt-8 bg-background/50 backdrop-blur-sm border border-secondary/30 rounded-lg p-6">
-          <h2 className="font-heading text-2xl font-bold text-foreground mb-3">
-            Como Usar
-          </h2>
-          <ul className="font-paragraph text-foreground space-y-2">
-            <li className="flex items-start">
-              <span className="text-secondary mr-3">•</span>
-              <span>Arraste qualquer ponto para movê-lo pelo mapa</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-secondary mr-3">•</span>
-              <span>Clique em um ponto para obter mais informações</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-secondary mr-3">•</span>
-              <span>Pontos em laranja levam a outras páginas</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-secondary mr-3">•</span>
-              <span>Passe o mouse sobre um ponto para ver seu nome</span>
-            </li>
-          </ul>
-        </div>
-      </main>
 
+      </main>
       <Footer />
     </div>
   );
