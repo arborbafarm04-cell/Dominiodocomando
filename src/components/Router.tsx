@@ -28,6 +28,7 @@ const CasaPage = lazy(() => import('@/components/pages/CasaPage'));
 const BarracoPage = lazy(() => import('@/components/pages/BarracoPage'));
 const ProjectsPage = lazy(() => import('@/components/pages/ProjectsPage'));
 const BriberyGuardPage = lazy(() => import('@/components/pages/BriberyGuardPage'));
+const ResetAllPage = lazy(() => import('@/components/pages/ResetAllPage'));
 
 // Layout component that includes ScrollToTop
 function Layout() {
@@ -206,6 +207,13 @@ const router = createBrowserRouter([
         element: <BriberyGuardPage />,
         routeMetadata: {
           pageIdentifier: 'bribery-guard',
+        },
+      },
+      {
+        path: "reset-all",
+        element: <ResetAllPage />,
+        routeMetadata: {
+          pageIdentifier: 'reset-all',
         },
       },
       {
