@@ -1,121 +1,123 @@
 import { useEffect, useRef } from 'react';
 
 export default function GameMap() {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<any>(null);
+  const mapContainer = useRef(null);
+    const mapInstance = useRef(null);
 
-  useEffect(() => {
-    // Dynamically load Leaflet CSS
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
+      useEffect(() => {
+          // 1. Carregar CSS do Leaflet
+              if (!document.getElementById('leaflet-css')) {
+                    const link = document.createElement('link');
+                          link.id = 'leaflet-css';
+                                link.rel = 'stylesheet';
+                                      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+                                            document.head.appendChild(link);
+                                                }
 
-    // Add styles for giroflex animation and interactive elements
-    const style = document.createElement('style');
-    style.innerHTML = `
-      body, html { margin: 0; padding: 0; overflow: hidden; background: #000; }
-      #map { margin: 0; padding: 0; }
-      .leaflet-container { background: #000 !important; }
+                                                    // 2. Adicionar Estilos (Giroflex e Cursor)
+                                                        const styleId = 'map-styles';
+                                                            if (!document.getElementById(styleId)) {
+                                                                  const style = document.createElement('style');
+                                                                        style.id = styleId;
+                                                                              style.innerHTML = `
+                                                                                      #map { background: #000; width: 100%; height: 100%; }
+                                                                                              .giroflex {
+                                                                                                        animation: light 0.6s infinite;
+                                                                                                                  pointer-events: auto !important;
+                                                                                                                          }
+                                                                                                                                  @keyframes light {
+                                                                                                                                            0% { filter: drop-shadow(0 0 5px red); }
+                                                                                                                                                      50% { filter: drop-shadow(0 0 10px blue); }
+                                                                                                                                                                100% { filter: drop-shadow(0 0 5px red); }
+                                                                                                                                                                        }
+                                                                                                                                                                                .leaflet-image-layer { cursor: pointer; }
+                                                                                                                                                                                        .leaflet-tooltip {
+                                                                                                                                                                                                  background: rgba(0, 0, 0, 0.8) !important;
+                                                                                                                                                                                                            border: 1px solid #0ff !important;
+                                                                                                                                                                                                                      color: #0ff !important;
+                                                                                                                                                                                                                                font-weight: bold;
+                                                                                                                                                                                                                                          box-shadow: 0 0 10px #0ff;
+                                                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                                                        `;
+                                                                                                                                                                                                                                                              document.head.appendChild(style);
+                                                                                                                                                                                                                                                                  }
 
-      /* Efeito Giroflex */
-      .giroflex {
-        animation: light 0.6s infinite;
-        pointer-events: none;
-      }
-      @keyframes light {
-        0% { filter: drop-shadow(0 0 5px red); }
-        50% { filter: drop-shadow(0 0 10px blue); }
-        100% { filter: drop-shadow(0 0 5px red); }
-      }
+                                                                                                                                                                                                                                                                      // 3. Carregar Leaflet JS e Inicializar
+                                                                                                                                                                                                                                                                          const script = document.createElement('script');
+                                                                                                                                                                                                                                                                              script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+                                                                                                                                                                                                                                                                                  script.async = true;
+                                                                                                                                                                                                                                                                                      script.onload = () => {
+                                                                                                                                                                                                                                                                                            const L = window.L;
+                                                                                                                                                                                                                                                                                                  if (!L || !mapContainer.current) return;
 
-      .leaflet-image-layer {
-        cursor: pointer;
-      }
-      .leaflet-image-layer:hover {
-        opacity: 0.9;
-      }
-    `;
-    document.head.appendChild(style);
+                                                                                                                                                                                                                                                                                                        if (mapInstance.current) {
+                                                                                                                                                                                                                                                                                                                mapInstance.current.remove();
+                                                                                                                                                                                                                                                                                                                      }
 
-    // Dynamically load Leaflet JS
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    script.async = true;
-    script.onload = () => {
-      if (mapContainer.current && (window as any).L) {
-        const L = (window as any).L;
+                                                                                                                                                                                                                                                                                                                            // Inicializa o mapa com CRS Simples (importante para imagens)
+                                                                                                                                                                                                                                                                                                                                  const map = L.map(mapContainer.current, {
+                                                                                                                                                                                                                                                                                                                                          crs: L.CRS.Simple,
+                                                                                                                                                                                                                                                                                                                                                  minZoom: -1,
+                                                                                                                                                                                                                                                                                                                                                          maxZoom: 2,
+                                                                                                                                                                                                                                                                                                                                                                  zoomControl: false,
+                                                                                                                                                                                                                                                                                                                                                                          attributionControl: false
+                                                                                                                                                                                                                                                                                                                                                                                });
 
-        // Destroy existing map if it exists
-        if (mapInstance.current) {
-          mapInstance.current.remove();
-        }
+                                                                                                                                                                                                                                                                                                                                                                                      // Definição do Fundo do Mapa
+                                                                                                                                                                                                                                                                                                                                                                                            const bounds = [[0, 0], [1000, 600]];
+                                                                                                                                                                                                                                                                                                                                                                                                  L.imageOverlay('https://static.wixstatic.com/media/50f4bf_9dbf16b020134b02adc81709d1e774b9~mv2.png', bounds).addTo(map);
+                                                                                                                                                                                                                                                                                                                                                                                                        map.fitBounds(bounds);
+                                                                                                                                                                                                                                                                                                                                                                                                              mapInstance.current = map;
 
-        // Setup do Mapa
-        const map = L.map(mapContainer.current, {
-          crs: L.CRS.Simple,
-          minZoom: -1,
-          maxZoom: 2,
-          zoomControl: false,
-          attributionControl: false
-        });
+                                                                                                                                                                                                                                                                                                                                                                                                                    // FUNÇÃO PARA ADICIONAR ELEMENTOS QUE ACOMPANHAM O ZOOM (ImageOverlay)
+                                                                                                                                                                                                                                                                                                                                                                                                                          function addElemento(url, x, y, largura, altura, cssClass = '', label = '') {
+                                                                                                                                                                                                                                                                                                                                                                                                                                  const area = [[y, x], [y + altura, x + largura]];
+                                                                                                                                                                                                                                                                                                                                                                                                                                          const img = L.imageOverlay(url, area, {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                    interactive: true,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                              className: cssClass
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                      }).addTo(map);
 
-        const bounds = [[0, 0], [1000, 600]];
-        L.imageOverlay('https://static.wixstatic.com/media/50f4bf_9dbf16b020134b02adc81709d1e774b9~mv2.png', bounds).addTo(map);
-        map.fitBounds(bounds);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                              if (label) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        img.bindTooltip(label, { direction: 'top', sticky: true });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        return img;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              }
 
-        mapInstance.current = map;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    // --- POSICIONAMENTO CORRIGIDO ---
 
-        // Função para Criar Elementos que acompanham o Zoom
-        // Usamos ImageOverlay em vez de Markers para eles "grudarem" na escala do mapa
-        function addElemento(url: string, x: number, y: number, largura: number, altura: number, cssClass = '') {
-          const area = [[y, x], [y + altura, x + largura]];
-          const img = L.imageOverlay(url, area, {
-            interactive: true,
-            className: cssClass
-          }).addTo(map);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                // Viatura (na entrada da favela)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      // Ajuste os dois primeiros números (370, 420) para mover e os dois últimos (70, 45) para o tamanho
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            addElemento(
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    'https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            370, 420, 70, 45, 'giroflex', 'VIATURA'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  );
 
-          // Adiciona o Tooltip (opcional)
-          img.bindTooltip("ENTRAR", { direction: 'top', sticky: true });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        // Seu QG (Barraco inicial)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              addElemento(
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      'https://static.wixstatic.com/media/50f4bf_1776337cd2dc4ff1982d01b0079a48d2~mv2.png',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              210, 290, 100, 100, '', 'MEU QG'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    );
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        };
 
-          return img;
-        }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            document.body.appendChild(script);
 
-        // POSICIONAMENTO MANUAL (Ajuste os números para o lugar exato)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                return () => {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      if (mapInstance.current) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              mapInstance.current.remove();
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      mapInstance.current = null;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                };
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }, []);
 
-        // Viatura na entrada da favela (x, y, largura, altura)
-        // Aumente/Diminua largura e altura para o tamanho desejado
-        addElemento('https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png', 380, 420, 60, 40, 'giroflex');
-
-        // Seu QG (Barraco inicial)
-        addElemento('https://static.wixstatic.com/media/50f4bf_1776337cd2dc4ff1982d01b0079a48d2~mv2.png', 200, 300, 80, 80);
-      }
-    };
-    document.body.appendChild(script);
-
-    return () => {
-      // Cleanup
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-
-  return (
-    <div
-      ref={mapContainer}
-      id="map"
-      style={{
-        width: '100%',
-        height: '100%',
-        background: '#000',
-        margin: 0,
-        padding: 0,
-      }}
-    />
-  );
-}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    return (
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ref={mapContainer}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    id="map"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          style={{
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  width: '100%',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          height: '100vh',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  background: '#000'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              );
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              }
