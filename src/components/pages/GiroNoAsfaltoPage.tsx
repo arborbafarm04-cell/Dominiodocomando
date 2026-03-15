@@ -1,11 +1,10 @@
-import { useState } from 'react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import { Image } from '@/components/ui/image';
-import SlotMachine from '@/components/SlotMachine';
 import DraggableContainer from '@/components/DraggableContainer';
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
+import SlotMachine from '@/components/SlotMachine';
+import { Image } from '@/components/ui/image';
 import { useDraggableContainers } from '@/hooks/useDraggableContainers';
-import { RotateCcw } from 'lucide-react';
+import { useState } from 'react';
 
 export default function GiroNoAsfaltoPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -91,7 +90,7 @@ export default function GiroNoAsfaltoPage() {
               className="w-full h-full object-cover fixed top-0 left-0 brightness-125 contrast-110"
             />
             {/* Slot Machine Component positioned inside the slot machine screen - TV display area */}
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-20 relative z-10">
+            <div className="absolute inset-0 flex flex-col items-center justify-end pb-18 relative z-10">
               <div className="bg-transparent flex items-center justify-center">
                 <SlotMachine />
               </div>
