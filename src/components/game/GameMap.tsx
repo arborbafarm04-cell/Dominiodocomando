@@ -1,11 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { useGameScreenStore } from '@/store/gameScreenStore';
 
 export default function GameMap() {
   const mapContainer = useRef(null);
   const mapInstance = useRef(null);
-  const setScreen = useGameScreenStore((state) => state.setScreen);
-  const setSelectedLocation = useGameScreenStore((state) => state.setSelectedLocation);
 
   useEffect(() => {
     if (!document.getElementById('leaflet-css')) {
@@ -64,23 +61,15 @@ export default function GameMap() {
 
 
       // 3. RESTANTE DO CÓDIGO IGUAL (OBJETOS FIXOS)
-      function addElemento(url, x, y, largura, altura, cssClass = '', label = '', locationId = null) {
+      function addElemento(url, x, y, largura, altura, cssClass = '', label = '') {
         const area = [[y, x], [y + altura, x + largura]];
         const img = L.imageOverlay(url, area, { interactive: true, className: cssClass }).addTo(map);
         if (label) img.bindTooltip(label, { direction: 'top', sticky: true });
-        
-        // Add click handler if locationId is provided
-        if (locationId) {
-          img.on('click', () => {
-            setSelectedLocation(locationId);
-            setScreen('location');
-          });
-        }
       }
 
       // Blitz e QG permanecem nos mesmos lugares
-      addElemento('https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png', 130, 430, 80, 54, 'giroflex', 'BLITZ', 'viatura');
-      addElemento('https://static.wixstatic.com/media/50f4bf_1776337cd2dc4ff1982d01b0079a48d2~mv2.png', 200, 290, 200, 220, '', 'MEU QG', 'qg');
+      addElemento('https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png', 130, 430, 80, 54, 'giroflex', 'BLITZ');
+      addElemento('https://static.wixstatic.com/media/50f4bf_1776337cd2dc4ff1982d01b0079a48d2~mv2.png', 200, 290, 200, 220, '', 'MEU QG');
     };
     document.body.appendChild(script);
     return () => { if (mapInstance.current) mapInstance.current.remove(); };
