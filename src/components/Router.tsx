@@ -205,7 +205,7 @@ const router = createBrowserRouter([
         path: "BriberyGuardPage",
         element: <BriberyGuardPage />,
         routeMetadata: {
-          'Briberyguardpage': 'briberyguard''
+          'BriberyGuardPage': 'BriberyGuardPage'
         },
       },
       {
