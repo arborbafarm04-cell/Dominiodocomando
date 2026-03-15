@@ -1,10 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function GameMap() {
   const mapContainer = useRef(null);
   const mapInstance = useRef(null);
   const navigate = useNavigate();
+  const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
+  const [clickedCoordinates, setClickedCoordinates] = useState(null);
+  const [showCursor, setShowCursor] = useState(false);
 
   useEffect(() => {
     if (!document.getElementById('leaflet-css')) {
@@ -33,6 +36,80 @@ export default function GameMap() {
           pointer-events: none;
           z-index: 600;
           filter: drop-shadow(0 0 15px rgba(255, 255, 200, 0.6)); /* Brilho extra nos faróis */
+        }
+        /* Painel de debug de coordenadas */
+        .coordinate-debug-panel {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: rgba(0, 0, 0, 0.8);
+          border: 2px solid #00eaff;
+          border-radius: 8px;
+          padding: 12px 16px;
+          font-family: 'Courier New', monospace;
+          color: #00eaff;
+          font-size: 14px;
+          font-weight: bold;
+          z-index: 1000;
+          pointer-events: none;
+          box-shadow: 0 0 10px rgba(0, 234, 255, 0.3);
+        }
+        .coordinate-debug-panel div {
+          margin: 4px 0;
+        }
+        .coordinate-debug-panel .label {
+          color: #ffffff;
+          font-size: 12px;
+          opacity: 0.7;
+        }
+        .coordinate-debug-panel .clicked {
+          margin-top: 8px;
+          padding-top: 8px;
+          border-top: 1px solid #00eaff;
+          color: #00ff00;
+        }
+        .coordinate-debug-panel .copy-btn {
+          margin-top: 8px;
+          padding: 4px 8px;
+          background: #00eaff;
+          color: #000;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 11px;
+          font-weight: bold;
+          pointer-events: auto;
+          transition: all 0.2s;
+        }
+        .coordinate-debug-panel .copy-btn:hover {
+          background: #00ff00;
+          box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+        }
+        /* Cursor de coordenadas */
+        .coordinate-cursor {
+          position: absolute;
+          width: 20px;
+          height: 20px;
+          pointer-events: none;
+          z-index: 999;
+        }
+        .coordinate-cursor::before,
+        .coordinate-cursor::after {
+          content: '';
+          position: absolute;
+          background: #00eaff;
+        }
+        .coordinate-cursor::before {
+          width: 2px;
+          height: 20px;
+          left: 9px;
+          top: 0;
+        }
+        .coordinate-cursor::after {
+          width: 20px;
+          height: 2px;
+          left: 0;
+          top: 9px;
         }
       `;
       document.head.appendChild(style);
@@ -79,10 +156,84 @@ export default function GameMap() {
       addElemento('https://static.wixstatic.com/media/50f4bf_1776337cd2dc4ff1982d01b0079a48d2~mv2.png', 200, 290, 200, 220, '', 'MEU QG', () => {
         navigate('/barraco');
       });
+
+      // Adicionar listeners para coordenadas
+      if (mapContainer.current) {
+        const handleMouseMove = (e) => {
+          const rect = mapContainer.current.getBoundingClientRect();
+          const x = Math.round(e.clientX - rect.left);
+          const y = Math.round(e.clientY - rect.top);
+          setCoordinates({ x, y });
+        };
+
+        const handleClick = (e) => {
+          const rect = mapContainer.current.getBoundingClientRect();
+          const x = Math.round(e.clientX - rect.left);
+          const y = Math.round(e.clientY - rect.top);
+          setClickedCoordinates({ x, y, timestamp: new Date().toLocaleTimeString() });
+        };
+
+        const handleMouseEnter = () => setShowCursor(true);
+        const handleMouseLeave = () => setShowCursor(false);
+
+        mapContainer.current.addEventListener('mousemove', handleMouseMove);
+        mapContainer.current.addEventListener('click', handleClick);
+        mapContainer.current.addEventListener('mouseenter', handleMouseEnter);
+        mapContainer.current.addEventListener('mouseleave', handleMouseLeave);
+
+        return () => {
+          if (mapContainer.current) {
+            mapContainer.current.removeEventListener('mousemove', handleMouseMove);
+            mapContainer.current.removeEventListener('click', handleClick);
+            mapContainer.current.removeEventListener('mouseenter', handleMouseEnter);
+            mapContainer.current.removeEventListener('mouseleave', handleMouseLeave);
+          }
+          if (mapInstance.current) mapInstance.current.remove();
+        };
+      }
     };
     document.body.appendChild(script);
     return () => { if (mapInstance.current) mapInstance.current.remove(); };
   }, [navigate]);
 
-  return <div ref={mapContainer} id="map" />;
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  return (
+    <div ref={mapContainer} id="map" className="relative">
+      {/* Painel de Debug de Coordenadas */}
+      <div className="coordinate-debug-panel">
+        <div className="label">📍 COORDENADAS DO MAPA</div>
+        <div>X: <span className="text-cyan-400">{coordinates.x}</span></div>
+        <div>Y: <span className="text-cyan-400">{coordinates.y}</span></div>
+        
+        {clickedCoordinates && (
+          <div className="clicked">
+            <div className="label">✓ ÚLTIMA CLICADA</div>
+            <div>X: <span className="text-green-400">{clickedCoordinates.x}</span></div>
+            <div>Y: <span className="text-green-400">{clickedCoordinates.y}</span></div>
+            <button
+              className="copy-btn"
+              onClick={() => copyToClipboard(`${clickedCoordinates.x}, ${clickedCoordinates.y}`)}
+              title="Copiar coordenadas"
+            >
+              📋 COPIAR
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Cursor de Coordenadas */}
+      {showCursor && (
+        <div
+          className="coordinate-cursor"
+          style={{
+            left: `${coordinates.x - 10}px`,
+            top: `${coordinates.y - 10}px`,
+          }}
+        />
+      )}
+    </div>
+  );
 }
