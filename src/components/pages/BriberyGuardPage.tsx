@@ -144,7 +144,7 @@ export default function BriberyGuardPage() {
   const { dirtyMoney, removeDirtyMoney } = useDirtyMoneyStore();
   const { playerLevel, setPlayerLevel } = useGameStore();
   const { setLevel } = usePlayerStore();
-  const { getBriberyAmount, getNextBriberyAmount, addConsequence } = useBriberyStore();
+  const { getBriberyAmount, getNextBriberyAmount, addConsequence, resetLevelOnly: resetBriberyLevel } = useBriberyStore();
   
   const [dialogState, setDialogState] = useState<DialogState>('initial');
   const [consequence, setConsequence] = useState<BriberyConsequence | null>(null);
@@ -263,6 +263,7 @@ export default function BriberyGuardPage() {
     // Reset player to level 1
     setPlayerLevel(1);
     setLevel(1);
+    resetBriberyLevel();
     setDialogState('accepting');
     
     setTimeout(() => {

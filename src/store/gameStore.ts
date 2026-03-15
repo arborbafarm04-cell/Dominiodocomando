@@ -20,6 +20,7 @@ export interface GameState {
   addSpins: (amount: number) => void;
   subtractSpins: (amount: number) => void;
   reset: () => void;
+  resetLevelsOnly: () => void;
 }
 
 const initialState = {
@@ -47,6 +48,7 @@ export const useGameStore = create<GameState>()(
       addSpins: (amount) => set((state) => ({ spins: state.spins + amount })),
       subtractSpins: (amount) => set((state) => ({ spins: Math.max(0, state.spins - amount) })),
       reset: () => set(initialState),
+      resetLevelsOnly: () => set({ playerLevel: 1 }),
     }),
     {
       name: 'game-store',

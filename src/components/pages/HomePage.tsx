@@ -6,6 +6,7 @@ import { Image } from '@/components/ui/image';
 import { useMember } from '@/integrations';
 import { useGameStore } from '@/store/gameStore';
 import { usePlayerStore } from '@/store/playerStore';
+import { useBriberyStore } from '@/store/briberyStore';
 import { motion } from 'framer-motion';
 import { Chrome, Crosshair, Facebook, RotateCcw, ShieldAlert, Terminal, UserCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -19,6 +20,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { playerLevel, setPlayerLevel } = useGameStore();
   const { setLevel } = usePlayerStore();
+  const { resetLevelOnly: resetBriberyLevel } = useBriberyStore();
 
   useEffect(() => {
     const updateTime = () => {
@@ -49,6 +51,7 @@ export default function HomePage() {
   const handleResetBribery = () => {
     setPlayerLevel(1);
     setLevel(1);
+    resetBriberyLevel();
     setShowResetConfirm(false);
   };
 

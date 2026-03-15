@@ -17,6 +17,7 @@ interface PlayerState {
   
   loadPlayerData: (data: Partial<PlayerState>) => void;
   resetPlayer: () => void;
+  resetLevelOnly: () => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({
@@ -43,4 +44,5 @@ export const usePlayerStore = create<PlayerState>((set) => ({
     isGuest: false,
     profilePicture: null,
   }),
+  resetLevelOnly: () => set({ level: 1 }),
 }));
