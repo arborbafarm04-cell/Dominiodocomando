@@ -45,12 +45,13 @@ export default function GameMap() {
         
         const map = L.map(mapContainer.current, {
           crs: L.CRS.Simple,
-          minZoom: -2,
+          minZoom: -1.5,
+          maxZoom: 2,
           zoomControl: false,
           attributionControl: false,
         });
         
-        const bounds = [[0, 0], [1000, 1000]];
+        const bounds = [[0, 0], [1000, 600]];
         L.imageOverlay(urlMapaFundo, bounds).addTo(map);
         map.fitBounds(bounds);
 
@@ -71,23 +72,23 @@ export default function GameMap() {
             });
         }
 
-        // 1. Police Vehicle (in the middle of the avenue) with giroflex animation
+        // 1. Police Vehicle (at the entrance of the favela - adjusted to the asphalt of the climb)
         addLocal(
           'VIATURA PM',
           'https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png',
-          500,
-          520,
-          90,
+          380,
+          420,
+          70,
           'animacao-policia'
         );
 
-        // 2. Your Initial QG (in the favela)
+        // 2. Your Initial QG (deeper inside the community)
         addLocal(
           'SEU QG',
           'https://static.wixstatic.com/media/50f4bf_1776337cd2dc4ff1982d01b0079a48d2~mv2.png',
-          320,
-          280,
-          120
+          200,
+          300,
+          100
         );
       }
     };
