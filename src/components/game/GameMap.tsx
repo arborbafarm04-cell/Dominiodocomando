@@ -87,7 +87,7 @@ export default function GameMap() {
       addElemento('https://static.wixstatic.com/media/50f4bf_73f5f22017304e5198d1a876f1537486~mv2.png', 130, 430, 80, 54, classeBlitz, 'BLITZ', () => {
         navigate('/bribery-guard');
       });
-      addElemento(imagemDoQG, 200, 290, 200, 220, '', 'MEU QG', () => {
+  addElementodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElementomentodElemento(imagemDoQG, 200, 290, 200, 220, '', 'MEU QG', () => {
         navigate('/barraco');
       });
     };
