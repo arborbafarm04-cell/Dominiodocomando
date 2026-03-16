@@ -228,7 +228,7 @@ export default function Game2Page() {
         <Image
           src={currentImage}
           alt="Game 2 Scene"
-          className="w-full h-full object-cover"
+          className="w-4/5 h-4/5 object-contain"
           width={1080}
           height={1920}
         />
