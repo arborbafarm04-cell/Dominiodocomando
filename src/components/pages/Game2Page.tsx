@@ -3,6 +3,8 @@ import { Image } from '@/components/ui/image';
 import { Plus, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BaseCrudService } from '@/integrations';
+import { Players } from '@/entities';
 
 interface Hotspot {
   id: string;
@@ -21,10 +23,30 @@ export default function Game2Page() {
   const [isAddingHotspots, setIsAddingHotspots] = useState(false);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [selectedHotspotId, setSelectedHotspotId] = useState<string | null>(null);
+  const [playerLevel, setPlayerLevel] = useState<number>(1);
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load hotspots from localStorage on mount
+  // Load player level and hotspots on mount
   useEffect(() => {
+    const loadPlayerLevel = async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const idFromUrl = urlParams.get('playerId');
+        const playerId = idFromUrl || localStorage.getItem('currentPlayerId') || '';
+        
+        if (playerId) {
+          const playerData = await BaseCrudService.getById<Players>('players', playerId);
+          if (playerData?.level) {
+            setPlayerLevel(playerData.level);
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao carregar nível do jogador:', err);
+      }
+    };
+
+    loadPlayerLevel();
+
     const savedHotspots = localStorage.getItem('game2_hotspots');
     if (savedHotspots) {
       try {
@@ -70,7 +92,15 @@ export default function Game2Page() {
     };
   }, []);
 
-  const currentImage = images[currentImageIndex] || images[0];
+  // Determine which image to display based on player level
+  const getDisplayImage = (): string => {
+    if (playerLevel >= 10) {
+      return 'https://static.wixstatic.com/media/50f4bf_f1b0939c07364a7ead7fb3e92d126ff0~mv2.png';
+    }
+    return images[currentImageIndex] || images[0];
+  };
+
+  const currentImage = getDisplayImage();
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isAddingHotspots) return;
@@ -136,16 +166,16 @@ export default function Game2Page() {
         <Image
           src={currentImage}
           alt="Game 2 Scene"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
           width={1080}
           height={1920}
         />
 
-        {/* Hotspots Visualization */}
+        {/* Hotspots Visualization - Always on top */}
         {hotspots.map(hotspot => (
           <div
             key={hotspot.id}
-            className="absolute w-10 h-10 bg-red-500 rounded-full border-2 border-red-300 flex items-center justify-center cursor-pointer hover:bg-red-600 transition-colors font-bold text-white text-sm"
+            className="absolute w-10 h-10 bg-red-500 rounded-full border-2 border-red-300 flex items-center justify-center cursor-pointer hover:bg-red-600 transition-colors font-bold text-white text-sm z-40"
             style={{
               left: `${hotspot.x}%`,
               top: `${hotspot.y}%`,
