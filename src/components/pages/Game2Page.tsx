@@ -235,29 +235,32 @@ export default function Game2Page() {
 
         {/* Hotspots Visualization - Always on top */}
         {hotspots.map(hotspot => (
-          <div
-            key={hotspot.id}
-            className="absolute w-10 h-10 rounded-full border-2 border-gray-400 flex items-center justify-center cursor-pointer transition-colors font-bold text-white text-sm z-40"
-            style={{
-              left: `${hotspot.x}%`,
-              top: `${hotspot.y}%`,
-              transform: 'translate(-50%, -50%)',
-              backgroundColor: 'rgba(128, 128, 128, 0.2)',
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (hotspot.destination) {
-                navigate(`/${hotspot.destination}`);
-              }
-            }}
-            title={`Ponto ${hotspot.number} - Clique para ir para ${hotspot.destination || 'destino'}`}
-          >
-            {hotspot.number}
-          </div>
+          // Hide point 2 when barraco level >= 10
+          (hotspot.number === 2 && playerLevel >= 10) ? null : (
+            <div
+              key={hotspot.id}
+              className="absolute w-10 h-10 rounded-full border-2 border-gray-400 flex items-center justify-center cursor-pointer transition-colors font-bold text-white text-sm z-40"
+              style={{
+                left: `${hotspot.x}%`,
+                top: `${hotspot.y}%`,
+                transform: 'translate(-50%, -50%)',
+                backgroundColor: 'rgba(128, 128, 128, 0.2)',
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (hotspot.destination) {
+                  navigate(`/${hotspot.destination}`);
+                }
+              }}
+              title={`Ponto ${hotspot.number} - Clique para ir para ${hotspot.destination || 'destino'}`}
+            >
+              {hotspot.number}
+            </div>
+          )
         ))}
 
-        {/* Police Car at Point 2 */}
-        {hotspots.some(h => h.number === 2) && (
+        {/* Police Car at Point 2 - Hidden when barraco level >= 10 */}
+        {hotspots.some(h => h.number === 2) && playerLevel < 10 && (
           <div
             className="absolute w-86 h-86 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
             style={{
