@@ -23,6 +23,23 @@ export default function Game2Page() {
   const [selectedHotspotId, setSelectedHotspotId] = useState<string | null>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
+  // Load hotspots from localStorage on mount
+  useEffect(() => {
+    const savedHotspots = localStorage.getItem('game2_hotspots');
+    if (savedHotspots) {
+      try {
+        setHotspots(JSON.parse(savedHotspots));
+      } catch (e) {
+        console.error('Erro ao carregar pontos salvos:', e);
+      }
+    }
+  }, []);
+
+  // Save hotspots to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('game2_hotspots', JSON.stringify(hotspots));
+  }, [hotspots]);
+
   // Method to update the image during gameplay
   const updateGameImage = (imageUrl: string) => {
     setImages(prev => [...prev, imageUrl]);
@@ -78,7 +95,9 @@ export default function Game2Page() {
   };
 
   const clearAllHotspots = () => {
-    setHotspots([]);
+    if (confirm('Tem certeza que deseja limpar TODOS os pontos? Esta ação não pode ser desfeita.')) {
+      setHotspots([]);
+    }
   };
 
   const destinationOptions = [
