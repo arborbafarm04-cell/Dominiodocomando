@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Image } from '@/components/ui/image';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, ChevronDown } from 'lucide-react';
+import PoliceCar from '@/components/PoliceCar';
 
 interface Hotspot {
   id: string;
@@ -127,6 +128,11 @@ export default function Game2Page() {
             {hotspot.number}
           </div>
         ))}
+
+        {/* Police Car at Point 2 */}
+        {hotspots.some(h => h.number === 2) && (
+          <PoliceCar x={hotspots.find(h => h.number === 2)?.x || 50} y={hotspots.find(h => h.number === 2)?.y || 50} scale={0.8} />
+        )}
       </div>
 
       {/* Bottom Controls */}
