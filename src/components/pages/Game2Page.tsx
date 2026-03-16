@@ -71,6 +71,10 @@ export default function Game2Page() {
         console.error('Erro ao carregar pontos salvos:', e);
       }
     }
+
+    // Set up polling to detect level changes
+    const interval = setInterval(loadPlayerLevel, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   // Save hotspots to localStorage whenever they change
@@ -91,6 +95,28 @@ export default function Game2Page() {
       delete (window as any).updateGame2Image;
     };
   }, []);
+
+  // Refresh player level periodically to detect Barraco level changes
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const idFromUrl = urlParams.get('playerId');
+        const playerId = idFromUrl || localStorage.getItem('currentPlayerId') || '';
+        
+        if (playerId) {
+          const playerData = await BaseCrudService.getById<Players>('players', playerId);
+          if (playerData?.level && playerData.level !== playerLevel) {
+            setPlayerLevel(playerData.level);
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao atualizar nível do jogador:', err);
+      }
+    }, 2000); // Check every 2 seconds
+
+    return () => clearInterval(interval);
+  }, [playerLevel]);
 
   // Determine which image to display based on player level
   const getDisplayImage = (): string => {
