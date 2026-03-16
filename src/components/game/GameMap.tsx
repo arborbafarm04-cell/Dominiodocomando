@@ -126,8 +126,8 @@ export default function GameMap() {
 
       const map = L.map(mapContainer.current, {
         crs: L.CRS.Simple,
-        minZoom: -1,
-        maxZoom: 2,
+        minZoom: 0,
+        maxZoom: 4,
         zoomControl: false,
         attributionControl: false,
         dragging: false,
@@ -142,6 +142,7 @@ export default function GameMap() {
       const bounds = [[0, 0], [1000, 600]];
       L.imageOverlay('https://static.wixstatic.com/media/50f4bf_9dbf16b020134b02adc81709d1e774b9~mv2.png', bounds).addTo(map);
       map.fitBounds(bounds);
+      map.setZoom(1);
       mapInstance.current = map;
 
 
