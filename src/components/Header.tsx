@@ -132,7 +132,7 @@ export default function Header() {
             <Link to="/projects" className="text-foreground/70 hover:text-secondary transition-colors duration-300 font-paragraph text-sm uppercase tracking-wider">
               Projetos
             </Link>
-            <Link to="/game2" className="text-foreground/70 hover:text-secondary transition-colors duration-300 font-paragraph text-sm uppercase tracking-wider">
+            <Link to="/game" className="text-foreground/70 hover:text-secondary transition-colors duration-300 font-paragraph text-sm uppercase tracking-wider">
               Jogar
             </Link>
           </nav>
@@ -159,7 +159,7 @@ export default function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild onClick={() => setIsMobileMenuOpen(false)}>
-                  <Link to="/game2" className="cursor-pointer">
+                  <Link to="/game" className="cursor-pointer">
                     Jogar
                   </Link>
                 </DropdownMenuItem>
