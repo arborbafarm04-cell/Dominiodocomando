@@ -129,7 +129,13 @@ export default function GameMap() {
         minZoom: -1,
         maxZoom: 2,
         zoomControl: false,
-        attributionControl: false
+        attributionControl: false,
+        dragging: false,
+        touchZoom: false,
+        doubleClickZoom: false,
+        scrollWheelZoom: false,
+        boxZoom: false,
+        keyboard: false
       });
 
       // 1. FUNDO ORIGINAL (A CIDADE)
