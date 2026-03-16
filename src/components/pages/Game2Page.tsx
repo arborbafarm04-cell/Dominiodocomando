@@ -131,7 +131,22 @@ export default function Game2Page() {
 
         {/* Police Car at Point 2 */}
         {hotspots.some(h => h.number === 2) && (
-          <PoliceCar x={hotspots.find(h => h.number === 2)?.x || 50} y={hotspots.find(h => h.number === 2)?.y || 50} scale={0.8} />
+          <div
+            className="absolute w-48 h-48 flex items-center justify-center"
+            style={{
+              left: `${hotspots.find(h => h.number === 2)?.x || 50}%`,
+              top: `${hotspots.find(h => h.number === 2)?.y || 50}%`,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            <Image
+              src="https://static.wixstatic.com/media/50f4bf_be8212bb9150412aada836ee21d92405~mv2.png"
+              alt="Police Car"
+              width={192}
+              height={192}
+              className="w-full h-full object-contain"
+            />
+          </div>
         )}
       </div>
 
