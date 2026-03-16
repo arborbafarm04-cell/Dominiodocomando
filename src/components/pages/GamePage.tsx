@@ -32,7 +32,7 @@ const timer = setTimeout(() => {
 
   if (showCinematic) {
   return (
-  <div className="w-screen h-screen bg-black overflow-hidden">
+  <div className="w-screen h-[calc(100vh-80px)] bg-black overflow-hidden">
   <CinematicSignboard />
   </div>
   );
@@ -40,7 +40,7 @@ const timer = setTimeout(() => {
 
   return (
 
-  <div className="w-screen h-screen bg-black overflow-hidden">
+  <div className="w-screen h-[calc(100vh-80px)] bg-black overflow-hidden">
 
     {currentScreen === 'map' && <GameMapScreen />}
 
