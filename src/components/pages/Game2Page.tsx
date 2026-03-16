@@ -190,11 +190,12 @@ export default function Game2Page() {
         {hotspots.map(hotspot => (
           <div
             key={hotspot.id}
-            className="absolute w-10 h-10 bg-red-500 rounded-full border-2 border-red-300 flex items-center justify-center cursor-pointer hover:bg-red-600 transition-colors font-bold text-white text-sm z-40"
+            className="absolute w-10 h-10 rounded-full border-2 border-gray-400 flex items-center justify-center cursor-pointer transition-colors font-bold text-white text-sm z-40"
             style={{
               left: `${hotspot.x}%`,
               top: `${hotspot.y}%`,
               transform: 'translate(-50%, -50%)',
+              backgroundColor: 'rgba(128, 128, 128, 0.2)',
             }}
             onClick={(e) => {
               e.stopPropagation();
