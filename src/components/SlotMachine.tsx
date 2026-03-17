@@ -79,8 +79,11 @@ function SpinButton() {
   const handleSpin = async () => {
     if (spins <= 0 || isSpinning) return;
 
-    // Try to deduct spins
-    if (!deductSpins(1)) return;
+    // Calculate total spins to deduct based on multiplier
+    const spinsToDeduct = selectedMultiplier;
+
+    // Try to deduct spins (multiplier amount)
+    if (!deductSpins(spinsToDeduct)) return;
 
     setIsSpinning(true);
 

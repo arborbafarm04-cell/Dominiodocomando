@@ -3,7 +3,7 @@ import { useSpinVaultStore } from '@/store/spinVaultStore';
 import { usePlayerStore } from '@/store/playerStore';
 
 export const useSpinVault = () => {
-  const { spins, addSpins, deductSpins, initializeVault, getTimeUntilNextGain } = useSpinVaultStore();
+  const { spins, addSpins, deductSpins, initializeVault, getTimeUntilNextGain, barracoLevel: vaultBarracoLevel, setBarracoLevel } = useSpinVaultStore();
   const { barracoLevel } = usePlayerStore();
   const [timeUntilNextGain, setTimeUntilNextGain] = useState(0);
   const [lastGainAmount, setLastGainAmount] = useState(0);
@@ -14,10 +14,17 @@ export const useSpinVault = () => {
     initializeVault(barracoLevel);
   }, [initializeVault, barracoLevel]);
 
-  // Handle spin gain every 60 seconds
+  // Update barraco level in vault store when it changes
+  useEffect(() => {
+    if (barracoLevel && barracoLevel > 0) {
+      setBarracoLevel(barracoLevel);
+    }
+  }, [barracoLevel, setBarracoLevel]);
+
+  // Handle spin gain every 60 seconds - uses the barraco level from vault store
   useEffect(() => {
     const interval = setInterval(() => {
-      const gainAmount = Math.max(1, barracoLevel);
+      const gainAmount = Math.max(1, vaultBarracoLevel);
       addSpins(gainAmount);
       setLastGainAmount(gainAmount);
       setShowNotification(true);
@@ -29,7 +36,7 @@ export const useSpinVault = () => {
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [barracoLevel, addSpins]);
+  }, [vaultBarracoLevel, addSpins]);
 
   // Update countdown timer
   useEffect(() => {
@@ -47,7 +54,7 @@ export const useSpinVault = () => {
 
   return {
     spins,
-    barracoLevel,
+    barracoLevel: vaultBarracoLevel,
     timeUntilNextGain,
     formatTime,
     deductSpins,
