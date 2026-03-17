@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
 import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const SLOT_ITEMS = [
   {
@@ -37,6 +37,37 @@ export const SLOT_ITEMS = [
   }
 ];
 
+const MULTIPLIER_OPTIONS = [1, 2, 5, 10];
+
+// Animated Money Display Component
+interface AnimatedMoneyProps {
+  amount: number;
+  id: string;
+}
+
+const AnimatedMoney: React.FC<AnimatedMoneyProps> = ({ amount, id }) => {
+  return (
+    <motion.div
+      key={id}
+      initial={{ opacity: 1, y: 0, scale: 1 }}
+      animate={{ opacity: 0, y: -150, scale: 1.2 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 2, ease: 'easeOut' }}
+      className="fixed pointer-events-none font-heading font-bold text-3xl md:text-4xl"
+      style={{
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        color: '#4CAF50',
+        textShadow: '0 0 10px rgba(76, 175, 80, 0.8)',
+        zIndex: 1000,
+      }}
+    >
+      +{amount}
+    </motion.div>
+  );
+};
+
 // Spin Button Component - Independent
 function SpinButton() {
   const { spins, isSpinning, setIsSpinning, subtractSpins } = useGameStore();
@@ -58,7 +89,29 @@ function SpinButton() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
+    <div className="flex flex-col items-center justify-center gap-6 w-full">
+      {/* Multiplier Controls */}
+      <div className="flex flex-col items-center gap-2 w-full">
+        <div className="text-secondary font-heading text-sm md:text-base">Multiplicador: <span className="text-logo-gradient-start font-bold text-lg">x{selectedMultiplier}</span></div>
+        <div className="flex gap-2 flex-wrap justify-center">
+          {MULTIPLIER_OPTIONS.map((mult) => (
+            <button
+              key={mult}
+              onClick={() => setSelectedMultiplier(mult)}
+              disabled={isSpinning}
+              className={`px-4 py-2 font-heading font-bold rounded-lg transition-all duration-300 ${
+                selectedMultiplier === mult
+                  ? 'bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end text-white shadow-lg shadow-logo-gradient-start/50'
+                  : 'bg-white/10 text-secondary hover:bg-white/20 border border-secondary/50'
+              } disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              x{mult}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Spin Button */}
       <button
         onClick={handleSpin}
         disabled={isSpinning || spins <= 0}
@@ -87,6 +140,7 @@ function SlotsDisplay() {
   const [spinningIndices, setSpinningIndices] = useState<boolean[]>([false, false, false]);
   const [resultMessage, setResultMessage] = useState('');
   const [showPrisonModal, setShowPrisonModal] = useState(false);
+  const [animatedMoneys, setAnimatedMoneys] = useState<{ id: string; amount: number }[]>([]);
 
   useEffect(() => {
     const handleSpinEvent = (event: Event) => {
@@ -138,11 +192,23 @@ function SlotsDisplay() {
             addDirtMoney(bonus);
             addDirtyMoney(bonus);
             setResultMessage(`🔫 BÔNUS! +R$ ${bonus}`);
+            // Add animated money
+            const moneyId = `money-${Date.now()}`;
+            setAnimatedMoneys(prev => [...prev, { id: moneyId, amount: bonus }]);
+            setTimeout(() => {
+              setAnimatedMoneys(prev => prev.filter(m => m.id !== moneyId));
+            }, 2000);
           } else if (slotIds[0] === 'bank') {
             const bonus = 500;
             addDirtMoney(bonus);
             addDirtyMoney(bonus);
             setResultMessage(`🏢 BÔNUS! +R$ ${bonus}`);
+            // Add animated money
+            const moneyId = `money-${Date.now()}`;
+            setAnimatedMoneys(prev => [...prev, { id: moneyId, amount: bonus }]);
+            setTimeout(() => {
+              setAnimatedMoneys(prev => prev.filter(m => m.id !== moneyId));
+            }, 2000);
           }
         } else {
           // Regular money from 💰
@@ -152,6 +218,12 @@ function SlotsDisplay() {
             addDirtMoney(earned);
             addDirtyMoney(earned);
             setResultMessage(`💰 Ganhou R$ ${earned}`);
+            // Add animated money
+            const moneyId = `money-${Date.now()}`;
+            setAnimatedMoneys(prev => [...prev, { id: moneyId, amount: earned }]);
+            setTimeout(() => {
+              setAnimatedMoneys(prev => prev.filter(m => m.id !== moneyId));
+            }, 2000);
           } else {
             setResultMessage('Nenhum prêmio');
           }
@@ -164,7 +236,14 @@ function SlotsDisplay() {
   }, [dirtMoney, multiplier, setDirtMoney, setMultiplier, addDirtMoney]);
 
   return (
-    <div className="from-gray-900 to-black border-secondary rounded-lg p-3 shadow-2xl border border-none bg-transparent">
+    <div className="from-gray-900 to-black border-secondary rounded-lg p-3 shadow-2xl border border-none bg-transparent relative">
+      {/* Animated Money Display */}
+      <AnimatePresence>
+        {animatedMoneys.map(money => (
+          <AnimatedMoney key={money.id} amount={money.amount} id={money.id} />
+        ))}
+      </AnimatePresence>
+
       {/* Slot Item Labels */}
       {/* Slot Display */}
       <div className="flex gap-3 justify-center items-center">
