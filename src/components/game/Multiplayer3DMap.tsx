@@ -503,16 +503,6 @@ export default function Multiplayer3DMap() {
     return group;
   };
 
-    // Add grid lines
-    const gridHelper = new THREE.GridHelper(
-      Math.max(GRID_SIZE, GRID_HEIGHT),
-      Math.max(GRID_SIZE, GRID_HEIGHT),
-      0x444444,
-      0x222222
-    );
-    gridHelper.position.y = 0.01;
-    scene.add(gridHelper);
-
   // Generate random barraco position (4 contiguous tiles) - avoiding QG area and bribery zones
   const generateBarracoPosition = (): { tiles: number[]; x: number; z: number } | null => {
     const maxAttempts = 200;
