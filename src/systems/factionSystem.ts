@@ -13,3 +13,8 @@ export function createFaction(name: string, leaderId: string): Faction {
     members: [leaderId],
   };
 }
+
+export function addMember(faction: Faction, playerId: string): Faction {
+  faction.members.push(playerId);
+  return faction;
+}
