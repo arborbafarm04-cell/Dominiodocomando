@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
+import { BRIBERY_ZONES, isInBriberyZone, isValidBarracoPosition } from '@/systems/briberyZoneSystem';
 
 interface Tile {
   id: number;
@@ -10,6 +11,7 @@ interface Tile {
   occupied: boolean;
   playerId?: string;
   isQG?: boolean;
+  briberyZoneId?: string;
 }
 
 interface Barraco {
@@ -127,13 +129,19 @@ export default function Multiplayer3DMap() {
         const isQG = x >= QG_START_X && x < QG_START_X + QG_SIZE && 
                      z >= QG_START_Z && z < QG_START_Z + QG_SIZE;
 
+        // Check if tile is in a bribery zone
+        const briberyZone = isInBriberyZone(x, z);
+        const zoneColor = briberyZone ? briberyZone.color : 0x2a2a3e;
+        const emissiveColor = isQG ? 0x00ff00 : (briberyZone ? briberyZone.color : 0x000000);
+        const emissiveIntensity = isQG ? 0.3 : (briberyZone ? 0.2 : 0);
+
         const geometry = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
         const material = new THREE.MeshStandardMaterial({
-          color: isQG ? 0x1a4d2e : 0x2a2a3e,
+          color: isQG ? 0x1a4d2e : zoneColor,
           roughness: 0.8,
           metalness: 0.2,
-          emissive: isQG ? 0x00ff00 : 0x000000,
-          emissiveIntensity: isQG ? 0.3 : 0,
+          emissive: emissiveColor,
+          emissiveIntensity: emissiveIntensity,
         });
 
         const tile = new THREE.Mesh(geometry, material);
@@ -149,6 +157,7 @@ export default function Multiplayer3DMap() {
           z,
           occupied: false,
           isQG,
+          briberyZoneId: briberyZone?.id,
         });
 
         tileId++;
@@ -170,6 +179,29 @@ export default function Multiplayer3DMap() {
     const qgLine = new THREE.Line(qgGeometry, new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 3 }));
     scene.add(qgLine);
 
+    // Add bribery zone boundaries
+    BRIBERY_ZONES.forEach((zone) => {
+      const minX = zone.centerX - zone.width / 2;
+      const maxX = zone.centerX + zone.width / 2;
+      const minZ = zone.centerZ - zone.height / 2;
+      const maxZ = zone.centerZ + zone.height / 2;
+
+      const zoneGeometry = new THREE.BufferGeometry();
+      const zoneVertices = new Float32Array([
+        minX * TILE_SIZE, 0.02, minZ * TILE_SIZE,
+        maxX * TILE_SIZE, 0.02, minZ * TILE_SIZE,
+        maxX * TILE_SIZE, 0.02, maxZ * TILE_SIZE,
+        minX * TILE_SIZE, 0.02, maxZ * TILE_SIZE,
+        minX * TILE_SIZE, 0.02, minZ * TILE_SIZE,
+      ]);
+      zoneGeometry.setAttribute('position', new THREE.BufferAttribute(zoneVertices, 3));
+      const zoneLine = new THREE.Line(
+        zoneGeometry,
+        new THREE.LineBasicMaterial({ color: zone.color, linewidth: 2 })
+      );
+      scene.add(zoneLine);
+    });
+
     // Add grid lines
     const gridHelper = new THREE.GridHelper(
       Math.max(GRID_SIZE, GRID_HEIGHT),
@@ -181,29 +213,17 @@ export default function Multiplayer3DMap() {
     scene.add(gridHelper);
   };
 
-  // Generate random barraco position (4 contiguous tiles) - avoiding QG area
+  // Generate random barraco position (4 contiguous tiles) - avoiding QG area and bribery zones
   const generateBarracoPosition = (): { tiles: number[]; x: number; z: number } | null => {
     const maxAttempts = 200;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const startX = Math.floor(Math.random() * (GRID_SIZE - 1));
       const startZ = Math.floor(Math.random() * (GRID_HEIGHT - 1));
 
-      // Check if position would overlap with QG
-      let overlapsQG = false;
-      for (let dx = 0; dx < 2; dx++) {
-        for (let dz = 0; dz < 2; dz++) {
-          const x = startX + dx;
-          const z = startZ + dz;
-          if (x >= QG_START_X && x < QG_START_X + QG_SIZE && 
-              z >= QG_START_Z && z < QG_START_Z + QG_SIZE) {
-            overlapsQG = true;
-            break;
-          }
-        }
-        if (overlapsQG) break;
+      // Use the validation function from briberyZoneSystem
+      if (!isValidBarracoPosition(startX, startZ, 2, 2)) {
+        continue;
       }
-
-      if (overlapsQG) continue;
 
       const tiles: number[] = [];
       let canPlace = true;
@@ -414,12 +434,27 @@ export default function Multiplayer3DMap() {
           <div className="text-white text-2xl">Carregando mapa 3D...</div>
         </div>
       )}
-      <div className="absolute top-4 left-4 text-white bg-black bg-opacity-70 p-4 rounded">
+      <div className="absolute top-4 left-4 text-white bg-black bg-opacity-70 p-4 rounded max-h-96 overflow-y-auto">
         <h2 className="text-xl font-bold mb-2">Mapa Multiplayer 3D - Complexo</h2>
         <p>Total de Tiles: {GRID_SIZE * GRID_HEIGHT}</p>
         <p>QG do Complexo: {QG_SIZE * QG_SIZE} tiles (área central)</p>
         <p>Barracos: {barracosRef.current.size}</p>
         <p>Tiles por Barraco: {TILES_PER_BARRACO}</p>
+        
+        <div className="mt-4 border-t border-gray-600 pt-2">
+          <h3 className="text-lg font-bold mb-2">Zonas de Suborno:</h3>
+          <div className="space-y-1 text-sm">
+            {BRIBERY_ZONES.map((zone) => (
+              <div key={zone.id} className="flex items-center gap-2">
+                <div
+                  className="w-3 h-3 rounded"
+                  style={{ backgroundColor: `#${zone.color.toString(16).padStart(6, '0')}` }}
+                />
+                <span>{zone.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
