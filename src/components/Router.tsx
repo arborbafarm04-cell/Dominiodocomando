@@ -60,9 +60,9 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <GamePage1 />,
+        element: <HomePage />,
         routeMetadata: {
-          pageIdentifier: 'game-page-1',
+          pageIdentifier: 'home',
         },
       },
       {
