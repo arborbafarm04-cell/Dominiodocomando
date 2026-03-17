@@ -113,25 +113,24 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-screen aspect-video" style={{
+    <header className="fixed top-0 left-0 right-0 z-50 h-[110px]" style={{
       background: 'rgba(15,20,30,0.85)',
       backdropFilter: 'blur(10px)',
       borderBottom: '2px solid #00eaff',
-      boxShadow: '0 0 20px rgba(0,234,255,0.3)',
-      aspectRatio: '9 / 16'
+      boxShadow: '0 0 20px rgba(0,234,255,0.3)'
     }}>
       {/* HUD Lines */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[30%] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-hud-line-blue/20 to-transparent" />
-        <div className="absolute bottom-[30%] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-hud-line-blue/20 to-transparent" />
+        <div className="absolute top-[30px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-hud-line-blue/20 to-transparent" />
+        <div className="absolute bottom-[30px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-hud-line-blue/20 to-transparent" />
       </div>
-      <div className="h-full w-full max-w-[120rem] mx-auto px-6 flex flex-col items-center justify-between py-8">
-        {/* Top Area - Logo & Navigation */}
-        <div className="flex flex-col items-center gap-4">
+      <div className="h-full max-w-[120rem] mx-auto px-6 flex items-center justify-between">
+        {/* Left Area - Logo & Navigation */}
+        <div className="flex items-center gap-8">
           <Link to="/" className="text-white hover:text-secondary transition-colors duration-300 font-heading text-lg font-bold uppercase tracking-wider">
             DOMÍNIO
           </Link>
-          <nav className="hidden md:flex flex-col items-center gap-4">
+          <nav className="hidden md:flex items-center gap-6">
             <Link to="/projects" className="text-foreground/70 hover:text-secondary transition-colors duration-300 font-paragraph text-sm uppercase tracking-wider">
               Projetos
             </Link>
@@ -205,7 +204,7 @@ export default function Header() {
         </div>
 
         {/* Right Area - Player Name & Icons */}
-        <div className="flex flex-col items-center gap-4 w-full">
+        <div className="flex items-center gap-6">
           {/* Player Names */}
           <div className="flex flex-col items-start gap-1">
             {/* Main Player Name */}
