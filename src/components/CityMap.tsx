@@ -100,13 +100,13 @@ export default function CityMap() {
 
     tilesRef.current = tiles;
 
-    // Handle mouse click for tile selection
-    const handleMouseClick = (event: MouseEvent) => {
+    // Handle tile selection (mouse and touch)
+    const handleTileSelection = (clientX: number, clientY: number) => {
       if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
 
       const rect = containerRef.current.getBoundingClientRect();
-      mouseRef.current.x = ((event.clientX - rect.left) / width) * 2 - 1;
-      mouseRef.current.y = -((event.clientY - rect.top) / height) * 2 + 1;
+      mouseRef.current.x = ((clientX - rect.left) / width) * 2 - 1;
+      mouseRef.current.y = -((clientY - rect.top) / height) * 2 + 1;
 
       raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
 
@@ -147,7 +147,21 @@ export default function CityMap() {
       }
     };
 
+    // Handle mouse click for tile selection
+    const handleMouseClick = (event: MouseEvent) => {
+      handleTileSelection(event.clientX, event.clientY);
+    };
+
+    // Handle touch for tile selection
+    const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length > 0) {
+        const touch = event.touches[0];
+        handleTileSelection(touch.clientX, touch.clientY);
+      }
+    };
+
     renderer.domElement.addEventListener('click', handleMouseClick);
+    renderer.domElement.addEventListener('touchstart', handleTouchStart);
 
     // Animation loop
     const animate = () => {
@@ -172,6 +186,7 @@ export default function CityMap() {
     return () => {
       window.removeEventListener('resize', handleResize);
       renderer.domElement.removeEventListener('click', handleMouseClick);
+      renderer.domElement.removeEventListener('touchstart', handleTouchStart);
       if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
         containerRef.current.removeChild(renderer.domElement);
       }
