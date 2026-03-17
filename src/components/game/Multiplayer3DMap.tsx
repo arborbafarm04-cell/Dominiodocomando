@@ -9,6 +9,7 @@ interface Tile {
   z: number;
   occupied: boolean;
   playerId?: string;
+  isQG?: boolean;
 }
 
 interface Barraco {
@@ -18,12 +19,19 @@ interface Barraco {
   tiles: number[];
   position: { x: number; z: number };
   mesh?: THREE.Group;
+  color: number;
 }
 
-const GRID_SIZE = 40; // 40x20 = 800 tiles
-const GRID_HEIGHT = 20;
+// 800 tiles = 32x25 grid
+const GRID_SIZE = 32;
+const GRID_HEIGHT = 25;
 const TILE_SIZE = 1;
 const TILES_PER_BARRACO = 4;
+
+// QG do Complexo - Central area (8x8 tiles in the center)
+const QG_SIZE = 8;
+const QG_START_X = (GRID_SIZE - QG_SIZE) / 2;
+const QG_START_Z = (GRID_HEIGHT - QG_SIZE) / 2;
 
 export default function Multiplayer3DMap() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -115,11 +123,17 @@ export default function Multiplayer3DMap() {
 
     for (let x = 0; x < GRID_SIZE; x++) {
       for (let z = 0; z < GRID_HEIGHT; z++) {
+        // Check if tile is in QG area
+        const isQG = x >= QG_START_X && x < QG_START_X + QG_SIZE && 
+                     z >= QG_START_Z && z < QG_START_Z + QG_SIZE;
+
         const geometry = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
         const material = new THREE.MeshStandardMaterial({
-          color: 0x2a2a3e,
+          color: isQG ? 0x1a4d2e : 0x2a2a3e,
           roughness: 0.8,
           metalness: 0.2,
+          emissive: isQG ? 0x00ff00 : 0x000000,
+          emissiveIntensity: isQG ? 0.3 : 0,
         });
 
         const tile = new THREE.Mesh(geometry, material);
@@ -134,6 +148,7 @@ export default function Multiplayer3DMap() {
           x,
           z,
           occupied: false,
+          isQG,
         });
 
         tileId++;
@@ -141,6 +156,19 @@ export default function Multiplayer3DMap() {
     }
 
     scene.add(tileGroup);
+
+    // Add QG boundary visualization
+    const qgGeometry = new THREE.BufferGeometry();
+    const qgVertices = new Float32Array([
+      QG_START_X * TILE_SIZE, 0.01, QG_START_Z * TILE_SIZE,
+      (QG_START_X + QG_SIZE) * TILE_SIZE, 0.01, QG_START_Z * TILE_SIZE,
+      (QG_START_X + QG_SIZE) * TILE_SIZE, 0.01, (QG_START_Z + QG_SIZE) * TILE_SIZE,
+      QG_START_X * TILE_SIZE, 0.01, (QG_START_Z + QG_SIZE) * TILE_SIZE,
+      QG_START_X * TILE_SIZE, 0.01, QG_START_Z * TILE_SIZE,
+    ]);
+    qgGeometry.setAttribute('position', new THREE.BufferAttribute(qgVertices, 3));
+    const qgLine = new THREE.Line(qgGeometry, new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 3 }));
+    scene.add(qgLine);
 
     // Add grid lines
     const gridHelper = new THREE.GridHelper(
@@ -153,12 +181,29 @@ export default function Multiplayer3DMap() {
     scene.add(gridHelper);
   };
 
-  // Generate random barraco position (4 contiguous tiles)
+  // Generate random barraco position (4 contiguous tiles) - avoiding QG area
   const generateBarracoPosition = (): { tiles: number[]; x: number; z: number } | null => {
-    const maxAttempts = 100;
+    const maxAttempts = 200;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const startX = Math.floor(Math.random() * (GRID_SIZE - 1));
       const startZ = Math.floor(Math.random() * (GRID_HEIGHT - 1));
+
+      // Check if position would overlap with QG
+      let overlapsQG = false;
+      for (let dx = 0; dx < 2; dx++) {
+        for (let dz = 0; dz < 2; dz++) {
+          const x = startX + dx;
+          const z = startZ + dz;
+          if (x >= QG_START_X && x < QG_START_X + QG_SIZE && 
+              z >= QG_START_Z && z < QG_START_Z + QG_SIZE) {
+            overlapsQG = true;
+            break;
+          }
+        }
+        if (overlapsQG) break;
+      }
+
+      if (overlapsQG) continue;
 
       const tiles: number[] = [];
       let canPlace = true;
@@ -255,12 +300,14 @@ export default function Multiplayer3DMap() {
           const position = generateBarracoPosition();
           if (!position) return;
 
+          const color = colors[index % colors.length];
           const barraco: Barraco = {
             id: player._id,
             playerId: player.playerId || player._id,
             playerName: player.playerName || 'Unknown',
             tiles: position.tiles,
             position: { x: position.x, z: position.z },
+            color,
           };
 
           // Mark tiles as occupied
@@ -273,7 +320,6 @@ export default function Multiplayer3DMap() {
           });
 
           // Create mesh
-          const color = colors[index % colors.length];
           const mesh = createBarracoMesh(position, color);
           barraco.mesh = mesh;
           sceneRef.current!.add(mesh);
@@ -303,14 +349,17 @@ export default function Multiplayer3DMap() {
           if (!playersRef.current.has(player._id)) {
             // New player - create barraco
             const position = generateBarracoPosition();
-            if (!position && sceneRef.current) {
+            if (position && sceneRef.current) {
               const colors = [0xff4500, 0x00eaff, 0x00ff00, 0xff00ff, 0xffff00, 0xff8800];
+              const color = colors[Object.keys(playersRef.current).length % colors.length];
+              
               const barraco: Barraco = {
                 id: player._id,
                 playerId: player.playerId || player._id,
                 playerName: player.playerName || 'Unknown',
                 tiles: position.tiles,
                 position: { x: position.x, z: position.z },
+                color,
               };
 
               position.tiles.forEach((tileId) => {
@@ -321,7 +370,6 @@ export default function Multiplayer3DMap() {
                 }
               });
 
-              const color = colors[Object.keys(playersRef.current).length % colors.length];
               const mesh = createBarracoMesh(position, color);
               barraco.mesh = mesh;
               sceneRef.current.add(mesh);
@@ -367,8 +415,9 @@ export default function Multiplayer3DMap() {
         </div>
       )}
       <div className="absolute top-4 left-4 text-white bg-black bg-opacity-70 p-4 rounded">
-        <h2 className="text-xl font-bold mb-2">Mapa Multiplayer 3D</h2>
+        <h2 className="text-xl font-bold mb-2">Mapa Multiplayer 3D - Complexo</h2>
         <p>Total de Tiles: {GRID_SIZE * GRID_HEIGHT}</p>
+        <p>QG do Complexo: {QG_SIZE * QG_SIZE} tiles (área central)</p>
         <p>Barracos: {barracosRef.current.size}</p>
         <p>Tiles por Barraco: {TILES_PER_BARRACO}</p>
       </div>
