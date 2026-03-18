@@ -39,6 +39,7 @@ const BriberyGovernadorPage = lazy(() => import('@/components/pages/BriberyGover
 const BriberyMinistroPage = lazy(() => import('@/components/pages/BriberyMinistroPage'));
 const BriberyPresidentePage = lazy(() => import('@/components/pages/BriberyPresidentePage'));
 const StarMapPage = lazy(() => import('@/components/pages/StarMapPage'));
+const CameraControlPage = lazy(() => import('@/components/pages/CameraControlPage'));
 
 // Layout component that includes ScrollToTop
 function Layout() {
@@ -287,6 +288,13 @@ const router = createBrowserRouter([
         element: <StarMapPage />,
         routeMetadata: {
           pageIdentifier: 'star-map',
+        },
+      },
+      {
+        path: "camera-control",
+        element: <CameraControlPage />,
+        routeMetadata: {
+          pageIdentifier: 'camera-control',
         },
       },
       {
