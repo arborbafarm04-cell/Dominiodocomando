@@ -77,7 +77,8 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
 
     // ===== CREATE TILE GRID =====
     const totalTiles = gridSize * gridSize;
-    const geometry = new THREE.PlaneGeometry(tileSize * 0.95, tileSize * 0.95);
+    // Create 3D box geometry instead of flat plane for true 3D appearance
+    const geometry = new THREE.BoxGeometry(tileSize * 0.95, tileSize * 0.3, tileSize * 0.95);
     
     // Base material - urban concrete/asphalt style
     const baseMaterial = new THREE.MeshStandardMaterial({
@@ -93,7 +94,7 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       metalness: 0.5,
       roughness: 0.4,
       emissive: 0x00eaff,
-      emissiveIntensity: 0.3,
+      emissiveIntensity: 0.5,
     });
     highlightMaterialRef.current = highlightMaterial;
 
@@ -113,10 +114,9 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       for (let col = 0; col < gridSize; col++) {
         const x = startX + col * tileSize + tileSize / 2;
         const z = startZ + row * tileSize + tileSize / 2;
-        const y = 0;
+        const y = tileSize * 0.15; // Position box so bottom sits at y=0
 
         dummy.position.set(x, y, z);
-        dummy.rotation.x = -Math.PI / 2; // Rotate to lay flat
         dummy.updateMatrix();
         instancedMesh.setMatrixAt(tileIndex, dummy.matrix);
 
@@ -135,23 +135,36 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     instancedMesh.instanceMatrix.needsUpdate = true;
     scene.add(instancedMesh);
 
+    // ===== ADD GROUND PLANE =====
+    const groundGeometry = new THREE.PlaneGeometry(gridSize * tileSize * 1.2, gridSize * tileSize * 1.2);
+    const groundMaterial = new THREE.MeshStandardMaterial({
+      color: 0x2a2a2a,
+      metalness: 0.2,
+      roughness: 0.9,
+    });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.1;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
     // ===== ADD SUBTLE GRID LINES (optional visual aid) =====
     const gridLinesGeometry = new THREE.BufferGeometry();
-    const gridLinesMaterial = new THREE.LineBasicMaterial({ color: 0x333333, linewidth: 1 });
+    const gridLinesMaterial = new THREE.LineBasicMaterial({ color: 0x555555, linewidth: 1 });
     const gridLinesPoints: number[] = [];
 
     // Vertical lines
     for (let i = 0; i <= gridSize; i++) {
       const pos = startX + i * tileSize;
-      gridLinesPoints.push(pos, 0.01, startZ);
-      gridLinesPoints.push(pos, 0.01, startZ + gridSize * tileSize);
+      gridLinesPoints.push(pos, 0.05, startZ);
+      gridLinesPoints.push(pos, 0.05, startZ + gridSize * tileSize);
     }
 
     // Horizontal lines
     for (let i = 0; i <= gridSize; i++) {
       const pos = startZ + i * tileSize;
-      gridLinesPoints.push(startX, 0.01, pos);
-      gridLinesPoints.push(startX + gridSize * tileSize, 0.01, pos);
+      gridLinesPoints.push(startX, 0.05, pos);
+      gridLinesPoints.push(startX + gridSize * tileSize, 0.05, pos);
     }
 
     gridLinesGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(gridLinesPoints), 3));
@@ -291,6 +304,8 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       geometry.dispose();
       baseMaterial.dispose();
       highlightMaterial.dispose();
+      groundGeometry.dispose();
+      groundMaterial.dispose();
       gridLinesGeometry.dispose();
       gridLinesMaterial.dispose();
       instancedMesh.dispose();
