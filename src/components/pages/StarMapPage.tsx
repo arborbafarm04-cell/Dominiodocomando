@@ -168,7 +168,7 @@ export default function StarMapPage() {
 
         {/* Interactive Tile Grid Section */}
         <div className="flex-1 w-full h-full overflow-hidden">
-          <InteractiveTileGrid gridSize={28} tileSize={1} />
+          <InteractiveTileGrid gridWidth={40} gridHeight={20} tileSize={1} />
         </div>
 
         <Footer />
