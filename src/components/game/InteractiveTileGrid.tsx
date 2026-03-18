@@ -172,10 +172,11 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     const qgAreaSize = qgGridSize * tileSize; // Size of 4x4 area in world units
     
     // Calculate center position of the 4x4 area within the grid
-    // Grid goes from startX to startX + gridTotalWidth
-    // Center of 4x4 area = center of entire grid
-    const qgCenterX = 0; // Center of grid (since grid is centered at origin)
-    const qgCenterZ = 0; // Center of grid (since grid is centered at origin)
+    // The 4x4 area is centered in the middle of the entire grid
+    // Grid center is at (gridTotalWidth / 2, gridTotalHeight / 2) in world space
+    // But since we offset by startX and startZ, the actual center is at (0, 0)
+    const qgCenterX = (gridTotalWidth / 2) - (gridTotalWidth / 2); // = 0
+    const qgCenterZ = (gridTotalHeight / 2) - (gridTotalHeight / 2); // = 0
     
     const gltfLoader = new GLTFLoader();
     gltfLoader.load(
