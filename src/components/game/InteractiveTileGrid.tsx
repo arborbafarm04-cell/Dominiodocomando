@@ -19,9 +19,19 @@ interface LuxuryStoreData {
   isClickable: boolean;
 }
 
+interface QGData {
+  position: { x: number; z: number };
+  gridX: number;
+  gridZ: number;
+  size: number; // 4x4 tiles
+  model: THREE.Group | null;
+  isClickable: boolean;
+}
+
 interface InteractiveTileGridProps {
   onTileSelect?: (tileId: number, position: { x: number; z: number }) => void;
   onLuxuryStoreClick?: () => void;
+  onQGClick?: () => void;
   gridWidth?: number;
   gridHeight?: number;
   tileSize?: number;
@@ -30,6 +40,7 @@ interface InteractiveTileGridProps {
 const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
   onTileSelect,
   onLuxuryStoreClick,
+  onQGClick,
   gridWidth = 40,
   gridHeight = 20,
   tileSize = 1,
@@ -293,6 +304,97 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       }
     );
 
+    // ===== LOAD QG 3D MODEL (4x4 tiles in center) =====
+    // Position the QG in the center of the grid (16 central tiles)
+    const qgSize = 4; // 4x4 tiles
+    const qgGridX = (gridWidth / 2) - (qgSize / 2); // Center horizontally
+    const qgGridZ = (gridHeight / 2) - (qgSize / 2); // Center vertically
+    
+    // Convert grid coordinates to world coordinates
+    const qgCenterGridX = qgGridX + qgSize / 2;
+    const qgCenterGridZ = qgGridZ + qgSize / 2;
+    
+    const qgWorldX = startX + qgCenterGridX * tileSize;
+    const qgWorldZ = startZ + qgCenterGridZ * tileSize;
+    
+    qgRef.current = {
+      position: { x: qgWorldX, z: qgWorldZ },
+      gridX: qgGridX,
+      gridZ: qgGridZ,
+      size: qgSize,
+      model: null,
+      isClickable: true,
+    };
+    
+    // Debug: Log the QG position
+    console.log('QG Position:', {
+      gridX: qgGridX,
+      gridZ: qgGridZ,
+      worldX: qgWorldX,
+      worldZ: qgWorldZ,
+      gridSize: qgSize,
+    });
+    
+    gltfLoader.load(
+      'https://static.wixstatic.com/3d/50f4bf_938928189a844f56ac340bada0b551bd.glb',
+      (gltf) => {
+        const model = gltf.scene;
+        
+        // Create a group for the QG
+        const qgGroup = new THREE.Group();
+        
+        // Position at center of platform
+        qgGroup.position.set(qgWorldX, 0, qgWorldZ);
+        
+        // Calculate bounding box to determine proper scale
+        const bbox = new THREE.Box3().setFromObject(model);
+        const size = bbox.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        
+        // Scale to fit exactly 4x4 tiles (4 units in world space)
+        const targetSize = qgSize * tileSize; // 4 units
+        const scale = targetSize / maxDim;
+        model.scale.set(scale, scale, scale);
+        
+        // Center the model within the group
+        bbox.setFromObject(model);
+        const center = bbox.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+        
+        // Ensure model sits on the ground (y = 0)
+        // Get the bottom of the model
+        bbox.setFromObject(model);
+        const bottomY = bbox.min.y;
+        model.position.y -= bottomY; // Lift model so bottom is at y = 0
+        
+        // Apply shadow properties recursively to all children
+        model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            // Enhance material brightness for better visibility
+            if (child.material instanceof THREE.Material) {
+              if (child.material instanceof THREE.MeshStandardMaterial) {
+                child.material.emissiveIntensity = 0.3;
+                child.material.metalness = Math.max(0, child.material.metalness - 0.2);
+                child.material.roughness = Math.min(1, child.material.roughness + 0.1);
+              }
+            }
+          }
+        });
+        
+        qgGroup.add(model);
+        scene.add(qgGroup);
+        
+        qgRef.current.model = qgGroup;
+        qgGroupRef.current = qgGroup;
+      },
+      undefined,
+      (error) => {
+        console.warn('Failed to load QG 3D model:', error);
+      }
+    );
+
     // ===== ORBIT CONTROLS WITH CUSTOM CONFIGURATION =====
     const controls = new OrbitControls(camera, renderer.domElement);
     
@@ -363,6 +465,17 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
 
     const onMouseClick = (event: MouseEvent) => {
       raycasterRef.current.setFromCamera(mouseRef.current, camera);
+
+      // Check if QG was clicked
+      if (qgGroupRef.current) {
+        const qgIntersects = raycasterRef.current.intersectObject(qgGroupRef.current, true);
+        if (qgIntersects.length > 0) {
+          if (onQGClick) {
+            onQGClick();
+          }
+          return;
+        }
+      }
 
       // Check if luxury store was clicked
       if (luxuryStoreGroupRef.current) {
@@ -444,7 +557,7 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       controls.dispose();
       renderer.dispose();
     };
-  }, [gridWidth, gridHeight, tileSize, onTileSelect, onLuxuryStoreClick]);
+  }, [gridWidth, gridHeight, tileSize, onTileSelect, onLuxuryStoreClick, onQGClick]);
 
   return (
     <div

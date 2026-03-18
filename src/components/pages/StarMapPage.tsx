@@ -7,9 +7,16 @@ export default function StarMapPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showLuxuryNotification, setShowLuxuryNotification] = useState(false);
 
+  const [showQGNotification, setShowQGNotification] = useState(false);
+
   const handleLuxuryStoreClick = () => {
     setShowLuxuryNotification(true);
     setTimeout(() => setShowLuxuryNotification(false), 3000);
+  };
+
+  const handleQGClick = () => {
+    setShowQGNotification(true);
+    setTimeout(() => setShowQGNotification(false), 3000);
   };
 
   useEffect(() => {
@@ -179,12 +186,20 @@ export default function StarMapPage() {
             gridHeight={20} 
             tileSize={1}
             onLuxuryStoreClick={handleLuxuryStoreClick}
+            onQGClick={handleQGClick}
           />
           
           {/* Luxury Store Notification */}
           {showLuxuryNotification && (
             <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end px-6 py-3 rounded-lg shadow-lg animate-pulse">
               <p className="text-white font-heading text-lg">🏢 Loja de Luxo 3D Clicada!</p>
+            </div>
+          )}
+
+          {/* QG Notification */}
+          {showQGNotification && (
+            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-subtitle-neon-blue to-player-info-glow-blue px-6 py-3 rounded-lg shadow-lg animate-pulse">
+              <p className="text-white font-heading text-lg">🏛️ Quartel General Clicado!</p>
             </div>
           )}
         </div>
