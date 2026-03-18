@@ -325,11 +325,11 @@ if (typeof document !== 'undefined') {
   const style = document.createElement('style');
   style.textContent = `
     body {
-      padding-top: auto;
-    }
-    main {
-      margin-top: 140px;
+      padding-top: 0;
     }
   `;
-  document.head.appendChild(style);
+  if (!document.head.querySelector('style[data-header-style]')) {
+    style.setAttribute('data-header-style', 'true');
+    document.head.appendChild(style);
+  }
 }
