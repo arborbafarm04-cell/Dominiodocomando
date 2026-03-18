@@ -445,14 +445,16 @@ export default function Multiplayer3DMap() {
     };
 
     // PLATFORM BASE - 4x4 tiles (16 tiles total) - RIGID SURFACE
-    const platformGeometry = new THREE.BoxGeometry(4, 0.4, 4);
+    // Platform is 4 units wide/deep (4 tiles × 1 unit per tile)
+    // Height is 0.5 units, positioned so bottom is at y=0 (ground level)
+    const platformGeometry = new THREE.BoxGeometry(4, 0.5, 4);
     const platformMaterial = new THREE.MeshStandardMaterial({ 
       color: 0x555555,
       roughness: 0.6,
       metalness: 0.3,
     });
     const platform = new THREE.Mesh(platformGeometry, platformMaterial);
-    platform.position.y = 0.2; // Sits on ground (y=0)
+    platform.position.y = 0.25; // Half of height (0.5/2) so bottom touches y=0
     platform.castShadow = true;
     platform.receiveShadow = true;
     group.add(platform);
@@ -461,7 +463,7 @@ export default function Multiplayer3DMap() {
     const baseGeometry = new THREE.BoxGeometry(2.5, 0.3, 2.5);
     const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
     const base = new THREE.Mesh(baseGeometry, baseMaterial);
-    base.position.y = 0.55; // 0.2 (platform center) + 0.2 (platform half-height) + 0.15 (base half-height)
+    base.position.y = 0.65; // 0.25 (platform center) + 0.25 (platform half-height) + 0.15 (base half-height)
     base.castShadow = true;
     base.receiveShadow = true;
     group.add(base);
@@ -474,7 +476,7 @@ export default function Multiplayer3DMap() {
       emissiveIntensity: 0.3,
     });
     const structure = new THREE.Mesh(structureGeometry, structureMaterial);
-    structure.position.y = 2.05; // 0.55 + 0.3 (base half-height) + 1.2 (structure half-height)
+    structure.position.y = 2.15; // 0.65 + 0.15 (base half-height) + 1.25 (structure half-height)
     structure.castShadow = true;
     structure.receiveShadow = true;
     group.add(structure);
@@ -483,7 +485,7 @@ export default function Multiplayer3DMap() {
     const roofGeometry = new THREE.ConeGeometry(1.8, 1.2, 4);
     const roofMaterial = new THREE.MeshStandardMaterial({ color: 0xd2691e });
     const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-    roof.position.y = 3.7; // 2.05 + 1.25 (structure half-height) + 0.6 (roof half-height)
+    roof.position.y = 3.85; // 2.15 + 1.25 (structure half-height) + 0.6 (roof half-height)
     roof.rotation.y = Math.PI / 4;
     roof.castShadow = true;
     roof.receiveShadow = true;
@@ -493,7 +495,7 @@ export default function Multiplayer3DMap() {
     const doorGeometry = new THREE.BoxGeometry(0.8, 1.5, 0.1);
     const doorMaterial = new THREE.MeshStandardMaterial({ color: 0x654321 });
     const door = new THREE.Mesh(doorGeometry, doorMaterial);
-    door.position.set(0, 2.05 + 0.7, 1.3); // Positioned on structure
+    door.position.set(0, 2.15 + 0.7, 1.3); // Positioned on structure
     door.castShadow = true;
     group.add(door);
 
@@ -502,15 +504,18 @@ export default function Multiplayer3DMap() {
       const windowGeometry = new THREE.BoxGeometry(0.4, 0.4, 0.05);
       const windowMaterial = new THREE.MeshStandardMaterial({ color: 0x87CEEB });
       const window = new THREE.Mesh(windowGeometry, windowMaterial);
-      window.position.set(-0.6 + i * 1.2, 2.05 + 1.2, 1.3); // Positioned on structure
+      window.position.set(-0.6 + i * 1.2, 2.15 + 1.2, 1.3); // Positioned on structure
       window.castShadow = true;
       group.add(window);
     }
 
+    // Position group at the center of the 4x4 tile area
+    // position.x and position.z are in tile coordinates
+    // Center of 4x4 area = position + 2 tiles offset (since 4/2 = 2)
     group.position.set(
-      position.x * TILE_SIZE,
+      (position.x + 2) * TILE_SIZE,
       0,
-      position.z * TILE_SIZE
+      (position.z + 2) * TILE_SIZE
     );
 
     return group;
