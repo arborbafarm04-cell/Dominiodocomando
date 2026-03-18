@@ -317,19 +317,20 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     
     // ===== CAMERA TARGET (Fixed at platform center) =====
     const platformCenterX = gridTotalWidth / 2;
-    const platformCenterY = 0; // Ground level
+    const platformCenterY = 0; // Ground level - FIXED, cannot change
     const platformCenterZ = gridTotalHeight / 2;
     controls.target.set(platformCenterX, platformCenterY, platformCenterZ);
     
-    // ===== VERTICAL ANGLE RESTRICTIONS =====
-    // Restrict vertical rotation to prevent upside-down view
-    // minPolarAngle: minimum angle from top (prevents looking down too much)
-    // maxPolarAngle: maximum angle from top (prevents looking up too much)
-    controls.minPolarAngle = Math.PI * 0.25; // ~45 degrees from top (slight downward tilt)
-    controls.maxPolarAngle = Math.PI * 0.75; // ~135 degrees from top (prevents upside-down)
+    // ===== VERTICAL AXIS LOCK (Y-axis completely blocked) =====
+    // Block all vertical movement by restricting polar angle to a very narrow range
+    // This prevents the camera from moving up or down while still allowing horizontal rotation
+    const fixedPolarAngle = Math.PI * 0.5; // 90 degrees - camera at same height as target
+    controls.minPolarAngle = fixedPolarAngle - 0.01; // ~89.4 degrees
+    controls.maxPolarAngle = fixedPolarAngle + 0.01; // ~90.6 degrees
     
     // ===== HORIZONTAL ROTATION (Y-axis only) =====
-    // azimuthAngleGap allows free rotation around Y-axis
+    // Allow free rotation around the vertical axis (azimuth)
+    // No restrictions on azimuth angle
     controls.autoRotateSpeed = 0;
     
     // ===== TOUCH SUPPORT =====
@@ -338,6 +339,20 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     
     controls.update();
     controlsRef.current = controls;
+    
+    // ===== CUSTOM CAMERA POSITION LOCK =====
+    // Store the initial camera Y position and enforce it every frame
+    const initialCameraY = camera.position.y;
+    const originalUpdate = controls.update.bind(controls);
+    
+    // Override the update method to lock Y-axis after each update
+    controls.update = function() {
+      originalUpdate();
+      // Lock camera Y position to prevent vertical movement
+      camera.position.y = initialCameraY;
+      // Ensure target Y remains at ground level
+      this.target.y = platformCenterY;
+    };
 
     // ===== MOUSE INTERACTION FOR TILE SELECTION =====
     const onMouseMove = (event: MouseEvent) => {
