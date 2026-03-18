@@ -184,17 +184,49 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       }
     );
 
-    // ===== ORBIT CONTROLS =====
+    // ===== ORBIT CONTROLS WITH CUSTOM CONFIGURATION =====
     const controls = new OrbitControls(camera, renderer.domElement);
+    
+    // ===== DAMPING CONFIGURATION (Smooth Movement) =====
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
+    controls.dampingFactor = 0.08; // Smooth deceleration
     controls.autoRotate = false;
     controls.autoRotateSpeed = 0;
+    
+    // ===== ZOOM CONFIGURATION =====
     controls.enableZoom = true;
-    controls.enablePan = true;
-    controls.minDistance = maxDim * 0.3;
-    controls.maxDistance = maxDim * 2;
-    controls.target.set(gridTotalWidth / 2, 0, gridTotalHeight / 2);
+    controls.zoomSpeed = 1.2; // Sensitivity for scroll/pinch
+    controls.minDistance = maxDim * 0.4; // Zoom in limit (close to platform)
+    controls.maxDistance = maxDim * 2.5; // Zoom out limit (overview)
+    
+    // ===== PAN CONFIGURATION =====
+    controls.enablePan = false; // Disable panning to keep focus on center
+    
+    // ===== ROTATION CONFIGURATION =====
+    controls.enableRotate = true;
+    controls.rotateSpeed = 0.8; // Rotation sensitivity
+    
+    // ===== CAMERA TARGET (Fixed at platform center) =====
+    const platformCenterX = gridTotalWidth / 2;
+    const platformCenterY = 0; // Ground level
+    const platformCenterZ = gridTotalHeight / 2;
+    controls.target.set(platformCenterX, platformCenterY, platformCenterZ);
+    
+    // ===== VERTICAL ANGLE RESTRICTIONS =====
+    // Restrict vertical rotation to prevent upside-down view
+    // minPolarAngle: minimum angle from top (prevents looking down too much)
+    // maxPolarAngle: maximum angle from top (prevents looking up too much)
+    controls.minPolarAngle = Math.PI * 0.25; // ~45 degrees from top (slight downward tilt)
+    controls.maxPolarAngle = Math.PI * 0.75; // ~135 degrees from top (prevents upside-down)
+    
+    // ===== HORIZONTAL ROTATION (Y-axis only) =====
+    // azimuthAngleGap allows free rotation around Y-axis
+    controls.autoRotateSpeed = 0;
+    
+    // ===== TOUCH SUPPORT =====
+    controls.touchDollyRotate = true; // Enable pinch-to-zoom on mobile
+    controls.touchDollySpeed = 8; // Pinch zoom sensitivity
+    
     controls.update();
     controlsRef.current = controls;
 
