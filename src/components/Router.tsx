@@ -38,7 +38,6 @@ const BriberySecretarioPage = lazy(() => import('@/components/pages/BriberySecre
 const BriberyGovernadorPage = lazy(() => import('@/components/pages/BriberyGovernadorPage'));
 const BriberyMinistroPage = lazy(() => import('@/components/pages/BriberyMinistroPage'));
 const BriberyPresidentePage = lazy(() => import('@/components/pages/BriberyPresidentePage'));
-const CityMapPage = lazy(() => import('@/components/pages/CityMapPage'));
 const StarMapPage = lazy(() => import('@/components/pages/StarMapPage'));
 
 // Layout component that includes ScrollToTop
@@ -281,13 +280,6 @@ const router = createBrowserRouter([
         element: <BriberyPresidentePage />,
         routeMetadata: {
           pageIdentifier: 'bribery-presidente',
-        },
-      },
-      {
-        path: "city-map",
-        element: <CityMapPage />,
-        routeMetadata: {
-          pageIdentifier: 'city-map',
         },
       },
       {
