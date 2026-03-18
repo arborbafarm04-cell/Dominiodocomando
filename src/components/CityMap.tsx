@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { useLuxuryShopStore } from '@/store/luxuryShopStore';
 
 interface Tile {
   id: string;
@@ -20,6 +21,7 @@ export default function CityMap() {
   const tilesGroupRef = useRef<THREE.Group | null>(null);
   const selectedTileMeshRef = useRef<THREE.Mesh | null>(null);
   const [selectedTile, setSelectedTile] = useState<Tile | null>(null);
+  const { openShop } = useLuxuryShopStore();
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -144,6 +146,11 @@ export default function CityMap() {
           y: tileData.y,
           occupied: tileData.occupied,
         });
+
+        // Open luxury shop if tile is occupied
+        if (tileData.occupied) {
+          openShop();
+        }
       }
     };
 
