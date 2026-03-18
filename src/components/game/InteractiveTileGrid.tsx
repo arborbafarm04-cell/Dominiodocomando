@@ -198,21 +198,27 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     // ===== LOAD LUXURY STORE 3D MODEL =====
     const gltfLoader = new GLTFLoader();
     
-    // Calculate random position for 4x4 luxury store (16 tiles)
+    // Calculate CENTERED position for 4x4 luxury store (16 tiles)
     const storeSize = 4; // 4x4 tiles
-    const maxGridX = gridWidth - storeSize;
-    const maxGridZ = gridHeight - storeSize;
-    const randomGridX = Math.floor(Math.random() * maxGridX);
-    const randomGridZ = Math.floor(Math.random() * maxGridZ);
     
-    // Convert grid coordinates to world coordinates
-    const storeWorldX = startX + randomGridX * tileSize + (storeSize * tileSize) / 2;
-    const storeWorldZ = startZ + randomGridZ * tileSize + (storeSize * tileSize) / 2;
+    // Center the store on the platform
+    // Platform spans from startX to startX + gridTotalWidth
+    // Center is at startX + gridTotalWidth / 2
+    const platformCenterWorldX = startX + gridTotalWidth / 2;
+    const platformCenterWorldZ = startZ + gridTotalHeight / 2;
+    
+    // For a 4x4 store, the center position should be at platform center
+    const storeWorldX = platformCenterWorldX;
+    const storeWorldZ = platformCenterWorldZ;
+    
+    // Calculate grid coordinates from world coordinates
+    const storeGridX = Math.round((storeWorldX - startX) / tileSize) - storeSize / 2;
+    const storeGridZ = Math.round((storeWorldZ - startZ) / tileSize) - storeSize / 2;
     
     luxuryStoreRef.current = {
       position: { x: storeWorldX, z: storeWorldZ },
-      gridX: randomGridX,
-      gridZ: randomGridZ,
+      gridX: storeGridX,
+      gridZ: storeGridZ,
       size: storeSize,
       model: null,
       isClickable: true,
@@ -225,13 +231,30 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
         
         // Create a group for the luxury store
         const storeGroup = new THREE.Group();
+        
+        // Position at center of platform
         storeGroup.position.set(storeWorldX, 0, storeWorldZ);
         
-        // Scale model to fit 4x4 tiles (approximately 4 units)
-        model.scale.set(2, 2, 2);
+        // Calculate bounding box to determine proper scale
+        const bbox = new THREE.Box3().setFromObject(model);
+        const size = bbox.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        
+        // Scale to fit exactly 4x4 tiles (4 units in world space)
+        const targetSize = storeSize * tileSize; // 4 units
+        const scale = targetSize / maxDim;
+        model.scale.set(scale, scale, scale);
+        
+        // Center the model within the group
+        bbox.setFromObject(model);
+        const center = bbox.getCenter(new THREE.Vector3());
+        model.position.sub(center);
         
         // Ensure model sits on the ground (y = 0)
-        model.position.y = 0;
+        // Get the bottom of the model
+        bbox.setFromObject(model);
+        const bottomY = bbox.min.y;
+        model.position.y -= bottomY; // Lift model so bottom is at y = 0
         
         // Apply shadow properties recursively to all children
         model.traverse((child) => {
