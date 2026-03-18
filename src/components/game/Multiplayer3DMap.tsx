@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { BaseCrudService } from '@/integrations';
 import { Players, Characters } from '@/entities';
 import { BRIBERY_ZONES, isInBriberyZone, isValidBarracoPosition } from '@/systems/briberyZoneSystem';
@@ -42,8 +43,8 @@ const GRID_HEIGHT = 25;
 const TILE_SIZE = 1;
 const TILES_PER_BARRACO = 4;
 
-// QG do Complexo - Central area (8x8 tiles in the center)
-const QG_SIZE = 8;
+// QG do Complexo - Central area (4x4 tiles in the center - 16 grid squares)
+const QG_SIZE = 4;
 const QG_START_X = (GRID_SIZE - QG_SIZE) / 2;
 const QG_START_Z = (GRID_HEIGHT - QG_SIZE) / 2;
 
@@ -59,6 +60,7 @@ export default function Multiplayer3DMap() {
   const playersRef = useRef<Map<string, any>>(new Map());
   const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
   const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
+  const qgModelRef = useRef<THREE.Group | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   
@@ -124,6 +126,9 @@ export default function Multiplayer3DMap() {
 
     // Create buildings (bribery zones and QG)
     createBuildings(scene);
+
+    // Load QG 3D model
+    loadQGModel(scene);
 
     // Handle mouse click for building selection
     const handleMouseClick = (event: MouseEvent) => {
@@ -375,20 +380,12 @@ export default function Multiplayer3DMap() {
 
   // Create buildings for bribery zones and QG
   const createBuildings = (scene: THREE.Scene) => {
-    // Create QG building
-    const qgBuilding = createBuildingMesh(
-      { x: QG_START_X + QG_SIZE / 2, z: QG_START_Z + QG_SIZE / 2 },
-      0x1a4d2e,
-      'QG do Complexo',
-      'qg'
-    );
-    scene.add(qgBuilding);
+    // QG building is now replaced by 3D model, but keep the building data for reference
     buildingsRef.current.set('qg', {
       id: 'qg',
       name: 'QG do Complexo',
       type: 'qg',
       position: { x: QG_START_X + QG_SIZE / 2, z: QG_START_Z + QG_SIZE / 2 },
-      mesh: qgBuilding,
       color: 0x1a4d2e,
     });
 
@@ -501,6 +498,64 @@ export default function Multiplayer3DMap() {
     );
 
     return group;
+  };
+
+  // Load QG 3D model
+  const loadQGModel = (scene: THREE.Scene) => {
+    const loader = new GLTFLoader();
+    const modelUrl = 'https://static.wixstatic.com/3d/50f4bf_938928189a844f56ac340bada0b551bd.glb';
+    
+    loader.load(
+      modelUrl,
+      (gltf) => {
+        const model = gltf.scene;
+        
+        // Position at QG center
+        const qgCenterX = QG_START_X + QG_SIZE / 2;
+        const qgCenterZ = QG_START_Z + QG_SIZE / 2;
+        
+        model.position.set(
+          qgCenterX * TILE_SIZE,
+          0,
+          qgCenterZ * TILE_SIZE
+        );
+        
+        // Calculate bounding box to determine scale
+        const bbox = new THREE.Box3().setFromObject(model);
+        const size = bbox.getSize(new THREE.Vector3());
+        
+        // Scale to fit within 4x4 grid (4 tiles = 4 units)
+        const maxDimension = Math.max(size.x, size.y, size.z);
+        const targetSize = QG_SIZE * TILE_SIZE * 0.9; // 90% of grid size
+        const scale = targetSize / maxDimension;
+        
+        model.scale.multiplyScalar(scale);
+        
+        // Center the model on the grid
+        const scaledBbox = new THREE.Box3().setFromObject(model);
+        const scaledSize = scaledBbox.getSize(new THREE.Vector3());
+        const scaledCenter = scaledBbox.getCenter(new THREE.Vector3());
+        
+        model.position.x -= (scaledCenter.x - model.position.x);
+        model.position.z -= (scaledCenter.z - model.position.z);
+        model.position.y = 0;
+        
+        // Enable shadows
+        model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        
+        scene.add(model);
+        qgModelRef.current = model;
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading QG model:', error);
+      }
+    );
   };
 
   // Generate random barraco position (4 contiguous tiles) - avoiding QG area and bribery zones
