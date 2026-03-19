@@ -69,10 +69,10 @@ export default function LuxuryShowroomPage() {
         if (itemsResult.items) {
           const sortedItems = itemsResult.items.sort((a, b) => (a.level || 0) - (b.level || 0));
           // Assign generated images to items
-          const itemsWithImages = sortedItems.map(item => ({
+          const itemsWithImages = sortedItems.map(item => (({
             ...item,
             imageUrl: ITEM_IMAGES[item.itemName || ''] || item.imageUrl
-          }));
+          })));
           setLuxuryItems(itemsWithImages);
           if (itemsWithImages.length > 0) {
             setSelectedItem(itemsWithImages[0]);
@@ -146,275 +146,301 @@ export default function LuxuryShowroomPage() {
             </p>
           </motion.div>
 
-          {/* Main Grid Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-            {/* Left Sidebar - Items List */}
+          {/* Main Content */}
+          {luxuryItems.length === 0 ? (
             <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="lg:col-span-1"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="w-full"
             >
-              <div className="sticky top-24">
-                <div className="relative">
-                  {/* Spotlight glow effect */}
-                  <div className="absolute -inset-1 bg-gradient-to-b from-amber-500/20 to-amber-600/10 rounded-xl blur-xl opacity-50" />
-                  
-                  <div className="relative bg-gradient-to-b from-slate-900/80 to-slate-950/80 border border-amber-500/40 rounded-xl p-6 backdrop-blur-md max-h-[700px] overflow-y-auto">
-                    <div className="flex items-center gap-2 mb-6">
-                      <ShoppingBag className="w-5 h-5 text-amber-400" />
-                      <h2 className="font-heading text-xl text-amber-100">Coleção</h2>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      {luxuryItems.map((item, index) => {
-                        const isLocked = playerLevel < (item.level || 0);
-                        const isPurchased = purchasedItems.has(item._id);
-                        const isSelected = selectedItem?._id === item._id;
-                        
-                        return (
-                          <motion.button
-                            key={item._id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            whileHover={{ scale: 1.02, x: 4 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => setSelectedItem(item)}
-                            className={`w-full text-left p-4 rounded-lg transition-all border group relative overflow-hidden ${
-                              isSelected
-                                ? 'bg-gradient-to-r from-amber-600/50 to-amber-500/30 border-amber-300 shadow-lg shadow-amber-500/40'
-                                : 'bg-slate-800/30 border-amber-500/20 hover:border-amber-500/50 hover:bg-slate-800/50'
-                            } ${isLocked ? 'opacity-50' : ''}`}
-                          >
-                            {isSelected && (
-                              <motion.div
-                                layoutId="selectedBg"
-                                className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent"
-                                initial={false}
-                              />
-                            )}
-                            
-                            <div className="relative flex items-center justify-between">
-                              <div className="flex-1">
-                                <p className="font-heading text-sm text-amber-300 font-bold">
-                                  Nível {item.level}
-                                </p>
-                                <p className="font-paragraph text-xs text-amber-200/70 truncate">
-                                  {item.itemName}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2 ml-2">
-                                {isLocked && <Lock className="w-4 h-4 text-red-400" />}
-                                {isPurchased && <Check className="w-4 h-4 text-green-400" />}
-                                {isSelected && <ChevronRight className="w-4 h-4 text-amber-400" />}
-                              </div>
-                            </div>
-                          </motion.button>
-                        );
-                      })}
-                    </div>
-                  </div>
+              <div className="relative">
+                <div className="absolute -inset-4 bg-gradient-to-b from-amber-500/20 to-transparent rounded-2xl blur-2xl opacity-30" />
+                <div className="relative bg-gradient-to-b from-slate-900/95 to-slate-950/95 border-2 border-amber-500/40 rounded-2xl px-8 py-20 text-center backdrop-blur-xl">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                    className="flex justify-center mb-6"
+                  >
+                    <Sparkles className="w-16 h-16 text-amber-400" />
+                  </motion.div>
+                  <h2 className="font-heading text-4xl text-amber-100 mb-4">Coleção Vazia</h2>
+                  <p className="font-paragraph text-lg text-amber-200/70 max-w-2xl mx-auto">
+                    A coleção de itens de luxo foi removida. Nenhum item está disponível no momento.
+                  </p>
                 </div>
               </div>
             </motion.div>
-
-            {/* Right Content - Item Showcase */}
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="lg:col-span-4"
-            >
-              {selectedItem ? (
-                <div className="relative">
-                  {/* Cinematographic spotlight background */}
-                  <div className="absolute -inset-4 bg-gradient-to-b from-amber-500/30 via-amber-600/10 to-transparent rounded-2xl blur-2xl opacity-40" />
-                  <div className="absolute top-0 right-0 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl opacity-30" />
-                  
-                  {/* Main Card */}
-                  <div className="relative bg-gradient-to-br from-slate-900/95 via-slate-950/95 to-black/95 border-2 border-amber-500/50 rounded-2xl overflow-hidden backdrop-blur-xl">
-                    {/* Top accent line */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+              {/* Left Sidebar - Items List */}
+              <motion.div
+                initial={{ opacity: 0, x: -40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="lg:col-span-1"
+              >
+                <div className="sticky top-24">
+                  <div className="relative">
+                    {/* Spotlight glow effect */}
+                    <div className="absolute -inset-1 bg-gradient-to-b from-amber-500/20 to-amber-600/10 rounded-xl blur-xl opacity-50" />
                     
-                    {/* Header Section */}
-                    <div className="relative bg-gradient-to-r from-amber-950/60 to-amber-900/40 px-8 py-8 border-b border-amber-600/30">
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="flex items-center gap-4"
-                      >
-                        <div className="p-3 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg">
-                          <Sparkles className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-paragraph text-sm text-amber-300/70">Apresentação Exclusiva</p>
-                          <h2 className="font-heading text-3xl text-amber-100">Item Premium</h2>
-                        </div>
-                      </motion.div>
-                    </div>
-
-                    {/* Content Section */}
-                    <div className="p-8 space-y-8">
-                      {/* Image Showcase with Spotlight Effect */}
-                      {selectedItem.imageUrl && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.3, duration: 0.6 }}
-                          className="relative group"
-                        >
-                          {/* Spotlight glow around image */}
-                          <div className="absolute -inset-4 bg-gradient-to-b from-amber-500/40 via-amber-600/20 to-transparent rounded-xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity" />
+                    <div className="relative bg-gradient-to-b from-slate-900/80 to-slate-950/80 border border-amber-500/40 rounded-xl p-6 backdrop-blur-md max-h-[700px] overflow-y-auto">
+                      <div className="flex items-center gap-2 mb-6">
+                        <ShoppingBag className="w-5 h-5 text-amber-400" />
+                        <h2 className="font-heading text-xl text-amber-100">Coleção</h2>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {luxuryItems.map((item, index) => {
+                          const isLocked = playerLevel < (item.level || 0);
+                          const isPurchased = purchasedItems.has(item._id);
+                          const isSelected = selectedItem?._id === item._id;
                           
-                          <div className="relative rounded-xl overflow-hidden border-2 border-amber-500/60 shadow-2xl">
-                            <Image
-                              src={selectedItem.imageUrl}
-                              alt={selectedItem.itemName || 'Luxury Item'}
-                              className="w-full h-96 object-cover"
-                              width={700}
-                            />
-                            {/* Overlay gradient for cinematic effect */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                          </div>
-                        </motion.div>
-                      )}
-
-                      {/* Title and Description */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                        className="space-y-3"
-                      >
-                        <h3 className="font-heading text-4xl font-bold bg-gradient-to-r from-amber-200 to-amber-100 bg-clip-text text-transparent">
-                          {selectedItem.itemName}
-                        </h3>
-                        {selectedItem.description && (
-                          <p className="font-paragraph text-base text-amber-200/80 leading-relaxed">
-                            {selectedItem.description}
-                          </p>
-                        )}
-                      </motion.div>
-
-                      {/* Stats Section */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
-                        className="grid grid-cols-2 gap-4 p-6 bg-gradient-to-br from-slate-800/50 to-slate-900/30 border border-amber-500/20 rounded-lg"
-                      >
-                        <div className="space-y-2">
-                          <p className="font-paragraph text-xs text-amber-200/60 uppercase tracking-wider">Preço</p>
-                          <p className="font-heading text-2xl text-amber-300 font-bold">
-                            R$ {(selectedItem.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </p>
-                        </div>
-                        <div className="space-y-2">
-                          <p className="font-paragraph text-xs text-amber-200/60 uppercase tracking-wider">Nível Mínimo</p>
-                          <p className={`font-heading text-2xl font-bold ${meetsLevel ? 'text-green-400' : 'text-red-400'}`}>
-                            {selectedItem.level}
-                          </p>
-                        </div>
-                        <div className="space-y-2">
-                          <p className="font-paragraph text-xs text-amber-200/60 uppercase tracking-wider">Seu Nível</p>
-                          <p className="font-heading text-2xl text-cyan-400 font-bold">{playerLevel}</p>
-                        </div>
-                        <div className="space-y-2">
-                          <p className="font-paragraph text-xs text-amber-200/60 uppercase tracking-wider">Dinheiro Sujo</p>
-                          <p className={`font-heading text-2xl font-bold ${canAfford ? 'text-green-400' : 'text-red-400'}`}>
-                            R$ {dirtMoney.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </p>
-                        </div>
-                      </motion.div>
-
-                      {/* Purchase Button */}
-                      <motion.button
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handlePurchase}
-                        disabled={!canAfford || !meetsLevel || alreadyPurchased}
-                        className={`w-full py-5 rounded-lg font-heading text-lg font-bold transition-all flex items-center justify-center gap-3 relative overflow-hidden group ${
-                          alreadyPurchased
-                            ? 'bg-gradient-to-r from-green-600/50 to-green-700/50 text-green-200 cursor-not-allowed border border-green-500/30'
-                            : canAfford && meetsLevel
-                              ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white border border-amber-400/50 cursor-pointer shadow-lg shadow-amber-500/50'
-                              : 'bg-gradient-to-r from-slate-600 to-slate-700 text-slate-400 cursor-not-allowed border border-slate-500/30'
-                        }`}
-                      >
-                        {!alreadyPurchased && !canAfford && !meetsLevel && (
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:translate-x-full transition-transform duration-500" />
-                        )}
-                        <div className="relative flex items-center gap-3">
-                          {alreadyPurchased ? (
-                            <>
-                              <Check className="w-6 h-6" />
-                              <span>Comprado com Sucesso</span>
-                            </>
-                          ) : canAfford && meetsLevel ? (
-                            <>
-                              <ShoppingBag className="w-6 h-6" />
-                              <span>Comprar Agora</span>
-                            </>
-                          ) : (
-                            <span>Indisponível</span>
-                          )}
-                        </div>
-                      </motion.button>
-
-                      {/* Error Messages */}
-                      {!canAfford && (
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="font-paragraph text-sm text-red-400 text-center bg-red-500/10 border border-red-500/30 rounded-lg py-3"
-                        >
-                          ⚠️ Dinheiro sujo insuficiente para esta compra
-                        </motion.p>
-                      )}
-                      {!meetsLevel && (
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="font-paragraph text-sm text-red-400 text-center bg-red-500/10 border border-red-500/30 rounded-lg py-3"
-                        >
-                          ⚠️ Nível insuficiente para desbloquear este item
-                        </motion.p>
-                      )}
+                          return (
+                            <motion.button
+                              key={item._id}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              whileHover={{ scale: 1.02, x: 4 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => setSelectedItem(item)}
+                              className={`w-full text-left p-4 rounded-lg transition-all border group relative overflow-hidden ${
+                                isSelected
+                                  ? 'bg-gradient-to-r from-amber-600/50 to-amber-500/30 border-amber-300 shadow-lg shadow-amber-500/40'
+                                  : 'bg-slate-800/30 border-amber-500/20 hover:border-amber-500/50 hover:bg-slate-800/50'
+                              } ${isLocked ? 'opacity-50' : ''}`}
+                            >
+                              {isSelected && (
+                                <motion.div
+                                  layoutId="selectedBg"
+                                  className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent"
+                                  initial={false}
+                                />
+                              )}
+                              
+                              <div className="relative flex items-center justify-between">
+                                <div className="flex-1">
+                                  <p className="font-heading text-sm text-amber-300 font-bold">
+                                    Nível {item.level}
+                                  </p>
+                                  <p className="font-paragraph text-xs text-amber-200/70 truncate">
+                                    {item.itemName}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-2 ml-2">
+                                  {isLocked && <Lock className="w-4 h-4 text-red-400" />}
+                                  {isPurchased && <Check className="w-4 h-4 text-green-400" />}
+                                  {isSelected && <ChevronRight className="w-4 h-4 text-amber-400" />}
+                                </div>
+                              </div>
+                            </motion.button>
+                          );
+                        })}
+                      </div>
                     </div>
-
-                    {/* Bottom accent line */}
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
                   </div>
                 </div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="relative"
-                >
-                  <div className="absolute -inset-4 bg-gradient-to-b from-amber-500/20 to-transparent rounded-2xl blur-2xl opacity-30" />
-                  <div className="relative bg-gradient-to-b from-slate-900/95 to-slate-950/95 border-2 border-amber-500/40 rounded-2xl px-8 py-16 text-center backdrop-blur-xl">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                      className="flex justify-center mb-6"
-                    >
-                      <Sparkles className="w-12 h-12 text-amber-400" />
-                    </motion.div>
-                    <h3 className="font-heading text-3xl text-amber-100 mb-4">Carregando Coleção...</h3>
-                    <p className="font-paragraph text-amber-200/70">
-                      Preparando a apresentação cinematográfica dos itens premium
-                    </p>
+              </motion.div>
+
+              {/* Right Content - Item Showcase */}
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="lg:col-span-4"
+              >
+                {selectedItem ? (
+                  <div className="relative">
+                    {/* Cinematographic spotlight background */}
+                    <div className="absolute -inset-4 bg-gradient-to-b from-amber-500/30 via-amber-600/10 to-transparent rounded-2xl blur-2xl opacity-40" />
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl opacity-30" />
+                    
+                    {/* Main Card */}
+                    <div className="relative bg-gradient-to-br from-slate-900/95 via-slate-950/95 to-black/95 border-2 border-amber-500/50 rounded-2xl overflow-hidden backdrop-blur-xl">
+                      {/* Top accent line */}
+                      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+                      
+                      {/* Header Section */}
+                      <div className="relative bg-gradient-to-r from-amber-950/60 to-amber-900/40 px-8 py-8 border-b border-amber-600/30">
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                          className="flex items-center gap-4"
+                        >
+                          <div className="p-3 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg">
+                            <Sparkles className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-paragraph text-sm text-amber-300/70">Apresentação Exclusiva</p>
+                            <h2 className="font-heading text-3xl text-amber-100">Item Premium</h2>
+                          </div>
+                        </motion.div>
+                      </div>
+
+                      {/* Content Section */}
+                      <div className="p-8 space-y-8">
+                        {/* Image Showcase with Spotlight Effect */}
+                        {selectedItem.imageUrl && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.3, duration: 0.6 }}
+                            className="relative group"
+                          >
+                            {/* Spotlight glow around image */}
+                            <div className="absolute -inset-4 bg-gradient-to-b from-amber-500/40 via-amber-600/20 to-transparent rounded-xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity" />
+                            
+                            <div className="relative rounded-xl overflow-hidden border-2 border-amber-500/60 shadow-2xl">
+                              <Image
+                                src={selectedItem.imageUrl}
+                                alt={selectedItem.itemName || 'Luxury Item'}
+                                className="w-full h-96 object-cover"
+                                width={700}
+                              />
+                              {/* Overlay gradient for cinematic effect */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                            </div>
+                          </motion.div>
+                        )}
+
+                        {/* Title and Description */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                          className="space-y-3"
+                        >
+                          <h3 className="font-heading text-4xl font-bold bg-gradient-to-r from-amber-200 to-amber-100 bg-clip-text text-transparent">
+                            {selectedItem.itemName}
+                          </h3>
+                          {selectedItem.description && (
+                            <p className="font-paragraph text-base text-amber-200/80 leading-relaxed">
+                              {selectedItem.description}
+                            </p>
+                          )}
+                        </motion.div>
+
+                        {/* Stats Section */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.5 }}
+                          className="grid grid-cols-2 gap-4 p-6 bg-gradient-to-br from-slate-800/50 to-slate-900/30 border border-amber-500/20 rounded-lg"
+                        >
+                          <div className="space-y-2">
+                            <p className="font-paragraph text-xs text-amber-200/60 uppercase tracking-wider">Preço</p>
+                            <p className="font-heading text-2xl text-amber-300 font-bold">
+                              R$ {(selectedItem.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </p>
+                          </div>
+                          <div className="space-y-2">
+                            <p className="font-paragraph text-xs text-amber-200/60 uppercase tracking-wider">Nível Mínimo</p>
+                            <p className={`font-heading text-2xl font-bold ${meetsLevel ? 'text-green-400' : 'text-red-400'}`}>
+                              {selectedItem.level}
+                            </p>
+                          </div>
+                          <div className="space-y-2">
+                            <p className="font-paragraph text-xs text-amber-200/60 uppercase tracking-wider">Seu Nível</p>
+                            <p className="font-heading text-2xl text-cyan-400 font-bold">{playerLevel}</p>
+                          </div>
+                          <div className="space-y-2">
+                            <p className="font-paragraph text-xs text-amber-200/60 uppercase tracking-wider">Dinheiro Sujo</p>
+                            <p className={`font-heading text-2xl font-bold ${canAfford ? 'text-green-400' : 'text-red-400'}`}>
+                              R$ {dirtMoney.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </p>
+                          </div>
+                        </motion.div>
+
+                        {/* Purchase Button */}
+                        <motion.button
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.6 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handlePurchase}
+                          disabled={!canAfford || !meetsLevel || alreadyPurchased}
+                          className={`w-full py-5 rounded-lg font-heading text-lg font-bold transition-all flex items-center justify-center gap-3 relative overflow-hidden group ${
+                            alreadyPurchased
+                              ? 'bg-gradient-to-r from-green-600/50 to-green-700/50 text-green-200 cursor-not-allowed border border-green-500/30'
+                              : canAfford && meetsLevel
+                                ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white border border-amber-400/50 cursor-pointer shadow-lg shadow-amber-500/50'
+                                : 'bg-gradient-to-r from-slate-600 to-slate-700 text-slate-400 cursor-not-allowed border border-slate-500/30'
+                          }`}
+                        >
+                          {!alreadyPurchased && !canAfford && !meetsLevel && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:translate-x-full transition-transform duration-500" />
+                          )}
+                          <div className="relative flex items-center gap-3">
+                            {alreadyPurchased ? (
+                              <>
+                                <Check className="w-6 h-6" />
+                                <span>Comprado com Sucesso</span>
+                              </>
+                            ) : canAfford && meetsLevel ? (
+                              <>
+                                <ShoppingBag className="w-6 h-6" />
+                                <span>Comprar Agora</span>
+                              </>
+                            ) : (
+                              <span>Indisponível</span>
+                            )}
+                          </div>
+                        </motion.button>
+
+                        {/* Error Messages */}
+                        {!canAfford && (
+                          <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="font-paragraph text-sm text-red-400 text-center bg-red-500/10 border border-red-500/30 rounded-lg py-3"
+                          >
+                            ⚠️ Dinheiro sujo insuficiente para esta compra
+                          </motion.p>
+                        )}
+                        {!meetsLevel && (
+                          <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="font-paragraph text-sm text-red-400 text-center bg-red-500/10 border border-red-500/30 rounded-lg py-3"
+                          >
+                            ⚠️ Nível insuficiente para desbloquear este item
+                          </motion.p>
+                        )}
+                      </div>
+
+                      {/* Bottom accent line */}
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+                    </div>
                   </div>
-                </motion.div>
-              )}
-            </motion.div>
-          </div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="relative"
+                  >
+                    <div className="absolute -inset-4 bg-gradient-to-b from-amber-500/20 to-transparent rounded-2xl blur-2xl opacity-30" />
+                    <div className="relative bg-gradient-to-b from-slate-900/95 to-slate-950/95 border-2 border-amber-500/40 rounded-2xl px-8 py-16 text-center backdrop-blur-xl">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                        className="flex justify-center mb-6"
+                      >
+                        <Sparkles className="w-12 h-12 text-amber-400" />
+                      </motion.div>
+                      <h3 className="font-heading text-3xl text-amber-100 mb-4">Carregando Coleção...</h3>
+                      <p className="font-paragraph text-amber-200/70">
+                        Preparando a apresentação cinematográfica dos itens premium
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            </div>
+          )}
         </div>
 
         <Footer />
