@@ -469,3 +469,76 @@ const luxuryItems = {
                                                                                                                                                                                                                                                   };
 
 }
+const luxuryItems = {
+    61: [
+        { name: "Colar Eternal Crown", price: 36537.64 },
+            { name: "Anel Eternal Crown", price: 36537.64 },
+                { name: "Pulseira Eternal Crown", price: 36537.64 },
+                    { name: "Relógio Eternal Crown", price: 36537.64 },
+                        { name: "Bolsa Eternal Crown", price: 36537.64 },
+                          ],
+                            62: [
+                                { name: "Colar Divine Prestige", price: 40191.40 },
+                                    { name: "Anel Divine Prestige", price: 40191.40 },
+                                        { name: "Pulseira Divine Prestige", price: 40191.40 },
+                                            { name: "Relógio Divine Prestige", price: 40191.40 },
+                                                { name: "Bolsa Divine Prestige", price: 40191.40 },
+                                                  ],
+                                                    63: [
+                                                        { name: "Colar Celestial Elite", price: 44210.54 },
+                                                            { name: "Anel Celestial Elite", price: 44210.54 },
+                                                                { name: "Pulseira Celestial Elite", price: 44210.54 },
+                                                                    { name: "Relógio Celestial Elite", price: 44210.54 },
+                                                                        { name: "Bolsa Celestial Elite", price: 44210.54 },
+                                                                          ],
+                                                                            64: [
+                                                                                { name: "Colar Infinite Aura", price: 48631.59 },
+                                                                                    { name: "Anel Infinite Aura", price: 48631.59 },
+                                                                                        { name: "Pulseira Infinite Aura", price: 48631.59 },
+                                                                                            { name: "Relógio Infinite Aura", price: 48631.59 },
+                                                                                                { name: "Bolsa Infinite Aura", price: 48631.59 },
+                                                                                                  ],
+                                                                                                    65: [
+                                                                                                        { name: "Colar Obsidian Legend", price: 53494.75 },
+                                                                                                            { name: "Anel Obsidian Legend", price: 53494.75 },
+                                                                                                                { name: "Pulseira Obsidian Legend", price: 53494.75 },
+                                                                                                                    { name: "Relógio Obsidian Legend", price: 53494.75 },
+                                                                                                                        { name: "Bolsa Obsidian Legend", price: 53494.75 },
+                                                                                                                          ],
+                                                                                                                            66: [
+                                                                                                                                { name: "Colar Diamond Eternity", price: 58844.23 },
+                                                                                                                                    { name: "Anel Diamond Eternity", price: 58844.23 },
+                                                                                                                                        { name: "Pulseira Diamond Eternity", price: 58844.23 },
+                                                                                                                                            { name: "Relógio Diamond Eternity", price: 58844.23 },
+                                                                                                                                                { name: "Bolsa Diamond Eternity", price: 58844.23 },
+                                                                                                                                                  ],
+                                                                                                                                                    67: [
+                                                                                                                                                        { name: "Colar Mythic Sovereign", price: 64728.65 },
+                                                                                                                                                            { name: "Anel Mythic Sovereign", price: 64728.65 },
+                                                                                                                                                                { name: "Pulseira Mythic Sovereign", price: 64728.65 },
+                                                                                                                                                                    { name: "Relógio Mythic Sovereign", price: 64728.65 },
+                                                                                                                                                                        { name: "Bolsa Mythic Sovereign", price: 64728.65 },
+                                                                                                                                                                          ],
+                                                                                                                                                                            68: [
+                                                                                                                                                                                { name: "Colar Infinite Majesty", price: 71201.52 },
+                                                                                                                                                                                    { name: "Anel Infinite Majesty", price: 71201.52 },
+                                                                                                                                                                                        { name: "Pulseira Infinite Majesty", price: 71201.52 },
+                                                                                                                                                                                            { name: "Relógio Infinite Majesty", price: 71201.52 },
+                                                                                                                                                                                                { name: "Bolsa Infinite Majesty", price: 71201.52 },
+                                                                                                                                                                                                  ],
+                                                                                                                                                                                                    69: [
+                                                                                                                                                                                                        { name: "Colar Cosmic Dynasty", price: 78321.67 },
+                                                                                                                                                                                                            { name: "Anel Cosmic Dynasty", price: 78321.67 },
+                                                                                                                                                                                                                { name: "Pulseira Cosmic Dynasty", price: 78321.67 },
+                                                                                                                                                                                                                    { name: "Relógio Cosmic Dynasty", price: 78321.67 },
+                                                                                                                                                                                                                        { name: "Bolsa Cosmic Dynasty", price: 78321.67 },
+                                                                                                                                                                                                                          ],
+                                                                                                                                                                                                                            70: [
+                                                                                                                                                                                                                                { name: "Colar Apex Infinity", price: 86153.84 },
+                                                                                                                                                                                                                                    { name: "Anel Apex Infinity", price: 86153.84 },
+                                                                                                                                                                                                                                        { name: "Pulseira Apex Infinity", price: 86153.84 },
+                                                                                                                                                                                                                                            { name: "Relógio Apex Infinity", price: 86153.84 },
+                                                                                                                                                                                                                                                { name: "Bolsa Apex Infinity", price: 86153.84 },
+                                                                                                                                                                                                                                                  ],
+                                                                                                                                                                                                                                                  };
+}
