@@ -21,6 +21,29 @@ export interface Background {
 
 
 /**
+ * Collection ID: itensdeluxo
+ * Interface for ItensdeLuxo
+ */
+export interface ItensdeLuxo {
+  _id: string;
+  _createdDate?: Date;
+  _updatedDate?: Date;
+  /** @wixFieldType number */
+  level?: number;
+  /** @wixFieldType text */
+  itemName?: string;
+  /** @wixFieldType number */
+  price?: number;
+  /** @wixFieldType text */
+  description?: string;
+  /** @wixFieldType image - Contains image URL, render with <Image> component, NOT as text */
+  imageUrl?: string;
+  /** @wixFieldType text */
+  category?: string;
+}
+
+
+/**
  * Collection ID: personagens
  * Interface for Characters
  */
