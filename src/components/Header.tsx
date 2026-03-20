@@ -131,9 +131,7 @@ export default function Header() {
             DOMÍNIO
           </Link>
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/projects" className="text-foreground/70 hover:text-secondary transition-colors duration-300 font-paragraph text-xs md:text-sm uppercase tracking-wider whitespace-nowrap">
-              Projetos
-            </Link>
+
             <Link to="/game" className="text-foreground/70 hover:text-secondary transition-colors duration-300 font-paragraph text-xs md:text-sm uppercase tracking-wider whitespace-nowrap">
               Jogar
             </Link>
