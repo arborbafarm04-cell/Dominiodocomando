@@ -149,4 +149,4 @@ export const useLuxuryShopStore = create<LuxuryShopState>()(
   )
 );
 
-export { luxuryItems };
+export {  };

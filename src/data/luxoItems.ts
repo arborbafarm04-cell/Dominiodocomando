@@ -22,12 +22,30 @@ CONCEITO:
 // ==========================================
 
 const itemTypes = [
-  "Anel",
-  "Pulseira",
-  "Corrente",
-  "Relógio",
-  "Bolsa",
-  "Óculos",
+  {
+    name: "Anel",
+    image: "https://static.wixstatic.com/media/50f4bf_b4ba3afc05854898ba783d0de389365c~mv2.png"
+  },
+  {
+    name: "Pulseira",
+    image: "https://static.wixstatic.com/media/50f4bf_80f3ea6ada6a4239b5fde6e862c0f4b0~mv2.png"
+  },
+  {
+    name: "Corrente",
+    image: "https://static.wixstatic.com/media/50f4bf_24463c72375a4151be5f718bd0169cab~mv2.png"
+  },
+  {
+    name: "Relógio",
+    image: "https://static.wixstatic.com/media/50f4bf_3f8630e8f4a845d581213e7fc906ba09~mv2.png"
+  },
+  {
+    name: "Bolsa",
+    image: "https://static.wixstatic.com/media/50f4bf_0f2cb270b40649d4a24e14b5aa4788bc~mv2.png"
+  },
+  {
+    name: "Óculos",
+    image: "https://static.wixstatic.com/media/50f4bf_226ad016652549d4a32bf5d065c22547~mv2.png"
+  },
 ];
 
 // ==========================================
@@ -90,9 +108,10 @@ export function generateLuxuryItems(level: number) {
 
   const collection = collectionNames[level] || `Nível ${level}`;
 
-  return itemTypes.map((type) => ({
-    name: `${type} ${collection}`,
+  return itemTypes.map((item) => ({
+    name: `${item.name} ${collection}`,
     price: Number(price.toFixed(2)),
+    image: item.image,
   }));
 }
 

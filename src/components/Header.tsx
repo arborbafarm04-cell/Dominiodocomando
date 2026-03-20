@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, Crown, Vault, Zap, Menu, X, Dice5 } from 'lucide-react';
+import { Vault, Zap, Dice5, Menu, X } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
 import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
@@ -9,325 +9,157 @@ import { useSpinVault } from '@/hooks/useSpinVault';
 import { Link } from 'react-router-dom';
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
+    DropdownMenuTrigger,
+      DropdownMenuContent,
+        DropdownMenuItem,
+        } from '@/components/ui/dropdown-menu';
 
-export default function Header() {
-  const { dirtMoney } = useGameStore();
-  const { dirtyMoney } = useDirtyMoneyStore();
-  const { cleanMoney } = useCleanMoneyStore();
-  const { playerName, level, setPlayerName, setLevel } = usePlayerStore();
-  const { spins, timeUntilNextGain, formatTime } = useSpinVault();
-  const [customPlayerName, setCustomPlayerName] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('https://static.wixstatic.com/media/50f4bf_a888df3d639f415b853110e459edba8c~mv2.png?originWidth=128&originHeight=128');
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [isEditingCustomName, setIsEditingCustomName] = useState(false);
-  const [tempName, setTempName] = useState('');
-  const [tempCustomName, setTempCustomName] = useState('');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+        export default function Header() {
+          const { dirtyMoney } = useDirtyMoneyStore();
+            const { cleanMoney } = useCleanMoneyStore();
+              const { playerName, level, setPlayerName } = usePlayerStore();
+                const { spins, timeUntilNextGain, formatTime } = useSpinVault();
 
-  // Load saved data from localStorage
-  useEffect(() => {
-    const savedName = localStorage.getItem('playerName');
-    const savedCustomName = localStorage.getItem('customPlayerName');
-    const savedAvatar = localStorage.getItem('playerAvatar');
-    
-    if (savedName) {
-      setPlayerName(savedName);
-    }
-    
-    if (savedCustomName) {
-      setCustomPlayerName(savedCustomName);
-    }
-    
-    if (savedAvatar) {
-      setAvatarUrl(savedAvatar);
-    }
-  }, []);
+                  const [customPlayerName, setCustomPlayerName] = useState('');
+                    const [avatarUrl, setAvatarUrl] = useState(
+                        'https://static.wixstatic.com/media/50f4bf_a888df3d639f415b853110e459edba8c~mv2.png?originWidth=128&originHeight=128'
+                          );
 
-  // Handle avatar click to open file picker
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
+                            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+                              const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle avatar image selection
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imageUrl = reader.result as string;
-        setAvatarUrl(imageUrl);
-        localStorage.setItem('playerAvatar', imageUrl);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+                                useEffect(() => {
+                                    const savedName = localStorage.getItem('playerName');
+                                        const savedCustomName = localStorage.getItem('customPlayerName');
+                                            const savedAvatar = localStorage.getItem('playerAvatar');
 
-  // Handle name edit
-  const handleNameClick = () => {
-    setIsEditingName(true);
-    setTempName(playerName);
-  };
+                                                if (savedName) setPlayerName(savedName);
+                                                    if (savedCustomName) setCustomPlayerName(savedCustomName);
+                                                        if (savedAvatar) setAvatarUrl(savedAvatar);
+                                                          }, []);
 
-  const handleNameSave = () => {
-    if (tempName.trim()) {
-      const newName = tempName.trim().toUpperCase();
-      setPlayerName(newName);
-      localStorage.setItem('playerName', newName);
-    }
-    setIsEditingName(false);
-  };
+                                                            const handleAvatarClick = () => fileInputRef.current?.click();
 
-  const handleNameKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleNameSave();
-    } else if (e.key === 'Escape') {
-      setIsEditingName(false);
-    }
-  };
+                                                              const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                  const file = e.target.files?.[0];
+                                                                      if (!file) return;
 
-  // Handle custom name edit
-  const handleCustomNameClick = () => {
-    setIsEditingCustomName(true);
-    setTempCustomName(customPlayerName);
-  };
+                                                                          const reader = new FileReader();
+                                                                              reader.onloadend = () => {
+                                                                                    const url = reader.result as string;
+                                                                                          setAvatarUrl(url);
+                                                                                                localStorage.setItem('playerAvatar', url);
+                                                                                                    };
+                                                                                                        reader.readAsDataURL(file);
+                                                                                                          };
 
-  const handleCustomNameSave = () => {
-    if (tempCustomName.trim()) {
-      setCustomPlayerName(tempCustomName.trim());
-      localStorage.setItem('customPlayerName', tempCustomName.trim());
-    }
-    setIsEditingCustomName(false);
-  };
+                                                                                                            return (
+                                                                                                                <header
+                                                                                                                      className="fixed top-0 left-0 right-0 z-50 px-4 py-3"
+                                                                                                                            style={{
+                                                                                                                                    background: '#0a0a0a',
+                                                                                                                                            backgroundImage:
+                                                                                                                                                      'linear-gradient(rgba(0,0,0,0.9), rgba(10,10,10,0.95)), url("https://www.transparenttextures.com/patterns/concrete-wall.png")',
+                                                                                                                                                              borderBottom: '2px solid #d4af37',
+                                                                                                                                                                      boxShadow: '0 0 25px rgba(212,175,55,0.4)',
+                                                                                                                                                                            }}
+                                                                                                                                                                                >
+                                                                                                                                                                                      <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
 
-  const handleCustomNameKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleCustomNameSave();
-    } else if (e.key === 'Escape') {
-      setIsEditingCustomName(false);
-    }
-  };
+                                                                                                                                                                                              {/* LOGO + MENU */}
+                                                                                                                                                                                                      <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
+                                                                                                                                                                                                                <Link
+                                                                                                                                                                                                                            to="/"
+                                                                                                                                                                                                                                        className="text-2xl font-bold uppercase tracking-widest"
+                                                                                                                                                                                                                                                    style={{
+                                                                                                                                                                                                                                                                  color: '#d4af37',
+                                                                                                                                                                                                                                                                                textShadow: '0 0 10px rgba(255,0,0,0.5)',
+                                                                                                                                                                                                                                                                                            }}
+                                                                                                                                                                                                                                                                                                      >
+                                                                                                                                                                                                                                                                                                                  DOMÍNIO DO COMANDO
+                                                                                                                                                                                                                                                                                                                            </Link>
 
-  return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-auto py-3" style={{
-      background: 'rgba(15,20,30,0.85)',
-      backdropFilter: 'blur(10px)',
-      borderBottom: '2px solid #00eaff',
-      boxShadow: '0 0 20px rgba(0,234,255,0.3)'
-    }}>
-      {/* HUD Lines */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[20px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-hud-line-blue/20 to-transparent" />
-        <div className="absolute bottom-[20px] left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-hud-line-blue/20 to-transparent" />
-      </div>
-      <div className="max-w-[120rem] mx-auto px-4 md:px-6 flex items-center justify-between flex-wrap gap-3">
-        {/* Left Area - Logo & Navigation */}
-        <div className="flex items-center gap-4 md:gap-8 order-1 md:order-1">
-          <Link to="/" className="text-white hover:text-secondary transition-colors duration-300 font-heading text-base md:text-lg font-bold uppercase tracking-wider whitespace-nowrap">
-            DOMÍNIO
-          </Link>
-          <nav className="hidden md:flex items-center gap-6">
+                                                                                                                                                                                                                                                                                                                                      {/* MOBILE MENU */}
+                                                                                                                                                                                                                                                                                                                                                <div className="md:hidden">
+                                                                                                                                                                                                                                                                                                                                                            <DropdownMenu open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                                                                                                                                                                                                                                                                                                                                                                          <DropdownMenuTrigger asChild>
+                                                                                                                                                                                                                                                                                                                                                                                          <button className="text-white">
+                                                                                                                                                                                                                                                                                                                                                                                                            {isMobileMenuOpen ? <X /> : <Menu />}
+                                                                                                                                                                                                                                                                                                                                                                                                                            </button>
+                                                                                                                                                                                                                                                                                                                                                                                                                                          </DropdownMenuTrigger>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        <DropdownMenuContent>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <DropdownMenuItem asChild>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <Link to="/game">Jogar</Link>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          </DropdownMenuItem>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </DropdownMenuContent>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </DropdownMenu>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      </div>
 
-            <Link to="/game" className="text-foreground/70 hover:text-secondary transition-colors duration-300 font-paragraph text-xs md:text-sm uppercase tracking-wider whitespace-nowrap">
-              Jogar
-            </Link>
-          </nav>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              {/* CENTER (AVATAR + PLAYER) */}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <div className="flex flex-col items-center gap-1">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <button onClick={handleAvatarClick}>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          className="w-[70px] h-[70px] rounded-full overflow-hidden border-4 border-yellow-500"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        style={{
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        boxShadow: '0 0 25px gold, inset 0 0 10px rgba(0,0,0,0.8)',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <Image src={avatarUrl} className="w-full h-full object-cover" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      </button>
 
-          {/* Mobile Menu */}
-          <div className="md:hidden">
-            <DropdownMenu open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="text-foreground hover:text-secondary transition-colors duration-300"
-                  aria-label="Menu"
-                >
-                  {isMobileMenuOpen ? (
-                    <X className="w-5 h-5" />
-                  ) : (
-                    <Menu className="w-5 h-5" />
-                  )}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                <DropdownMenuItem asChild onClick={() => setIsMobileMenuOpen(false)}>
-                  <Link to="/projects" className="cursor-pointer">
-                    Projetos
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild onClick={() => setIsMobileMenuOpen(false)}>
-                  <Link to="/game" className="cursor-pointer">
-                    Jogar
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <div
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            className="text-lg font-bold uppercase"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        style={{ color: '#d4af37', textShadow: '0 0 8px black' }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              {playerName}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </div>
 
-        {/* Center Area - Avatar */}
-        <div className="flex items-center justify-center order-3 md:order-2 w-full md:w-auto">
-          <button
-            onClick={handleAvatarClick}
-            className="relative group cursor-pointer transition-transform duration-300 hover:scale-110"
-            aria-label="Alterar avatar"
-          >
-            <div className="w-[50px] h-[50px] md:w-[60px] md:h-[60px] rounded-full overflow-hidden border-[2px] md:border-[3px] border-subtitle-neon-blue relative" style={{
-              boxShadow: '0 0 20px rgba(0,234,255,0.8), inset 0 0 10px rgba(0,234,255,0.3)'
-            }}>
-              <Image
-                src={avatarUrl}
-                alt="Avatar do jogador"
-                width={60}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-subtitle-neon-blue/0 group-hover:bg-subtitle-neon-blue/20 transition-colors duration-300 flex items-center justify-center">
-                <span className="text-white text-xs font-paragraph opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  TROCAR
-                </span>
-              </div>
-            </div>
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleAvatarChange}
-            className="hidden"
-            aria-label="Selecionar imagem do avatar"
-          />
-        </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <div
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              className="text-xs px-3 py-1 bg-red-600 uppercase font-bold"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          style={{ clipPath: 'polygon(10% 0, 100% 0, 90% 100%, 0% 100%)' }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                COMANDANTE DE ELITE
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  </div>
 
-        {/* Right Area - Player Name & Icons */}
-        <div className="flex items-center gap-2 md:gap-4 order-2 md:order-3 flex-wrap justify-center md:justify-end w-full md:w-auto">
-          {/* Player Names */}
-          <div className="flex flex-col items-start gap-1 hidden sm:flex">
-            {/* Main Player Name */}
-            <div className="flex items-center gap-2">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          {/* STATS */}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <div className="flex flex-wrap justify-center gap-3 text-white text-xs md:text-sm">
 
-            </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            {/* NÍVEL */}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <div className="flex items-center gap-2 px-3 py-2 border border-yellow-500 bg-black/70">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <Zap className="text-yellow-400" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <span>NÍVEL {level}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </div>
 
-            {/* Custom Player Name */}
-            <div className="flex items-center">
-              {isEditingCustomName ? (
-                <input
-                  type="text"
-                  value={tempCustomName}
-                  onChange={(e) => setTempCustomName(e.target.value)}
-                  onBlur={handleCustomNameSave}
-                  onKeyDown={handleCustomNameKeyPress}
-                  className="bg-transparent border-b-2 border-logo-gradient-start text-logo-gradient-start font-paragraph text-xs md:text-sm font-medium tracking-wider outline-none px-2"
-                  style={{
-                    textShadow: '0 0 8px rgba(255,69,0,0.6)'
-                  }}
-                  autoFocus
-                  maxLength={30}
-                  placeholder="Digite seu nome gamer..."
-                />
-              ) : (
-                <button
-                  onClick={handleCustomNameClick}
-                  className="px-2 md:px-3 py-1 rounded border-2 border-logo-gradient-start text-logo-gradient-start font-paragraph text-xs md:text-sm font-medium tracking-wider hover:bg-logo-gradient-start/10 hover:brightness-150 transition-all duration-300"
-                  style={{
-                    textShadow: '0 0 8px rgba(255,69,0,0.6)'
-                  }}
-                >
-                  {customPlayerName || '+ Nome'}
-                </button>
-              )}
-            </div>
-          </div>
-          {/* Clean Money Vault */}
-          <div className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 md:py-2 bg-gradient-to-r from-logo-gradient-start/20 to-logo-gradient-end/20 rounded-lg border-2 border-logo-gradient-start text-xs md:text-sm" style={{
-            filter: 'drop-shadow(0 0 10px rgba(255,69,0,0.5))'
-          }}>
-            <Vault className="w-4 h-4 md:w-5 md:h-5 text-logo-gradient-start" style={{
-              filter: 'drop-shadow(0 0 8px rgba(255,69,0,0.8))'
-            }} />
-            <div className="flex flex-col">
-              <span className="text-xs text-logo-gradient-start font-heading leading-none">SUJO</span>
-              <span className="font-bold text-white font-heading text-xs md:text-sm leading-none">R$ {dirtyMoney.toLocaleString('pt-BR')}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 md:py-2 bg-gradient-to-r from-subtitle-neon-blue/20 to-subtitle-neon-blue/10 rounded-lg border-2 border-subtitle-neon-blue text-xs md:text-sm" style={{
-            filter: 'drop-shadow(0 0 10px rgba(0,234,255,0.5))'
-          }}>
-            <Vault className="w-4 h-4 md:w-5 md:h-5 text-subtitle-neon-blue" style={{
-              filter: 'drop-shadow(0 0 8px rgba(0,234,255,0.8))'
-            }} />
-            <div className="flex flex-col">
-              <span className="text-xs text-subtitle-neon-blue font-heading leading-none">LIMPO</span>
-              <span className="font-bold text-white font-heading text-xs md:text-sm leading-none">R$ {cleanMoney.toLocaleString('pt-BR')}</span>
-            </div>
-          </div>
-          {/* Spin Vault */}
-          <div className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 md:py-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-lg border-2 border-yellow-400 text-xs md:text-sm" style={{
-            filter: 'drop-shadow(0 0 10px rgba(255,193,7,0.5))'
-          }}>
-            <Dice5 className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" style={{
-              filter: 'drop-shadow(0 0 8px rgba(255,193,7,0.8))'
-            }} />
-            <div className="flex flex-col">
-              <span className="text-xs text-yellow-400 font-heading leading-none">GIROS</span>
-              <span className="font-bold text-white font-heading text-xs md:text-sm leading-none">{spins}</span>
-              <span className="text-xs text-yellow-300 font-paragraph leading-none">+{Math.max(1, level)}</span>
-            </div>
-          </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  {/* DINHEIRO SUJO */}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div className="flex items-center gap-2 px-3 py-2 border border-red-600 bg-black/70">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <Vault className="text-red-500" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <span>R$ {dirtyMoney.toLocaleString('pt-BR')}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              </div>
 
-          {/* Level Display */}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {/* DINHEIRO LIMPO */}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <div className="flex items-center gap-2 px-3 py-2 border border-blue-500 bg-black/70">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <Vault className="text-blue-400" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <span>R$ {cleanMoney.toLocaleString('pt-BR')}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </div>
 
-          <div className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 md:py-2 bg-gradient-to-r from-logo-gradient-start/20 to-logo-gradient-end/20 rounded-lg border-2 border-logo-gradient-start text-xs md:text-sm" style={{
-            filter: 'drop-shadow(0 0 10px rgba(255,69,0,0.5))'
-          }}>
-            <Zap className="w-4 h-4 md:w-5 md:h-5 text-logo-gradient-start" style={{
-              filter: 'drop-shadow(0 0 8px rgba(255,69,0,0.8))'
-            }} />
-            <div className="flex flex-col">
-              <span className="text-xs text-logo-gradient-start font-heading leading-none">NÍVEL</span>
-              <span className="font-bold text-white font-heading text-xs md:text-sm leading-none">{level}/100</span>
-            </div>
-          </div>
-          {/* Dirty Money Display */}
-          {/* Icons */}
-          <div className="flex items-center gap-2 md:gap-3">
-            <button
-              className="text-white hover:text-subtitle-neon-blue transition-all duration-300 hover:brightness-150"
-              style={{
-                filter: 'drop-shadow(0 0 8px rgba(0,234,255,0.6))'
-              }}
-              aria-label="Notificações"
-            >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              {/* GIROS */}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div className="flex items-center gap-2 px-3 py-2 border border-yellow-400 bg-black/70">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <Dice5 className="text-yellow-400" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <span>GIROS {spins}</span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  </div>
 
-            </button>
-            <button
-              className="text-white hover:text-subtitle-neon-blue transition-all duration-300 hover:brightness-150"
-              style={{
-                filter: 'drop-shadow(0 0 8px rgba(0,234,255,0.6))'
-              }}
-              aria-label="Configurações"
-            >
-
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-// Add padding to body to account for fixed header
-if (typeof document !== 'undefined') {
-  const style = document.createElement('style');
-  style.textContent = `
-    body {
-      padding-top: 0;
-    }
-  `;
-  if (!document.head.querySelector('style[data-header-style]')) {
-    style.setAttribute('data-header-style', 'true');
-    document.head.appendChild(style);
-  }
-}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          {/* TIMER */}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <div
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            className="text-red-500 font-bold text-xs animate-pulse"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      style={{ textShadow: '0 0 10px red' }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        PRÓXIMO GIRO: {formatTime(timeUntilNextGain)}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          </header>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            );
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
