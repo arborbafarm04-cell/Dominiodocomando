@@ -70,7 +70,7 @@ export default function CharacterDialog() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="relative max-w-2xl w-full bg-gradient-to-b from-[#1a1f2e] to-[#0f1419] border-2 border-[#FF4500] rounded-lg overflow-hidden shadow-[0_0_40px_rgba(255,69,0,0.5)]"
+              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-b from-[#1a1f2e] to-[#0f1419] border-2 border-[#FF4500] rounded-lg overflow-hidden shadow-[0_0_40px_rgba(255,69,0,0.5)]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Background accent */}

@@ -4,14 +4,18 @@ import { Image } from '@/components/ui/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BlingModal from '@/components/BlingModal';
+import LuxuryNPCDialog from '@/components/LuxuryNPCDialog';
+import { usePlayerStore } from '@/store/playerStore';
+import { luxuryItems } from '@/data/luxoItems';
 
 export default function LuxuryShowroomPage() {
   const [showItemsModal, setShowItemsModal] = useState(false);
   const [showInitialDialog, setShowInitialDialog] = useState(false);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
 
-  // Simulação do nível do jogador
-  const playerLevel = 1;
+  // Get player's barraco level and player level from store
+  const barracoLevel = usePlayerStore((state) => state.barracoLevel);
+  const playerLevel = usePlayerStore((state) => state.level);
 
   // Show initial dialog after 2 seconds
   useEffect(() => {
@@ -21,20 +25,12 @@ export default function LuxuryShowroomPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Gerador de itens por nível
-  const generateItems = (level: number) => {
-    const basePrice = 120;
-    return Array.from({ length: 5 }).map((_, i) => {
-      const price = basePrice * Math.pow(1.1, level + i);
-      return {
-        id: i,
-        name: `Item de Luxo Nível ${level} - ${i + 1}`,
-        price: price.toFixed(2),
-      };
-    });
-  };
-
-  const items = generateItems(playerLevel);
+  // Get items for the player's barraco level
+  const items = (luxuryItems[barracoLevel] || []).map((item, index) => ({
+    id: index,
+    name: item.name,
+    price: item.price.toFixed(2),
+  }));
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -59,40 +55,24 @@ export default function LuxuryShowroomPage() {
           height={800}
         />
 
-        {/* INITIAL DIALOG */}
-        {showInitialDialog && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="absolute right-32 top-1/3 w-80 pointer-events-auto"
-          >
-            {/* Dialog Box */}
-            <div className="relative">
-              {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-2xl blur-xl"></div>
-
-              {/* Main dialog */}
-              <div className="relative bg-black/70 backdrop-blur-md border border-white/20 rounded-2xl p-6 shadow-2xl">
-                {/* Text */}
-                <p className="text-white text-sm leading-relaxed font-paragraph text-center mb-6">
-                  Bem-vindo… Aqui não é sobre comprar. É sobre se posicionar. Cada coleção revela o seu nível. Escolha com cuidado… porque aqui, status é tudo.
-                </p>
-
-                {/* Button */}
-                <button
-                  onClick={() => {
-                    setShowInitialDialog(false);
-                    setShowCollectionModal(true);
-                  }}
-                  className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-heading font-bold py-3 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  Ver Coleção
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
+        {/* LUXURY NPC DIALOG - 48% WIDTH LEFT SIDE */}
+        <LuxuryNPCDialog
+          isOpen={showInitialDialog}
+          onClose={() => setShowInitialDialog(false)}
+          onViewCollection={() => {
+            setShowInitialDialog(false);
+            setShowCollectionModal(true);
+          }}
+          onAccept={() => {
+            setShowInitialDialog(false);
+            setShowCollectionModal(true);
+          }}
+          onDenounce={() => {
+            setShowInitialDialog(false);
+          }}
+          title="Bem-vindo ao Showroom"
+          message="Bem-vindo… Aqui não é sobre comprar. É sobre se posicionar. Cada coleção revela o seu nível. Escolha com cuidado… porque aqui, status é tudo."
+        />
 
         {/* BLING COLLECTION MODAL */}
         <BlingModal

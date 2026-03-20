@@ -46,7 +46,7 @@ export default function LuxuryShop() {
             exit={{ opacity: 0, scale: 0.9 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-amber-500 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-amber-500 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
               {/* Header */}
               {/* Content */}
               <div className="flex-1 overflow-y-auto flex gap-6 p-6">

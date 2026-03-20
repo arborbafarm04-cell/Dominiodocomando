@@ -9,21 +9,6 @@ const HomePage = lazy(() => import('@/components/pages/HomePage'));
 const GamePage1 = lazy(() => import('@/components/pages/GamePage1'));
 const GiroNoAsfaltoPage = lazy(() => import('@/components/pages/GiroNoAsfaltoPage'));
 const LuxuryShowroomPage = lazy(() => import('@/components/pages/LuxuryShowroomPage'));
-const Luxo1Page = lazy(() => import('@/components/pages/Luxo1Page'));
-const Luxo2Page = lazy(() => import('@/components/pages/Luxo2Page'));
-const Luxo3Page = lazy(() => import('@/components/pages/Luxo3Page'));
-const Luxo4Page = lazy(() => import('@/components/pages/Luxo4Page'));
-const Luxo5Page = lazy(() => import('@/components/pages/Luxo5Page'));
-const Luxo6Page = lazy(() => import('@/components/pages/Luxo6Page'));
-const Luxo7Page = lazy(() => import('@/components/pages/Luxo7Page'));
-const Luxo8Page = lazy(() => import('@/components/pages/Luxo8Page'));
-const Luxo9Page = lazy(() => import('@/components/pages/Luxo9Page'));
-const Luxo10Page = lazy(() => import('@/components/pages/Luxo10Page'));
-const Luxo11Page = lazy(() => import('@/components/pages/Luxo11Page'));
-const Luxo12Page = lazy(() => import('@/components/pages/Luxo12Page'));
-const Luxo13Page = lazy(() => import('@/components/pages/Luxo13Page'));
-const Luxo14Page = lazy(() => import('@/components/pages/Luxo14Page'));
-const Luxo15Page = lazy(() => import('@/components/pages/Luxo15Page'));
 const Game2Page = lazy(() => import('@/components/pages/Game2Page'));
 const BarracoPage = lazy(() => import('@/components/pages/BarracoPage'));
 const BriberyGuardPage = lazy(() => import('@/components/pages/BriberyGuardPage'));
@@ -67,6 +52,13 @@ const router = createBrowserRouter([
         },
       },
       {
+        path: "game1",
+        element: <GamePage1 />,
+        routeMetadata: {
+          pageIdentifier: 'game1',
+        },
+      },
+      {
         path: "game2",
         element: <Game2Page />,
         routeMetadata: {
@@ -85,111 +77,6 @@ const router = createBrowserRouter([
         element: <LuxuryShowroomPage />,
         routeMetadata: {
           pageIdentifier: 'luxury-showroom',
-        },
-      },
-      {
-        path: "luxo-1",
-        element: <Luxo1Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-1',
-        },
-      },
-      {
-        path: "luxo-2",
-        element: <Luxo2Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-2',
-        },
-      },
-      {
-        path: "luxo-3",
-        element: <Luxo3Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-3',
-        },
-      },
-      {
-        path: "luxo-4",
-        element: <Luxo4Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-4',
-        },
-      },
-      {
-        path: "luxo-5",
-        element: <Luxo5Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-5',
-        },
-      },
-      {
-        path: "luxo-6",
-        element: <Luxo6Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-6',
-        },
-      },
-      {
-        path: "luxo-7",
-        element: <Luxo7Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-7',
-        },
-      },
-      {
-        path: "luxo-8",
-        element: <Luxo8Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-8',
-        },
-      },
-      {
-        path: "luxo-9",
-        element: <Luxo9Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-9',
-        },
-      },
-      {
-        path: "luxo-10",
-        element: <Luxo10Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-10',
-        },
-      },
-      {
-        path: "luxo-11",
-        element: <Luxo11Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-11',
-        },
-      },
-      {
-        path: "luxo-12",
-        element: <Luxo12Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-12',
-        },
-      },
-      {
-        path: "luxo-13",
-        element: <Luxo13Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-13',
-        },
-      },
-      {
-        path: "luxo-14",
-        element: <Luxo14Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-14',
-        },
-      },
-      {
-        path: "luxo-15",
-        element: <Luxo15Page />,
-        routeMetadata: {
-          pageIdentifier: 'luxo-15',
         },
       },
       {

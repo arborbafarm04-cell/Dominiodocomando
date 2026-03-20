@@ -393,21 +393,10 @@ export default function BriberyGuardPage() {
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={handleAccept}
-                          disabled={isProcessing || dirtyMoney < briberyAmount || !podeSubornarAgora}
-                          className="flex-1 px-8 py-3 bg-gradient-to-r from-[#FF4500] to-[#FF0000] text-white font-heading font-bold text-lg tracking-wider rounded-lg border-2 border-[#FF4500] hover:shadow-[0_0_20px_rgba(255,69,0,0.8)] transition-all duration-300 uppercase disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => navigate('/luxury-showroom')}
+                          className="flex-1 px-8 py-3 bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-black font-heading font-bold text-lg tracking-wider rounded-lg border-2 border-[#FFD700] hover:shadow-[0_0_20px_rgba(255,215,0,0.8)] transition-all duration-300 uppercase"
                         >
-                          {isProcessing ? 'Processando...' : 'Aceitar Suborno'}
-                        </motion.button>
-
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={handleDeny}
-                          disabled={isProcessing}
-                          className="flex-1 px-8 py-3 bg-gradient-to-r from-[#00eaff] to-[#0099cc] text-black font-heading font-bold text-lg tracking-wider rounded-lg border-2 border-[#00eaff] hover:shadow-[0_0_20px_rgba(0,234,255,0.8)] transition-all duration-300 uppercase disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isProcessing ? 'Processando...' : playerLevel === 100 ? 'Delação Premiada' : 'Denunciar'}
+                          Ver Coleção
                         </motion.button>
                       </div>
                     </motion.div>
