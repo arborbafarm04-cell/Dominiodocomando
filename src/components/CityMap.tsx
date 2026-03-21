@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { useNavigate } from 'react-router-dom';
+import { usePlayerStore } from '@/store/playerStore';
 
 interface Tile {
   id: string;
@@ -8,6 +10,11 @@ interface Tile {
   y: number;
   occupied: boolean;
   mesh?: THREE.Mesh;
+}
+
+interface BlockedTile {
+  x: number;
+  y: number;
 }
 
 export default function CityMap() {
@@ -20,7 +27,11 @@ export default function CityMap() {
   const tilesRef = useRef<Map<string, Tile>>(new Map());
   const tilesGroupRef = useRef<THREE.Group | null>(null);
   const selectedTileMeshRef = useRef<THREE.Mesh | null>(null);
+  const policeStationGroupRef = useRef<THREE.Group | null>(null);
+  const blockedTilesRef = useRef<Set<string>>(new Set());
   const [selectedTile, setSelectedTile] = useState<Tile | null>(null);
+  const navigate = useNavigate();
+  const playerLevel = usePlayerStore((state) => state.level);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -50,6 +61,9 @@ export default function CityMap() {
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(5, 10, 7);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
     scene.add(directionalLight);
 
     // Create tiles group for better organization
@@ -57,16 +71,37 @@ export default function CityMap() {
     scene.add(tilesGroup);
     tilesGroupRef.current = tilesGroup;
 
+    // Create police station group
+    const policeStationGroup = new THREE.Group();
+    scene.add(policeStationGroup);
+    policeStationGroupRef.current = policeStationGroup;
+
     // Generate tiles (32x25 = 800 tiles)
     const tileSize = 0.5;
     const gridWidth = 32;
     const gridHeight = 25;
     const tiles = new Map<string, Tile>();
 
+    // Define blocked tiles for police station (8 tiles: 2x4)
+    const policeStationCenterX = 10;
+    const policeStationCenterY = 10;
+    const policeStationWidthTiles = 2;
+    const policeStationDepthTiles = 4;
+
+    const policeStationStartX = policeStationCenterX - Math.floor(policeStationWidthTiles / 2);
+    const policeStationStartY = policeStationCenterY - Math.floor(policeStationDepthTiles / 2);
+
+    for (let x = policeStationStartX; x < policeStationStartX + policeStationWidthTiles; x++) {
+      for (let y = policeStationStartY; y < policeStationStartY + policeStationDepthTiles; y++) {
+        blockedTilesRef.current.add(`${x},${y}`);
+      }
+    }
+
     for (let y = 0; y < gridHeight; y++) {
       for (let x = 0; x < gridWidth; x++) {
         const tileId = `tile-${x}-${y}`;
-        const occupied = Math.random() > 0.7; // 30% chance of being occupied
+        const isBlocked = blockedTilesRef.current.has(`${x},${y}`);
+        const occupied = isBlocked || Math.random() > 0.7; // 30% chance of being occupied (or blocked by police station)
 
         // Create tile geometry (using PlaneGeometry for better performance)
         const geometry = new THREE.PlaneGeometry(tileSize, tileSize);
@@ -101,6 +136,61 @@ export default function CityMap() {
 
     tilesRef.current = tiles;
 
+    // Load and add police station model
+    const loadPoliceStation = async () => {
+      try {
+        const loader = new GLTFLoader();
+
+        loader.load(
+          'https://static.wixstatic.com/3d/50f4bf_55eda8581fc04c02a39a33c94b588afc.glb',
+          (gltf) => {
+            const model = gltf.scene;
+
+            // Calculate world position for police station center
+            const worldX = (policeStationCenterX - gridWidth / 2) * tileSize;
+            const worldY = (policeStationCenterY - gridHeight / 2) * tileSize;
+
+            // Position at Y=0 (ground level)
+            model.position.set(worldX, 0, worldY);
+
+            // Enable shadows
+            model.traverse((child) => {
+              if (child instanceof THREE.Mesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+              }
+            });
+
+            policeStationGroup.add(model);
+
+            // Create invisible clickable mesh for raycasting
+            const boundingBox = new THREE.Box3().setFromObject(model);
+            const size = boundingBox.getSize(new THREE.Vector3());
+            const center = boundingBox.getCenter(new THREE.Vector3());
+
+            const clickGeometry = new THREE.BoxGeometry(size.x, size.y, size.z);
+            const clickMaterial = new THREE.MeshBasicMaterial({
+              transparent: true,
+              opacity: 0,
+            });
+            const clickMesh = new THREE.Mesh(clickGeometry, clickMaterial);
+            clickMesh.position.copy(center);
+            (clickMesh as any).isPoliceStation = true;
+
+            policeStationGroup.add(clickMesh);
+          },
+          undefined,
+          (error) => {
+            console.error('Error loading police station model:', error);
+          }
+        );
+      } catch (error) {
+        console.error('Failed to load GLTFLoader:', error);
+      }
+    };
+
+    loadPoliceStation();
+
     // Handle tile selection (mouse and touch)
     const handleTileSelection = (clientX: number, clientY: number) => {
       if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
@@ -110,6 +200,32 @@ export default function CityMap() {
       mouseRef.current.y = -((clientY - rect.top) / height) * 2 + 1;
 
       raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
+
+      // Check for police station click first
+      if (policeStationGroupRef.current) {
+        const policeStationMeshes = policeStationGroupRef.current.children.filter(
+          (child) => child instanceof THREE.Mesh
+        ) as THREE.Mesh[];
+
+        const policeIntersects = raycasterRef.current.intersectObjects(policeStationMeshes);
+
+        if (policeIntersects.length > 0) {
+          const clickedMesh = policeIntersects[0].object as THREE.Mesh;
+          if ((clickedMesh as any).isPoliceStation) {
+            // Handle police station click based on player level
+            if (playerLevel < 10) {
+              console.log('Access denied: Player level too low');
+              return;
+            } else if (playerLevel >= 10 && playerLevel <= 19) {
+              navigate('/bribery-investigador');
+              return;
+            } else if (playerLevel >= 20) {
+              navigate('/bribery-delegado');
+              return;
+            }
+          }
+        }
+      }
 
       // Get all tile meshes
       const tilesMeshes = Array.from(tiles.values())
@@ -148,7 +264,7 @@ export default function CityMap() {
 
         // Open luxury shop if tile is occupied
         if (tileData.occupied) {
-          navigate('/luxuryshowroompage.');
+          navigate('/luxury-showroom');
         }
       }
     };
@@ -206,9 +322,23 @@ export default function CityMap() {
         }
       });
 
+      // Dispose police station
+      if (policeStationGroupRef.current) {
+        policeStationGroupRef.current.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.geometry.dispose();
+            if (Array.isArray(child.material)) {
+              child.material.forEach((m) => m.dispose());
+            } else {
+              child.material.dispose();
+            }
+          }
+        });
+      }
+
       renderer.dispose();
     };
-  }, []);
+  }, [navigate, playerLevel]);
 
   return (
     <div className="w-full h-screen flex flex-col">
