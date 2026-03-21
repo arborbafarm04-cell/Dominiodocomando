@@ -9,6 +9,7 @@ import { usePlayerStore } from '@/store/playerStore';
 import { Image } from '@/components/ui/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { getBackgroundByLevel } from '@/data/luxoItems';
 
 const CHARACTER_IMAGE = 'https://static.wixstatic.com/media/50f4bf_d7806ddb55be45cbba13fce8f16f2129~mv2.png';
 

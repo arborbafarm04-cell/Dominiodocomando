@@ -9,6 +9,7 @@ import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
 import { usePlayerStore } from '@/store/playerStore';
 import { useSpinVaultStore } from '@/store/spinVaultStore';
 import RoyalGreeting from '@/components/RoyalGreeting';
+import { getBackgroundByLevel } from '@/data/luxoItems';
 
 const BARRACO_LEVELS = [
   { level: 10, milestone: 'Casa de Alvenaria' },
@@ -231,9 +232,10 @@ export default function BarracoPage() {
   const evolutionCost = calculateEvolutionCost(currentLevel);
   const canEvolve = allItemsAtLevel && nextLevel <= 100;
   const barraco_image = getBarracoImage(currentLevel);
+  const dynamicBackground = getBackgroundByLevel(currentLevel);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950">
+    <div style={{ background: dynamicBackground }} className="min-h-screen">
       {showGreeting && (
         <RoyalGreeting
           playerName={player?.playerName || 'Rei do Comando'}

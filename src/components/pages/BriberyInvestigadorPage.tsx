@@ -9,6 +9,7 @@ import { usePlayerStore } from '@/store/playerStore';
 import { Image } from '@/components/ui/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { getBackgroundByLevel } from '@/data/luxoItems';
 
 const CHARACTER_IMAGE = 'https://static.wixstatic.com/media/50f4bf_54691ec5073848a3beab4cbe4e760bbc~mv2.png';
 
@@ -120,8 +121,11 @@ export default function BriberyInvestigadorPage() {
 
   if (!isMounted) return null;
 
+  const currentLevel = playerLevel ?? 1;
+  const dynamicBackground = getBackgroundByLevel(currentLevel);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0f1419] to-[#1a1f2e] flex flex-col">
+    <div style={{ background: dynamicBackground }} className="min-h-screen flex flex-col">
       <Header />
       
       <div className="w-full h-96 md:h-[500px] overflow-hidden relative">

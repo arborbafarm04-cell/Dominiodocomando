@@ -13,7 +13,7 @@ import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
 
 // sistema da loja
-import { getLuxurySystem, getBackgroundColorByLevel } from '../../data/luxoItems';
+import { getLuxurySystem, getBackgroundColorByLevel, getBackgroundByLevel } from '../../data/luxoItems';
 
 export default function LuxuryShowroomPage() {
   const [showItemsModal, setShowItemsModal] = useState(false);
@@ -130,7 +130,7 @@ export default function LuxuryShowroomPage() {
         />
       )}
 
-      <div className="flex-1 relative w-full overflow-hidden bg-black">
+      <div className="flex-1 relative w-full overflow-hidden" style={{ background: getBackgroundByLevel(level) }}>
 
         {/* 3D SHOWROOM */}
         <div className="absolute inset-0 w-full h-full">

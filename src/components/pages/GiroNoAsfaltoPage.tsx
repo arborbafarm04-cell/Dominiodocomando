@@ -6,12 +6,21 @@ import SpinVaultNotification from '@/components/SpinVaultNotification';
 import { Image } from '@/components/ui/image';
 import { useDraggableContainers } from '@/hooks/useDraggableContainers';
 import { useSpinVault } from '@/hooks/useSpinVault';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { usePlayerStore } from '@/store/playerStore';
+import { getBackgroundByLevel } from '@/data/luxoItems';
 
 export default function GiroNoAsfaltoPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const { showNotification, lastGainAmount } = useSpinVault();
+  const barracoLevel = usePlayerStore((state) => state.barracoLevel);
+  const [dynamicBackground, setDynamicBackground] = useState('');
+
+  useEffect(() => {
+    const level = barracoLevel ?? 1;
+    setDynamicBackground(getBackgroundByLevel(level));
+  }, [barracoLevel]);
 
   const { containers, removeContainer, toggleContainer, resetPositions } = useDraggableContainers([
     { id: 'header', title: 'Header', isVisible: true },
@@ -35,7 +44,7 @@ export default function GiroNoAsfaltoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0d14] flex flex-col relative">
+    <div style={{ background: dynamicBackground }} className="min-h-screen flex flex-col relative">
       {/* Spin Vault Notification */}
       <SpinVaultNotification show={showNotification} amount={lastGainAmount} />
       {/* Edit Title Modal */}

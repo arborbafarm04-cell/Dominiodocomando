@@ -9,6 +9,7 @@ import { usePlayerStore } from '@/store/playerStore';
 import { Image } from '@/components/ui/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { getBackgroundByLevel } from '@/data/luxoItems';
 
 const CHARACTER_IMAGE = 'https://static.wixstatic.com/media/50f4bf_3949fc256fce456eab1e7dcbc75cdc40~mv2.png';
 
@@ -279,8 +280,11 @@ export default function BriberyGuardPage() {
 
   if (!isMounted) return null;
 
+  const currentLevel = playerLevel ?? 1;
+  const dynamicBackground = getBackgroundByLevel(currentLevel);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0f1419] to-[#1a1f2e] flex flex-col">
+    <div style={{ background: dynamicBackground }} className="min-h-screen flex flex-col">
       <Header />
       
       {/* Cinematic Background Scene */}
