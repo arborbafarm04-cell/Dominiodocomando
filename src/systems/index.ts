@@ -11,3 +11,4 @@ export { PLATFORM_RULES, calculateTileSetCenter, getOccupiedTiles, isWithinPlatf
 export { default as briberyZoneSystem } from './briberyZoneSystem';
 export { default as factionSystem } from './factionSystem';
 export { default as houseSystem } from './houseSystem';
+export { BlockedTilesManager, type BlockedTile } from './BlockedTilesManager';

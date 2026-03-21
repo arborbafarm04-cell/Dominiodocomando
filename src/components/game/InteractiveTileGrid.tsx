@@ -1,9 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { useNavigate } from 'react-router-dom';
 import { usePlayerStore } from '@/store/playerStore';
+import GiroAsfaltoObject from '@/components/GiroAsfaltoObject';
 
 interface TileData {
   id: number;
@@ -92,8 +93,11 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
   const qgGroupRef = useRef<THREE.Group | null>(null);
   const delegaciaGroupRef = useRef<THREE.Group | null>(null);
   const customObjectsRef = useRef<Map<number, THREE.Group>>(new Map());
+  const giroAsfaltoGroupRef = useRef<THREE.Group | null>(null);
+  const blockedTilesRef = useRef<Set<string>>(new Set());
   const navigate = useNavigate();
   const { level } = usePlayerStore();
+  const [sceneReady, setSceneReady] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -103,6 +107,9 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     scene.background = null; // Transparent background to show page background
     scene.fog = new THREE.Fog(0x000000, 100, 200);
     sceneRef.current = scene;
+
+    // Initialize blocked tiles set
+    blockedTilesRef.current.clear();
 
     // ===== CAMERA SETUP =====
     const width = containerRef.current.clientWidth;
@@ -747,6 +754,16 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
         }
       }
 
+      // Check if giro no asfalto was clicked
+      if (giroAsfaltoGroupRef.current) {
+        const giroIntersects = raycasterRef.current.intersectObject(giroAsfaltoGroupRef.current, true);
+        if (giroIntersects.length > 0) {
+          console.log('Giro no Asfalto clicked from grid!');
+          navigate('/giro-no-asfalto');
+          return;
+        }
+      }
+
       // Check if custom objects were clicked
       for (let i = 0; i < customObjects.length; i++) {
         const customObjGroup = customObjectsRef.current.get(i);
@@ -853,6 +870,8 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
       instancedMesh.dispose();
       controls.dispose();
       renderer.dispose();
+
+      setSceneReady(true);
     };
   }, [gridWidth, gridHeight, tileSize, onTileSelect, onLuxuryStoreClick, onQGClick, customObjects, level, navigate]);
 
@@ -865,7 +884,26 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
         position: 'relative',
         overflow: 'hidden',
       }}
-    />
+    >
+      {sceneReady && sceneRef.current && cameraRef.current && (
+        <GiroAsfaltoObject
+          scene={sceneRef.current}
+          camera={cameraRef.current}
+          raycaster={raycasterRef.current}
+          tileSize={tileSize}
+          gridStartX={-(gridWidth * tileSize) / 2}
+          gridStartZ={-(gridHeight * tileSize) / 2}
+          onObjectLoaded={(group) => {
+            giroAsfaltoGroupRef.current = group;
+          }}
+          onBlockedTilesRegistered={(tiles) => {
+            tiles.forEach((tile) => {
+              blockedTilesRef.current.add(`${tile.x},${tile.z}`);
+            });
+          }}
+        />
+      )}
+    </div>
   );
 };
 
