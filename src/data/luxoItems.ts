@@ -121,27 +121,50 @@ export function generateLuxuryItems(level: number) {
 
 export function getBackgroundByLevel(level: number) {
   if (level <= 10) {
-    return "linear-gradient(#2c2c2c, #1a1a1a)";
+    return "linear-gradient(135deg, #2c2c2c, #1a1a1a)";
   }
 
   if (level <= 25) {
-    return "linear-gradient(#1e3c72, #2a5298)";
+    return "linear-gradient(135deg, #1e3c72, #2a5298)";
   }
 
   if (level <= 50) {
-    return "linear-gradient(#3a0ca3, #7209b7)";
+    return "linear-gradient(135deg, #3a0ca3, #7209b7)";
   }
 
   if (level <= 75) {
-    return "linear-gradient(#000000, #d4af37)";
+    return "linear-gradient(135deg, #000000, #d4af37)";
   }
 
   if (level <= 90) {
-    return "radial-gradient(circle, #000000, #ffd700)";
+    return "radial-gradient(circle at 30% 30%, #ffd700, #000000)";
   }
 
   // 91–100 (GOD TIER)
-  return "radial-gradient(circle, #ffd700, #ffffff)";
+  return "radial-gradient(circle at 50% 50%, #ffffff, #ffd700, #000000)";
+}
+
+// ==========================================
+// FUNÇÃO AUXILIAR: OBTER COR DO BACKGROUND
+// ==========================================
+
+export function getBackgroundColorByLevel(level: number): string {
+  if (level <= 10) {
+    return "#2c2c2c";
+  }
+  if (level <= 25) {
+    return "#1e3c72";
+  }
+  if (level <= 50) {
+    return "#3a0ca3";
+  }
+  if (level <= 75) {
+    return "#d4af37";
+  }
+  if (level <= 90) {
+    return "#ffd700";
+  }
+  return "#ffffff";
 }
 
 // ==========================================

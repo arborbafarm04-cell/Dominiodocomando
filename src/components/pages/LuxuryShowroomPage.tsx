@@ -12,7 +12,7 @@ import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
 
 // sistema da loja
-import { getLuxurySystem } from '../../data/luxoItems';
+import { getLuxurySystem, getBackgroundColorByLevel } from '../../data/luxoItems';
 
 export default function LuxuryShowroomPage() {
   const [showItemsModal, setShowItemsModal] = useState(false);
@@ -20,6 +20,7 @@ export default function LuxuryShowroomPage() {
   const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [purchaseMessage, setPurchaseMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [purchasedItems, setPurchasedItems] = useState<Set<number>>(new Set());
 
   // 🔥 STORE
   const barracoLevel = usePlayerStore((state) => state.barracoLevel);
@@ -83,9 +84,17 @@ export default function LuxuryShowroomPage() {
   }, []);
 
   // 🔥 função para comprar item
-  const handleBuyItem = (item: any) => {
+  const handleBuyItem = (item: any, itemIndex: number) => {
+    // Verifica se o item já foi comprado
+    if (purchasedItems.has(itemIndex)) {
+      setPurchaseMessage(`❌ Este item já foi comprado!`);
+      setTimeout(() => setPurchaseMessage(''), 3000);
+      return;
+    }
+
     if (cleanMoney >= item.price) {
       removeCleanMoney(item.price);
+      setPurchasedItems(new Set(purchasedItems).add(itemIndex));
       setPurchaseMessage(`✅ ${item.name} comprado com sucesso!`);
       setTimeout(() => setPurchaseMessage(''), 3000);
     } else {
@@ -177,51 +186,68 @@ export default function LuxuryShowroomPage() {
 
             {/* ITENS */}
             <div className="grid gap-6">
-              {items.map((item) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: item.id * 0.1 }}
-                  className="flex gap-4 p-4 bg-white/10 rounded-lg backdrop-blur hover:bg-white/20 transition-colors"
-                >
-                  {/* IMAGEM DO ITEM */}
-                  {item.image && (
-                    <div className="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-black/50">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                        width={96}
-                        height={96}
-                      />
+              {items.map((item, itemIndex) => {
+                const isBought = purchasedItems.has(itemIndex);
+                const bgColor = getBackgroundColorByLevel(level);
+                
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: item.id * 0.1 }}
+                    className={`flex gap-4 p-4 rounded-lg backdrop-blur transition-all ${
+                      isBought ? 'opacity-60 bg-white/5' : 'bg-white/10 hover:bg-white/20'
+                    }`}
+                    style={
+                      !isBought
+                        ? {
+                            background: `linear-gradient(135deg, ${bgColor}30, ${bgColor}10)`,
+                            border: `2px solid ${bgColor}80`,
+                          }
+                        : undefined
+                    }
+                  >
+                    {/* IMAGEM DO ITEM */}
+                    {item.image && (
+                      <div className="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden bg-black/50">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          width={96}
+                          height={96}
+                        />
+                      </div>
+                    )}
+
+                    {/* INFO DO ITEM */}
+                    <div className="flex-1 flex flex-col justify-center">
+                      <p className="text-white font-bold text-lg">{item.name}</p>
+                      <p className="text-yellow-400 font-heading text-xl">
+                        R$ {item.price.toLocaleString('pt-BR')}
+                      </p>
                     </div>
-                  )}
 
-                  {/* INFO DO ITEM */}
-                  <div className="flex-1 flex flex-col justify-center">
-                    <p className="text-white font-bold text-lg">{item.name}</p>
-                    <p className="text-yellow-400 font-heading text-xl">
-                      R$ {item.price.toLocaleString('pt-BR')}
-                    </p>
-                  </div>
-
-                  {/* BOTÃO DE COMPRA */}
-                  <div className="flex items-center">
-                    <button
-                      onClick={() => handleBuyItem(item)}
-                      disabled={cleanMoney < item.price}
-                      className={`px-4 py-2 rounded-lg font-bold transition-all ${
-                        cleanMoney >= item.price
-                          ? 'bg-yellow-400 text-black hover:bg-yellow-300 cursor-pointer'
-                          : 'bg-gray-500 text-gray-300 cursor-not-allowed opacity-50'
-                      }`}
-                    >
-                      Comprar
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
+                    {/* BOTÃO DE COMPRA */}
+                    <div className="flex items-center">
+                      <button
+                        onClick={() => handleBuyItem(item, itemIndex)}
+                        disabled={cleanMoney < item.price || isBought}
+                        className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                          isBought
+                            ? 'bg-green-600 text-white cursor-not-allowed'
+                            : cleanMoney >= item.price
+                              ? 'bg-yellow-400 text-black hover:bg-yellow-300 cursor-pointer'
+                              : 'bg-gray-500 text-gray-300 cursor-not-allowed opacity-50'
+                        }`}
+                      >
+                        {isBought ? '✓ Comprado' : 'Comprar'}
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </BlingModal>
         </div>
