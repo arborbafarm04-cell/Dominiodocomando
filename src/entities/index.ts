@@ -1,6 +1,6 @@
 /**
  * Auto-generated entity types
- * Contains all CMS collection interfaces in a single file
+ * Contains all CMS collection interfaces in a single file 
  */
 
 /**
@@ -41,7 +41,7 @@ export interface _3D {
   /** @wixFieldType url */
   sourceUrl?: string;
   /** @wixFieldType media_gallery */
-  model3DUrl?: string;
+  3D?: any;
 }
 
 
