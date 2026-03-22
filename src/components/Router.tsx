@@ -23,8 +23,6 @@ const BriberyPresidentePage = lazy(() => import('@/components/pages/BriberyPresi
 const StarMapPage = lazy(() => import('@/components/pages/StarMapPage'));
 const ResetLuxuryPage = lazy(() => import('@/components/pages/ResetLuxuryPage'));
 const InvestmentSkillTreePage = lazy(() => import('@/components/pages/InvestmentSkillTreePage'));
-const AgilitySkillTreePage = lazy(() => import('@/components/pages/AgilitySkillTreePage'));
-const AttackSkillTreePage = lazy(() => import('@/components/pages/AttackSkillTreePage'));
 
 // Layout component that includes ScrollToTop
 function Layout() {
@@ -168,20 +166,6 @@ const router = createBrowserRouter([
         element: <InvestmentSkillTreePage />,
         routeMetadata: {
           pageIdentifier: 'investment-center',
-        },
-      },
-      {
-        path: "agility-center",
-        element: <AgilitySkillTreePage />,
-        routeMetadata: {
-          pageIdentifier: 'agility-center',
-        },
-      },
-      {
-        path: "attack-center",
-        element: <AttackSkillTreePage />,
-        routeMetadata: {
-          pageIdentifier: 'attack-center',
         },
       },
       {
