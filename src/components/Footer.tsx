@@ -47,8 +47,8 @@ export default function Footer() {
               <Link to="/" className="font-paragraph text-sm text-slate-400 hover:text-secondary transition-colors duration-300">
                 Início
               </Link>
-              <Link to="/projects" className="font-paragraph text-sm text-slate-400 hover:text-secondary transition-colors duration-300">
-                Projetos
+              <Link to="/star-map" className="font-paragraph text-sm text-slate-400 hover:text-secondary transition-colors duration-300">
+                Star Map
               </Link>
               <Link to="/giro-no-asfalto" className="font-paragraph text-sm text-slate-400 hover:text-secondary transition-colors duration-300">
                 Giro no Asfalto
