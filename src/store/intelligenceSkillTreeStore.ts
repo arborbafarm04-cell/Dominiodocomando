@@ -13,51 +13,43 @@ export type Skill = {
   upgrading: boolean;
   startTime?: number;
   endTime?: number;
-  description?: string;
-  effect?: string;
+  description: string;
+  effect: string;
 };
 
 export type IntelligenceSkillTreeState = {
   skills: Record<string, Skill>;
   playerMoney: number;
   setPlayerMoney: (money: number) => void;
-  addPlayerMoney: (amount: number) => void;
-  subtractPlayerMoney: (amount: number) => boolean;
-  
-  // Upgrade functions
   startUpgrade: (skillId: string) => { success: boolean; error?: string };
   finalizeUpgrade: (skillId: string) => { success: boolean; error?: string };
   canUpgrade: (skillId: string) => boolean;
-  getUpgradeDetails: (skillId: string) => { cost: number; duration: number; error?: string } | null;
-  
-  // Query functions
   getRemainingTime: (skillId: string) => number;
   getIntelligenceBonus: () => number;
-  getSkillProgress: (skillId: string) => number; // 0-100
-  isSkillUnlocked: (skillId: string) => boolean;
-  getSkillRequirements: (skillId: string) => { met: boolean; details: string[] };
-  
-  // Utility
+  getSkillByLevel: (skillId: string) => Skill | null;
+  getSkillRequirements: (skillId: string) => { met: boolean; missing: string[] };
+  calculateUpgradeCost: (skillId: string) => number;
+  calculateUpgradeDuration: (skillId: string) => number;
   resetAllSkills: () => void;
-  getSkill: (skillId: string) => Skill | undefined;
 };
 
 const INITIAL_SKILLS: Record<string, Skill> = {
   inteligencia_1: {
     id: 'inteligencia_1',
-    name: 'Informante da Quebrada I',
+    name: 'Informante da Quebrada',
     category: 'inteligencia',
     level: 0,
     maxLevel: 20,
     baseCost: 500,
     baseTime: 300000, // 5 minutos
+    requires: [],
     upgrading: false,
     description: 'Recrute informantes locais para coletar inteligência',
     effect: '+1% lucro por nível',
   },
   inteligencia_2: {
     id: 'inteligencia_2',
-    name: 'Escuta Policial II',
+    name: 'Escuta Policial',
     category: 'inteligencia',
     level: 0,
     maxLevel: 25,
@@ -65,12 +57,12 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     baseTime: 600000, // 10 minutos
     requires: ['inteligencia_1'],
     upgrading: false,
-    description: 'Monitore comunicações policiais para evitar operações',
+    description: 'Intercepte comunicações policiais para evitar operações',
     effect: '-0.5% falha por nível',
   },
   inteligencia_3: {
     id: 'inteligencia_3',
-    name: 'Infiltração Digital III',
+    name: 'Infiltração Digital',
     category: 'inteligencia',
     level: 0,
     maxLevel: 30,
@@ -78,12 +70,12 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     baseTime: 1200000, // 20 minutos
     requires: ['inteligencia_2'],
     upgrading: false,
-    description: 'Infiltre sistemas digitais para obter dados sensíveis',
+    description: 'Infiltre sistemas digitais para ganhar vantagem',
     effect: '+2% eficiência',
   },
   inteligencia_4: {
     id: 'inteligencia_4',
-    name: 'Rede de Dados IV',
+    name: 'Rede de Dados',
     category: 'inteligencia',
     level: 0,
     maxLevel: 40,
@@ -91,12 +83,12 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     baseTime: 2400000, // 40 minutos
     requires: ['inteligencia_3'],
     upgrading: false,
-    description: 'Construa uma rede de coleta de dados em tempo real',
+    description: 'Construa uma rede de dados para operações avançadas',
     effect: '+1.5% lucro global',
   },
   inteligencia_5: {
     id: 'inteligencia_5',
-    name: 'Inteligência Estratégica V',
+    name: 'Inteligência Estratégica',
     category: 'inteligencia',
     level: 0,
     maxLevel: 50,
@@ -104,90 +96,77 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     baseTime: 3600000, // 1 hora
     requires: ['inteligencia_4'],
     upgrading: false,
-    description: 'Coordene todas as operações de inteligência para máxima eficiência',
+    description: 'Domine a inteligência estratégica para máxima eficiência',
     effect: 'Bônus geral em todas mecânicas',
   },
 };
 
-export const useIntelligenceSkillTree = create<IntelligenceSkillTreeState>()(
+export const useIntelligenceSkillTreeStore = create<IntelligenceSkillTreeState>()(
   persist(
     (set, get) => ({
       skills: INITIAL_SKILLS,
-      playerMoney: 10000, // Valor inicial para testes
+      playerMoney: 0,
 
       setPlayerMoney: (money: number) => {
         set({ playerMoney: Math.max(0, money) });
       },
 
-      addPlayerMoney: (amount: number) => {
-        const state = get();
-        set({ playerMoney: state.playerMoney + amount });
+      calculateUpgradeCost: (skillId: string) => {
+        const skill = get().skills[skillId];
+        if (!skill) return 0;
+        return Math.floor(skill.baseCost * Math.pow(skill.level + 1, 1.8));
       },
 
-      subtractPlayerMoney: (amount: number) => {
-        const state = get();
-        if (state.playerMoney >= amount) {
-          set({ playerMoney: state.playerMoney - amount });
-          return true;
-        }
-        return false;
+      calculateUpgradeDuration: (skillId: string) => {
+        const skill = get().skills[skillId];
+        if (!skill) return 0;
+        return Math.floor(skill.baseTime * Math.pow(skill.level + 1, 1.5));
       },
 
-      getUpgradeDetails: (skillId: string) => {
-        const state = get();
-        const skill = state.skills[skillId];
+      getSkillRequirements: (skillId: string) => {
+        const skill = get().skills[skillId];
+        const skills = get().skills;
 
-        if (!skill) {
-          return { cost: 0, duration: 0, error: 'Skill não encontrada' };
+        if (!skill || !skill.requires || skill.requires.length === 0) {
+          return { met: true, missing: [] };
         }
 
-        if (skill.level >= skill.maxLevel) {
-          return { cost: 0, duration: 0, error: 'Skill já está no máximo' };
-        }
+        const missing: string[] = [];
 
-        // Calcular custo: baseCost * (level + 1)^1.8
-        const cost = Math.ceil(skill.baseCost * Math.pow(skill.level + 1, 1.8));
+        skill.requires.forEach((requiredSkillId) => {
+          const requiredSkill = skills[requiredSkillId];
+          const requiredLevel = skillId === 'inteligencia_2' ? 10 : 
+                               skillId === 'inteligencia_3' ? 15 : 
+                               skillId === 'inteligencia_4' ? 20 : 
+                               skillId === 'inteligencia_5' ? 25 : 0;
 
-        // Calcular duração: baseTime * (level + 1)^1.5
-        const duration = Math.ceil(skill.baseTime * Math.pow(skill.level + 1, 1.5));
+          if (!requiredSkill || requiredSkill.level < requiredLevel) {
+            missing.push(`${requiredSkill?.name || 'Unknown'} nível ${requiredLevel}`);
+          }
+        });
 
-        return { cost, duration };
+        return { met: missing.length === 0, missing };
       },
 
       canUpgrade: (skillId: string) => {
-        const state = get();
-        const skill = state.skills[skillId];
+        const skill = get().skills[skillId];
+        const playerMoney = get().playerMoney;
 
         if (!skill) return false;
         if (skill.upgrading) return false;
         if (skill.level >= skill.maxLevel) return false;
 
-        // Verificar requisitos
-        if (skill.requires && skill.requires.length > 0) {
-          for (const requiredSkillId of skill.requires) {
-            const requiredSkill = state.skills[requiredSkillId];
-            if (!requiredSkill) return false;
+        const cost = get().calculateUpgradeCost(skillId);
+        if (playerMoney < cost) return false;
 
-            // Determinar nível mínimo necessário
-            const minLevelRequired = requiredSkillId === 'inteligencia_1' ? 10 : 
-                                     requiredSkillId === 'inteligencia_2' ? 15 :
-                                     requiredSkillId === 'inteligencia_3' ? 20 :
-                                     requiredSkillId === 'inteligencia_4' ? 25 : 0;
-
-            if (requiredSkill.level < minLevelRequired) return false;
-          }
-        }
-
-        // Verificar dinheiro
-        const details = state.getUpgradeDetails(skillId);
-        if (details?.error || state.playerMoney < details!.cost) return false;
+        const requirements = get().getSkillRequirements(skillId);
+        if (!requirements.met) return false;
 
         return true;
       },
 
       startUpgrade: (skillId: string) => {
-        const state = get();
-        const skill = state.skills[skillId];
+        const skill = get().skills[skillId];
 
         if (!skill) {
           return { success: false, error: 'Skill não encontrada' };
@@ -198,52 +177,25 @@ export const useIntelligenceSkillTree = create<IntelligenceSkillTreeState>()(
         }
 
         if (skill.level >= skill.maxLevel) {
-          return { success: false, error: 'Skill já está no máximo' };
+          return { success: false, error: 'Skill já atingiu o nível máximo' };
         }
 
-        // Verificar requisitos
-        if (skill.requires && skill.requires.length > 0) {
-          for (const requiredSkillId of skill.requires) {
-            const requiredSkill = state.skills[requiredSkillId];
-            if (!requiredSkill) {
-              return { success: false, error: `Skill requerida não encontrada: ${requiredSkillId}` };
-            }
-
-            const minLevelRequired = requiredSkillId === 'inteligencia_1' ? 10 : 
-                                     requiredSkillId === 'inteligencia_2' ? 15 :
-                                     requiredSkillId === 'inteligencia_3' ? 20 :
-                                     requiredSkillId === 'inteligencia_4' ? 25 : 0;
-
-            if (requiredSkill.level < minLevelRequired) {
-              return { 
-                success: false, 
-                error: `${requiredSkill.name} deve estar no nível ${minLevelRequired}` 
-              };
-            }
-          }
+        const requirements = get().getSkillRequirements(skillId);
+        if (!requirements.met) {
+          return { success: false, error: `Requisitos não atendidos: ${requirements.missing.join(', ')}` };
         }
 
-        // Calcular custo e duração
-        const details = state.getUpgradeDetails(skillId);
-        if (details?.error) {
-          return { success: false, error: details.error };
+        const cost = get().calculateUpgradeCost(skillId);
+        const playerMoney = get().playerMoney;
+
+        if (playerMoney < cost) {
+          return { success: false, error: `Dinheiro insuficiente. Necessário: ${cost}, Disponível: ${playerMoney}` };
         }
 
-        const { cost, duration } = details!;
-
-        // Verificar dinheiro
-        if (state.playerMoney < cost) {
-          return { success: false, error: `Dinheiro insuficiente. Necessário: ${cost}, Disponível: ${state.playerMoney}` };
-        }
-
-        // Descontar dinheiro
-        if (!state.subtractPlayerMoney(cost)) {
-          return { success: false, error: 'Erro ao descontar dinheiro' };
-        }
-
-        // Iniciar upgrade
+        const duration = get().calculateUpgradeDuration(skillId);
         const now = Date.now();
-        set({
+
+        set((state) => ({
           skills: {
             ...state.skills,
             [skillId]: {
@@ -253,14 +205,14 @@ export const useIntelligenceSkillTree = create<IntelligenceSkillTreeState>()(
               endTime: now + duration,
             },
           },
-        });
+          playerMoney: state.playerMoney - cost,
+        }));
 
         return { success: true };
       },
 
       finalizeUpgrade: (skillId: string) => {
-        const state = get();
-        const skill = state.skills[skillId];
+        const skill = get().skills[skillId];
 
         if (!skill) {
           return { success: false, error: 'Skill não encontrada' };
@@ -271,15 +223,10 @@ export const useIntelligenceSkillTree = create<IntelligenceSkillTreeState>()(
         }
 
         if (!skill.endTime || Date.now() < skill.endTime) {
-          const remainingTime = skill.endTime ? skill.endTime - Date.now() : 0;
-          return { 
-            success: false, 
-            error: `Upgrade ainda não está pronto. Tempo restante: ${Math.ceil(remainingTime / 1000)}s` 
-          };
+          return { success: false, error: 'Upgrade ainda não foi concluído' };
         }
 
-        // Incrementar nível
-        set({
+        set((state) => ({
           skills: {
             ...state.skills,
             [skillId]: {
@@ -290,118 +237,46 @@ export const useIntelligenceSkillTree = create<IntelligenceSkillTreeState>()(
               endTime: undefined,
             },
           },
-        });
+        }));
 
         return { success: true };
       },
 
       getRemainingTime: (skillId: string) => {
-        const state = get();
-        const skill = state.skills[skillId];
+        const skill = get().skills[skillId];
 
-        if (!skill || !skill.upgrading || !skill.endTime) {
-          return 0;
-        }
+        if (!skill || !skill.endTime) return 0;
 
         const remaining = skill.endTime - Date.now();
         return Math.max(0, remaining);
       },
 
       getIntelligenceBonus: () => {
-        const state = get();
-        let totalBonus = 0;
+        const skills = get().skills;
+        const totalLevels = Object.values(skills).reduce((sum, skill) => sum + skill.level, 0);
 
-        // Somar todos os níveis
-        Object.values(state.skills).forEach((skill) => {
-          totalBonus += skill.level;
-        });
+        // Bônus base: 0.5% por nível total
+        const baseBonus = totalLevels * 0.5;
 
-        return totalBonus;
+        // Bônus específico por skill
+        const informanteBonus = (skills.inteligencia_1.level * 1) / 100;
+        const escutaBonus = (skills.inteligencia_2.level * -0.5) / 100;
+        const infiltracaoBonus = (skills.inteligencia_3.level * 2) / 100;
+        const redeBonus = (skills.inteligencia_4.level * 1.5) / 100;
+        const estrategicaBonus = skills.inteligencia_5.level > 0 ? 5 : 0; // 5% bônus geral
+
+        return baseBonus + informanteBonus + escutaBonus + infiltracaoBonus + redeBonus + estrategicaBonus;
       },
 
-      getSkillProgress: (skillId: string) => {
-        const state = get();
-        const skill = state.skills[skillId];
-
-        if (!skill || !skill.upgrading || !skill.startTime || !skill.endTime) {
-          return 0;
-        }
-
-        const total = skill.endTime - skill.startTime;
-        const elapsed = Date.now() - skill.startTime;
-        return Math.min(100, (elapsed / total) * 100);
-      },
-
-      isSkillUnlocked: (skillId: string) => {
-        const state = get();
-        const skill = state.skills[skillId];
-
-        if (!skill) return false;
-
-        // Primeira skill é sempre desbloqueada
-        if (skillId === 'inteligencia_1') return true;
-
-        // Verificar requisitos
-        if (skill.requires && skill.requires.length > 0) {
-          for (const requiredSkillId of skill.requires) {
-            const requiredSkill = state.skills[requiredSkillId];
-            if (!requiredSkill) return false;
-
-            const minLevelRequired = requiredSkillId === 'inteligencia_1' ? 10 : 
-                                     requiredSkillId === 'inteligencia_2' ? 15 :
-                                     requiredSkillId === 'inteligencia_3' ? 20 :
-                                     requiredSkillId === 'inteligencia_4' ? 25 : 0;
-
-            if (requiredSkill.level < minLevelRequired) return false;
-          }
-        }
-
-        return true;
-      },
-
-      getSkillRequirements: (skillId: string) => {
-        const state = get();
-        const skill = state.skills[skillId];
-
-        if (!skill) {
-          return { met: false, details: ['Skill não encontrada'] };
-        }
-
-        const details: string[] = [];
-        let met = true;
-
-        if (skill.requires && skill.requires.length > 0) {
-          for (const requiredSkillId of skill.requires) {
-            const requiredSkill = state.skills[requiredSkillId];
-            if (!requiredSkill) {
-              details.push(`❌ ${requiredSkillId} não encontrada`);
-              met = false;
-              continue;
-            }
-
-            const minLevelRequired = requiredSkillId === 'inteligencia_1' ? 10 : 
-                                     requiredSkillId === 'inteligencia_2' ? 15 :
-                                     requiredSkillId === 'inteligencia_3' ? 20 :
-                                     requiredSkillId === 'inteligencia_4' ? 25 : 0;
-
-            const isMet = requiredSkill.level >= minLevelRequired;
-            const status = isMet ? '✓' : '❌';
-            details.push(`${status} ${requiredSkill.name} nível ${minLevelRequired} (atual: ${requiredSkill.level})`);
-            
-            if (!isMet) met = false;
-          }
-        }
-
-        return { met, details };
+      getSkillByLevel: (skillId: string) => {
+        return get().skills[skillId] || null;
       },
 
       resetAllSkills: () => {
-        set({ skills: INITIAL_SKILLS, playerMoney: 10000 });
-      },
-
-      getSkill: (skillId: string) => {
-        const state = get();
-        return state.skills[skillId];
+        set({
+          skills: INITIAL_SKILLS,
+          playerMoney: 0,
+        });
       },
     }),
     {

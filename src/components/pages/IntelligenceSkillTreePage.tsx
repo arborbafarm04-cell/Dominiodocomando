@@ -1,72 +1,56 @@
 import { useEffect, useState } from 'react';
-import { useIntelligenceSkillTree } from '@/store/intelligenceSkillTreeStore';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import { useIntelligenceSkillTreeStore } from '@/store/intelligenceSkillTreeStore';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { motion } from 'framer-motion';
-import { Zap, Lock, CheckCircle, Clock, DollarSign } from 'lucide-react';
+import { AlertCircle, Clock, Zap, TrendingUp } from 'lucide-react';
 
 export default function IntelligenceSkillTreePage() {
   const {
     skills,
     playerMoney,
+    setPlayerMoney,
     startUpgrade,
     finalizeUpgrade,
     canUpgrade,
     getRemainingTime,
-    getUpgradeDetails,
-    isSkillUnlocked,
+    getIntelligenceBonus,
     getSkillRequirements,
-    getSkillProgress,
-    resetAllSkills,
-  } = useIntelligenceSkillTree();
+    calculateUpgradeCost,
+    calculateUpgradeDuration,
+  } = useIntelligenceSkillTreeStore();
 
+  const [updateTrigger, setUpdateTrigger] = useState(0);
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
-  const [upgradeProgress, setUpgradeProgress] = useState<Record<string, number>>({});
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
-  // Atualizar progresso de upgrades em tempo real
+  // Simular atualização de tempo em tempo real
   useEffect(() => {
     const interval = setInterval(() => {
-      const newProgress: Record<string, number> = {};
-      Object.keys(skills).forEach((skillId) => {
-        newProgress[skillId] = getSkillProgress(skillId);
-      });
-      setUpgradeProgress(newProgress);
-    }, 100);
+      setUpdateTrigger((prev) => prev + 1);
 
-    return () => clearInterval(interval);
-  }, [skills, getSkillProgress]);
-
-  // Auto-finalizar upgrades quando prontos
-  useEffect(() => {
-    const interval = setInterval(() => {
+      // Verificar e finalizar upgrades completados
       Object.keys(skills).forEach((skillId) => {
         const skill = skills[skillId];
         if (skill.upgrading && skill.endTime && Date.now() >= skill.endTime) {
-          const result = finalizeUpgrade(skillId);
-          if (result.success) {
-            setSuccess(`${skill.name} foi aprimorada para nível ${skill.level + 1}!`);
-            setTimeout(() => setSuccess(null), 3000);
-          }
+          finalizeUpgrade(skillId);
         }
       });
-    }, 500);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [skills, finalizeUpgrade]);
 
   const handleStartUpgrade = (skillId: string) => {
-    setError(null);
-    setSuccess(null);
-
     const result = startUpgrade(skillId);
-    if (result.success) {
-      setSuccess(`Upgrade iniciado para ${skills[skillId].name}!`);
-      setTimeout(() => setSuccess(null), 3000);
-    } else {
-      setError(result.error || 'Erro ao iniciar upgrade');
-      setTimeout(() => setError(null), 5000);
+    if (!result.success) {
+      alert(`Erro: ${result.error}`);
+    }
+  };
+
+  const handleFinalizeUpgrade = (skillId: string) => {
+    const result = finalizeUpgrade(skillId);
+    if (!result.success) {
+      alert(`Erro: ${result.error}`);
     }
   };
 
@@ -86,6 +70,7 @@ export default function IntelligenceSkillTreePage() {
   };
 
   const skillOrder = ['inteligencia_1', 'inteligencia_2', 'inteligencia_3', 'inteligencia_4', 'inteligencia_5'];
+  const intelligenceBonus = getIntelligenceBonus();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
@@ -93,248 +78,307 @@ export default function IntelligenceSkillTreePage() {
 
       <main className="max-w-7xl mx-auto px-4 py-12">
         {/* Header Section */}
-        <div className="mb-12">
-          <h1 className="text-5xl font-heading font-bold text-white mb-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-12"
+        >
+          <h1 className="text-5xl font-bold text-white mb-4 font-heading">
             Árvore de Inteligência
           </h1>
-          <p className="text-lg text-slate-300 mb-6">
-            Desenvolva suas habilidades de inteligência para melhorar lucros, reduzir falhas e desbloquear operações avançadas.
+          <p className="text-lg text-slate-300 font-paragraph">
+            Desenvolva suas habilidades de inteligência para dominar a operação
           </p>
+        </motion.div>
 
-          {/* Player Money Display */}
-          <div className="bg-gradient-to-r from-amber-900 to-amber-800 rounded-lg p-6 border border-amber-700">
+        {/* Stats Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
+        >
+          <div className="bg-gradient-to-br from-blue-900/40 to-blue-800/20 border border-blue-500/30 rounded-lg p-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <DollarSign className="w-8 h-8 text-amber-400" />
-                <div>
-                  <p className="text-sm text-amber-200">Dinheiro Disponível</p>
-                  <p className="text-3xl font-bold text-white">
-                    ${playerMoney.toLocaleString()}
-                  </p>
-                </div>
+              <div>
+                <p className="text-slate-400 text-sm font-paragraph">Dinheiro Disponível</p>
+                <p className="text-3xl font-bold text-white mt-2 font-heading">
+                  ${playerMoney.toLocaleString()}
+                </p>
               </div>
-              <button
-                onClick={() => resetAllSkills()}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm"
-              >
-                Reset (Dev)
-              </button>
+              <TrendingUp className="w-12 h-12 text-blue-400 opacity-50" />
             </div>
           </div>
-        </div>
 
-        {/* Notifications */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="mb-6 p-4 bg-red-900 border border-red-700 rounded-lg text-red-200"
-          >
-            {error}
-          </motion.div>
-        )}
+          <div className="bg-gradient-to-br from-cyan-900/40 to-cyan-800/20 border border-cyan-500/30 rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-400 text-sm font-paragraph">Bônus Total</p>
+                <p className="text-3xl font-bold text-cyan-400 mt-2 font-heading">
+                  +{intelligenceBonus.toFixed(2)}%
+                </p>
+              </div>
+              <Zap className="w-12 h-12 text-cyan-400 opacity-50" />
+            </div>
+          </div>
 
-        {success && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="mb-6 p-4 bg-green-900 border border-green-700 rounded-lg text-green-200"
-          >
-            {success}
-          </motion.div>
-        )}
+          <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 border border-purple-500/30 rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-400 text-sm font-paragraph">Progresso Total</p>
+                <p className="text-3xl font-bold text-purple-400 mt-2 font-heading">
+                  {Object.values(skills).reduce((sum, s) => sum + s.level, 0)}/
+                  {Object.values(skills).reduce((sum, s) => sum + s.maxLevel, 0)}
+                </p>
+              </div>
+              <TrendingUp className="w-12 h-12 text-purple-400 opacity-50" />
+            </div>
+          </div>
+        </motion.div>
 
-        {/* Skills Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        {/* Skills Tree */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ staggerChildren: 0.1 }}
+          className="space-y-6"
+        >
           {skillOrder.map((skillId, index) => {
             const skill = skills[skillId];
-            const unlocked = isSkillUnlocked(skillId);
-            const canUpgradeSkill = canUpgrade(skillId);
-            const upgradeDetails = getUpgradeDetails(skillId);
-            const remainingTime = getRemainingTime(skillId);
-            const progress = upgradeProgress[skillId] || 0;
             const requirements = getSkillRequirements(skillId);
+            const cost = calculateUpgradeCost(skillId);
+            const duration = calculateUpgradeDuration(skillId);
+            const remainingTime = getRemainingTime(skillId);
+            const canUpgradeSkill = canUpgrade(skillId);
+            const progressPercent = (skill.level / skill.maxLevel) * 100;
 
             return (
               <motion.div
                 key={skillId}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
                 onClick={() => setSelectedSkill(selectedSkill === skillId ? null : skillId)}
-                className={`cursor-pointer rounded-lg border-2 transition-all ${
-                  selectedSkill === skillId
-                    ? 'border-cyan-400 bg-slate-700'
-                    : unlocked
-                    ? 'border-slate-600 bg-slate-800 hover:border-cyan-400'
-                    : 'border-slate-700 bg-slate-900 opacity-60'
-                }`}
+                className="cursor-pointer"
               >
-                <div className="p-6">
+                <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/30 border border-slate-600/50 rounded-lg p-6 hover:border-slate-500/70 transition-all duration-300">
                   {/* Skill Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-xl font-heading font-bold text-white">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-2xl font-bold text-white font-heading">
                           {skill.name}
                         </h3>
-                        {!unlocked && <Lock className="w-5 h-5 text-slate-500" />}
-                        {unlocked && skill.level >= skill.maxLevel && (
-                          <CheckCircle className="w-5 h-5 text-green-400" />
-                        )}
+                        <span className="text-sm bg-slate-700/50 text-slate-300 px-3 py-1 rounded-full font-paragraph">
+                          Nível {skill.level}/{skill.maxLevel}
+                        </span>
                       </div>
-                      <p className="text-sm text-slate-400">{skill.description}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-cyan-400">
-                        {skill.level}/{skill.maxLevel}
+                      <p className="text-slate-400 font-paragraph">{skill.description}</p>
+                      <p className="text-cyan-400 text-sm mt-2 font-paragraph">
+                        Efeito: {skill.effect}
                       </p>
+                    </div>
+
+                    {/* Status Badge */}
+                    <div className="ml-4">
+                      {skill.upgrading ? (
+                        <div className="bg-yellow-900/40 border border-yellow-600/50 rounded-lg px-4 py-2">
+                          <p className="text-yellow-400 text-sm font-bold font-heading">
+                            UPGRADING
+                          </p>
+                          <p className="text-yellow-300 text-xs mt-1 font-paragraph">
+                            {formatTime(remainingTime)}
+                          </p>
+                        </div>
+                      ) : skill.level >= skill.maxLevel ? (
+                        <div className="bg-green-900/40 border border-green-600/50 rounded-lg px-4 py-2">
+                          <p className="text-green-400 text-sm font-bold font-heading">
+                            MÁXIMO
+                          </p>
+                        </div>
+                      ) : !requirements.met ? (
+                        <div className="bg-red-900/40 border border-red-600/50 rounded-lg px-4 py-2">
+                          <p className="text-red-400 text-sm font-bold font-heading">
+                            BLOQUEADO
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="bg-blue-900/40 border border-blue-600/50 rounded-lg px-4 py-2">
+                          <p className="text-blue-400 text-sm font-bold font-heading">
+                            DISPONÍVEL
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Effect */}
-                  <div className="mb-4 p-3 bg-slate-700 rounded border border-slate-600">
-                    <p className="text-sm text-slate-300">
-                      <span className="text-cyan-400 font-semibold">Efeito:</span> {skill.effect}
+                  {/* Progress Bar */}
+                  <div className="mb-4">
+                    <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden border border-slate-600/30">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progressPercent}%` }}
+                        transition={{ duration: 0.5 }}
+                        className="h-full bg-gradient-to-r from-cyan-500 to-blue-500"
+                      />
+                    </div>
+                    <p className="text-xs text-slate-400 mt-2 font-paragraph">
+                      {skill.level}/{skill.maxLevel} níveis completos
                     </p>
                   </div>
 
-                  {/* Level Progress Bar */}
-                  <div className="mb-4">
-                    <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
-                      <motion.div
-                        className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(skill.level / skill.maxLevel) * 100}%` }}
-                        transition={{ duration: 0.5 }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Upgrade Progress */}
-                  {skill.upgrading && (
-                    <div className="mb-4 p-3 bg-blue-900 rounded border border-blue-700">
+                  {/* Upgrade Progress (if upgrading) */}
+                  {skill.upgrading && skill.startTime && skill.endTime && (
+                    <div className="mb-4 bg-slate-700/30 rounded-lg p-4 border border-yellow-600/30">
                       <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-blue-400" />
-                          <span className="text-sm text-blue-200">Upgrade em progresso</span>
-                        </div>
-                        <span className="text-sm font-bold text-blue-400">
+                        <span className="text-sm text-yellow-400 font-paragraph">
+                          Progresso do Upgrade
+                        </span>
+                        <span className="text-sm text-yellow-300 font-bold font-heading">
                           {formatTime(remainingTime)}
                         </span>
                       </div>
-                      <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+                      <div className="w-full bg-slate-600/50 rounded-full h-2 overflow-hidden">
                         <motion.div
-                          className="h-full bg-gradient-to-r from-blue-500 to-blue-400"
                           initial={{ width: 0 }}
-                          animate={{ width: `${progress}%` }}
-                          transition={{ duration: 0.1 }}
+                          animate={{
+                            width: `${Math.min(100, ((skill.startTime + (skill.endTime - skill.startTime) - Date.now()) / (skill.endTime - skill.startTime)) * -100 + 100)}%`,
+                          }}
+                          transition={{ duration: 0.5 }}
+                          className="h-full bg-gradient-to-r from-yellow-500 to-orange-500"
                         />
                       </div>
                     </div>
                   )}
 
-                  {/* Requirements */}
-                  {!unlocked && (
-                    <div className="mb-4 p-3 bg-slate-700 rounded border border-slate-600">
-                      <p className="text-xs font-semibold text-slate-300 mb-2">Requisitos:</p>
-                      {requirements.details.map((detail, i) => (
-                        <p key={i} className="text-xs text-slate-400">
-                          {detail}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Upgrade Details */}
-                  {unlocked && skill.level < skill.maxLevel && (
-                    <div className="mb-4 grid grid-cols-2 gap-3">
-                      <div className="p-3 bg-slate-700 rounded border border-slate-600">
-                        <p className="text-xs text-slate-400">Custo</p>
-                        <p className="text-lg font-bold text-amber-400">
-                          ${upgradeDetails?.cost?.toLocaleString() || 0}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-slate-700 rounded border border-slate-600">
-                        <p className="text-xs text-slate-400">Tempo</p>
-                        <p className="text-lg font-bold text-cyan-400">
-                          {formatTime(upgradeDetails?.duration || 0)}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Action Button */}
-                  {unlocked && skill.level < skill.maxLevel && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStartUpgrade(skillId);
-                      }}
-                      disabled={!canUpgradeSkill || skill.upgrading}
-                      className={`w-full py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-                        canUpgradeSkill && !skill.upgrading
-                          ? 'bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white cursor-pointer'
-                          : 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                      }`}
+                  {/* Expandable Details */}
+                  {selectedSkill === skillId && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-6 pt-6 border-t border-slate-600/30 space-y-4"
                     >
-                      <Zap className="w-5 h-5" />
-                      {skill.upgrading ? 'Atualizando...' : 'Iniciar Upgrade'}
-                    </button>
-                  )}
+                      {/* Requirements */}
+                      {skill.requires && skill.requires.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-300 mb-2 font-heading">
+                            Requisitos
+                          </h4>
+                          <div className="space-y-2">
+                            {!requirements.met && requirements.missing.length > 0 ? (
+                              requirements.missing.map((req, i) => (
+                                <div
+                                  key={i}
+                                  className="flex items-center gap-2 text-red-400 text-sm font-paragraph"
+                                >
+                                  <AlertCircle className="w-4 h-4" />
+                                  {req}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="flex items-center gap-2 text-green-400 text-sm font-paragraph">
+                                <Zap className="w-4 h-4" />
+                                Todos os requisitos atendidos
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
-                  {skill.level >= skill.maxLevel && (
-                    <div className="w-full py-3 rounded-lg font-semibold text-center bg-green-900 text-green-200 border border-green-700">
-                      ✓ Máximo Atingido
-                    </div>
-                  )}
+                      {/* Upgrade Info */}
+                      {skill.level < skill.maxLevel && (
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-300 mb-2 font-heading">
+                            Próximo Upgrade
+                          </h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-slate-700/30 rounded p-3">
+                              <p className="text-xs text-slate-400 font-paragraph">Custo</p>
+                              <p className="text-lg font-bold text-cyan-400 mt-1 font-heading">
+                                ${cost.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="bg-slate-700/30 rounded p-3">
+                              <p className="text-xs text-slate-400 font-paragraph">Duração</p>
+                              <p className="text-lg font-bold text-purple-400 mt-1 font-heading">
+                                {formatTime(duration)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
-                  {!unlocked && (
-                    <div className="w-full py-3 rounded-lg font-semibold text-center bg-slate-700 text-slate-400 border border-slate-600">
-                      🔒 Bloqueado
-                    </div>
+                      {/* Action Buttons */}
+                      <div className="flex gap-3 pt-4">
+                        {skill.upgrading ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFinalizeUpgrade(skillId);
+                            }}
+                            disabled={remainingTime > 0}
+                            className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 disabled:from-slate-600 disabled:to-slate-700 disabled:opacity-50 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 font-heading"
+                          >
+                            {remainingTime > 0 ? 'Aguardando...' : 'Finalizar Upgrade'}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStartUpgrade(skillId);
+                            }}
+                            disabled={!canUpgradeSkill}
+                            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 disabled:from-slate-600 disabled:to-slate-700 disabled:opacity-50 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 font-heading"
+                          >
+                            {skill.level >= skill.maxLevel
+                              ? 'Máximo Atingido'
+                              : !requirements.met
+                              ? 'Requisitos Não Atendidos'
+                              : playerMoney < cost
+                              ? 'Dinheiro Insuficiente'
+                              : 'Iniciar Upgrade'}
+                          </button>
+                        )}
+                      </div>
+                    </motion.div>
                   )}
                 </div>
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
 
-        {/* Info Section */}
-        <div className="bg-slate-800 rounded-lg border border-slate-700 p-8">
-          <h2 className="text-2xl font-heading font-bold text-white mb-4">
-            Sobre a Árvore de Inteligência
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-slate-300">
-            <div>
-              <h3 className="font-semibold text-white mb-2">Progressão</h3>
-              <p className="text-sm">
-                A árvore de inteligência é projetada para ser completada em aproximadamente 4 meses de jogo ativo, 
-                contribuindo para a meta de 2 anos de progressão total.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-white mb-2">Impacto no Gameplay</h3>
-              <p className="text-sm">
-                Cada nível aumenta seus lucros, reduz chances de falha e melhora a eficiência geral das operações.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-white mb-2">Requisitos</h3>
-              <p className="text-sm">
-                Cada skill requer que a anterior atinja um nível específico. Não é possível pular etapas.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-white mb-2">Balanceamento</h3>
-              <p className="text-sm">
-                Early game é rápido, mid game moderado, e late game extremamente lento para manter o desafio.
-              </p>
-            </div>
+        {/* Debug Section */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-12 bg-slate-800/50 border border-slate-600/30 rounded-lg p-6"
+        >
+          <h3 className="text-lg font-bold text-white mb-4 font-heading">
+            Ferramentas de Desenvolvimento
+          </h3>
+          <div className="flex gap-3 flex-wrap">
+            <button
+              onClick={() => setPlayerMoney(playerMoney + 10000)}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all font-heading"
+            >
+              +10.000 Dinheiro
+            </button>
+            <button
+              onClick={() => setPlayerMoney(playerMoney + 100000)}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all font-heading"
+            >
+              +100.000 Dinheiro
+            </button>
+            <button
+              onClick={() => setPlayerMoney(1000000)}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-all font-heading"
+            >
+              Definir 1M
+            </button>
           </div>
-        </div>
+        </motion.div>
       </main>
 
       <Footer />
