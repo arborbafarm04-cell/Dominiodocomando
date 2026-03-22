@@ -36,7 +36,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     id: 'intel-1',
     name: 'Informante da Quebrada',
     category: 'Inteligência',
-    level: 1,
+    level: 0,
     maxLevel: 20,
     baseCost: 5000,
     baseTime: 3600,
@@ -53,7 +53,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 25,
     baseCost: 7500,
     baseTime: 5400,
-    requires: ['intel-1'],
+    requires: [],
     upgrading: false,
     description: 'Monitore comunicações policiais',
     effect: '-0.5% falha',
@@ -66,7 +66,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 30,
     baseCost: 10000,
     baseTime: 7200,
-    requires: ['intel-2'],
+    requires: [],
     upgrading: false,
     description: 'Acesse sistemas digitais',
     effect: '+2% eficiência',
@@ -79,7 +79,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 40,
     baseCost: 15000,
     baseTime: 10800,
-    requires: ['intel-3'],
+    requires: [],
     upgrading: false,
     description: 'Construa rede de informações',
     effect: '+1.5% lucro global',
@@ -92,7 +92,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 50,
     baseCost: 25000,
     baseTime: 14400,
-    requires: ['intel-4'],
+    requires: [],
     upgrading: false,
     description: 'Planeje operações estratégicas',
     effect: 'Bônus global',
@@ -103,7 +103,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     id: 'agility-1',
     name: 'Fuga de Viela',
     category: 'Agilidade',
-    level: 1,
+    level: 0,
     maxLevel: 20,
     baseCost: 5000,
     baseTime: 3600,
@@ -120,7 +120,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 25,
     baseCost: 7500,
     baseTime: 5400,
-    requires: ['agility-1'],
+    requires: [],
     upgrading: false,
     description: 'Manobras de risco',
     effect: '+0.5% fuga',
@@ -133,7 +133,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 30,
     baseCost: 10000,
     baseTime: 7200,
-    requires: ['agility-2'],
+    requires: [],
     upgrading: false,
     description: 'Reações instantâneas',
     effect: '-1.5% cooldown',
@@ -146,7 +146,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 40,
     baseCost: 15000,
     baseTime: 10800,
-    requires: ['agility-3'],
+    requires: [],
     upgrading: false,
     description: 'Movimento estratégico',
     effect: '+1% velocidade',
@@ -159,7 +159,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 50,
     baseCost: 25000,
     baseTime: 14400,
-    requires: ['agility-4'],
+    requires: [],
     upgrading: false,
     description: 'Velocidade máxima',
     effect: 'Bônus global',
@@ -170,7 +170,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     id: 'attack-1',
     name: 'Abordagem Rápida',
     category: 'Ataque',
-    level: 1,
+    level: 0,
     maxLevel: 20,
     baseCost: 5000,
     baseTime: 3600,
@@ -187,7 +187,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 25,
     baseCost: 7500,
     baseTime: 5400,
-    requires: ['attack-1'],
+    requires: [],
     upgrading: false,
     description: 'Controle territorial',
     effect: '+1.5% ganho',
@@ -200,7 +200,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 30,
     baseCost: 10000,
     baseTime: 7200,
-    requires: ['attack-2'],
+    requires: [],
     upgrading: false,
     description: 'Força bruta coordenada',
     effect: '+2% eficiência',
@@ -213,7 +213,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 40,
     baseCost: 15000,
     baseTime: 10800,
-    requires: ['attack-3'],
+    requires: [],
     upgrading: false,
     description: 'Operações sincronizadas',
     effect: '+1% ataque',
@@ -226,7 +226,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 50,
     baseCost: 25000,
     baseTime: 14400,
-    requires: ['attack-4'],
+    requires: [],
     upgrading: false,
     description: 'Poder máximo',
     effect: 'Bônus ofensivo',
@@ -237,7 +237,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     id: 'defense-1',
     name: 'Esquema de Fuga',
     category: 'Defesa',
-    level: 1,
+    level: 0,
     maxLevel: 20,
     baseCost: 5000,
     baseTime: 3600,
@@ -254,7 +254,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 25,
     baseCost: 7500,
     baseTime: 5400,
-    requires: ['defense-1'],
+    requires: [],
     upgrading: false,
     description: 'Proteção de bens',
     effect: '+1.5% proteção',
@@ -267,7 +267,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 30,
     baseCost: 10000,
     baseTime: 7200,
-    requires: ['defense-2'],
+    requires: [],
     upgrading: false,
     description: 'Defesa territorial',
     effect: '-1.5% dano',
@@ -280,7 +280,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 40,
     baseCost: 15000,
     baseTime: 10800,
-    requires: ['defense-3'],
+    requires: [],
     upgrading: false,
     description: 'Sistemas avançados',
     effect: '+1% resistência',
@@ -293,7 +293,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 50,
     baseCost: 25000,
     baseTime: 14400,
-    requires: ['defense-4'],
+    requires: [],
     upgrading: false,
     description: 'Proteção total',
     effect: 'Bônus global defesa',
@@ -304,7 +304,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     id: 'respect-1',
     name: 'Nome na Quebrada',
     category: 'Respeito',
-    level: 1,
+    level: 0,
     maxLevel: 20,
     baseCost: 5000,
     baseTime: 3600,
@@ -321,7 +321,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 25,
     baseCost: 7500,
     baseTime: 5400,
-    requires: ['respect-1'],
+    requires: [],
     upgrading: false,
     description: 'Influencie NPCs',
     effect: 'Acesso NPCs',
@@ -334,7 +334,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 30,
     baseCost: 10000,
     baseTime: 7200,
-    requires: ['respect-2'],
+    requires: [],
     upgrading: false,
     description: 'Expanda contatos',
     effect: 'Operações',
@@ -347,7 +347,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 40,
     baseCost: 15000,
     baseTime: 10800,
-    requires: ['respect-3'],
+    requires: [],
     upgrading: false,
     description: 'Controle regional',
     effect: 'Acesso mapa',
@@ -360,7 +360,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 50,
     baseCost: 25000,
     baseTime: 14400,
-    requires: ['respect-4'],
+    requires: [],
     upgrading: false,
     description: 'Poder supremo',
     effect: 'Conteúdo global',
@@ -371,7 +371,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     id: 'vigor-1',
     name: 'Fôlego de Rua',
     category: 'Vigor',
-    level: 1,
+    level: 0,
     maxLevel: 20,
     baseCost: 5000,
     baseTime: 3600,
@@ -388,7 +388,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 25,
     baseCost: 7500,
     baseTime: 5400,
-    requires: ['vigor-1'],
+    requires: [],
     upgrading: false,
     description: 'Força física',
     effect: '-energia',
@@ -401,7 +401,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 30,
     baseCost: 10000,
     baseTime: 7200,
-    requires: ['vigor-2'],
+    requires: [],
     upgrading: false,
     description: 'Aumente ações',
     effect: '+ações',
@@ -414,7 +414,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 40,
     baseCost: 15000,
     baseTime: 10800,
-    requires: ['vigor-3'],
+    requires: [],
     upgrading: false,
     description: 'Regeneração rápida',
     effect: '+regen',
@@ -427,7 +427,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     maxLevel: 50,
     baseCost: 25000,
     baseTime: 14400,
-    requires: ['vigor-4'],
+    requires: [],
     upgrading: false,
     description: 'Energia infinita',
     effect: 'Bônus stamina',
@@ -461,14 +461,34 @@ export const useInvestmentSkillTreeStore = create<InvestmentSkillTreeState>()(
         if (skill.upgrading) return false;
         if (skill.level >= skill.maxLevel) return false;
 
-        // Check requirements
-        if (skill.requires && skill.requires.length > 0) {
-          for (const requiredSkillId of skill.requires) {
-            const requiredSkill = state.skills[requiredSkillId];
-            if (!requiredSkill || requiredSkill.level === 0) {
-              return false;
-            }
-          }
+        // Check if any skill is currently upgrading (only one upgrade at a time)
+        for (const s of Object.values(state.skills)) {
+          if (s.upgrading) return false;
+        }
+
+        // Get all skills in the same category
+        const categorySkills = Object.values(state.skills)
+          .filter((s) => s.category === skill.category)
+          .sort((a, b) => {
+            const aNum = parseInt(a.id.split('-')[1]);
+            const bNum = parseInt(b.id.split('-')[1]);
+            return aNum - bNum;
+          });
+
+        const skillIndex = categorySkills.findIndex((s) => s.id === skillId);
+
+        // For the first skill in a category (index 0), it's always available
+        if (skillIndex === 0) {
+          // Check money
+          const cost = skill.baseCost * Math.pow(skill.level + 1, 1.8);
+          if (state.dirtyMoney < cost) return false;
+          return true;
+        }
+
+        // For other skills, check if the previous skill has reached level 1
+        const previousSkill = categorySkills[skillIndex - 1];
+        if (!previousSkill || previousSkill.level < 1) {
+          return false;
         }
 
         // Check money
