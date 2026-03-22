@@ -279,12 +279,12 @@ export default function InvestmentSkillTreePage() {
   };
 
   const treeLabels = {
-    inteligencia: '🧠 Inteligência',
-    agilidade: '⚡ Agilidade',
-    ataque: '💥 Ataque',
-    defesa: '🛡️ Defesa',
-    respeito: '👑 Respeito',
-    vigor: '❤️ Vigor',
+    inteligencia: 'Inteligência',
+    agilidade: 'Agilidade',
+    ataque: 'Ataque',
+    defesa: 'Defesa',
+    respeito: 'Respeito',
+    vigor: 'Vigor',
   };
 
   return (
