@@ -12,3 +12,4 @@ export { default as briberyZoneSystem } from './briberyZoneSystem';
 export { default as factionSystem } from './factionSystem';
 export { default as houseSystem } from './houseSystem';
 export { BlockedTilesManager, type BlockedTile } from './BlockedTilesManager';
+export { RespeitSystem, useRespeitSystem, type RespeitUnlocks } from './respeitSystem';

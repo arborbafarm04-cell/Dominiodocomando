@@ -24,6 +24,7 @@ const StarMapPage = lazy(() => import('@/components/pages/StarMapPage'));
 const ResetLuxuryPage = lazy(() => import('@/components/pages/ResetLuxuryPage'));
 const InvestmentSkillTreePage = lazy(() => import('@/components/pages/InvestmentSkillTreePage'));
 const DefenseSkillTreePage = lazy(() => import('@/components/pages/DefenseSkillTreePage'));
+const RespeitSkillTreePage = lazy(() => import('@/components/pages/RespeitSkillTreePage'));
 
 // Layout component that includes ScrollToTop
 function Layout() {
@@ -174,6 +175,13 @@ const router = createBrowserRouter([
         element: <DefenseSkillTreePage />,
         routeMetadata: {
           pageIdentifier: 'defense-center',
+        },
+      },
+      {
+        path: "respeit-center",
+        element: <RespeitSkillTreePage />,
+        routeMetadata: {
+          pageIdentifier: 'respeit-center',
         },
       },
       {
