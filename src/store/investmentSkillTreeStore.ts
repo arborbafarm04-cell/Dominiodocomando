@@ -36,7 +36,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     id: 'intel-1',
     name: 'Informante da Quebrada',
     category: 'Inteligência',
-    level: 1,
+    level: 0,
     maxLevel: 20,
     baseCost: 5000,
     baseTime: 3600,
@@ -103,7 +103,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     id: 'agility-1',
     name: 'Fuga de Viela',
     category: 'Agilidade',
-    level: 1,
+    level: 0,
     maxLevel: 20,
     baseCost: 5000,
     baseTime: 3600,
@@ -170,7 +170,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     id: 'attack-1',
     name: 'Abordagem Rápida',
     category: 'Ataque',
-    level: 1,
+    level: 0,
     maxLevel: 20,
     baseCost: 5000,
     baseTime: 3600,
@@ -237,7 +237,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     id: 'defense-1',
     name: 'Esquema de Fuga',
     category: 'Defesa',
-    level: 1,
+    level: 0,
     maxLevel: 20,
     baseCost: 5000,
     baseTime: 3600,
@@ -304,7 +304,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     id: 'respect-1',
     name: 'Nome na Quebrada',
     category: 'Respeito',
-    level: 1,
+    level: 0,
     maxLevel: 20,
     baseCost: 5000,
     baseTime: 3600,
@@ -371,7 +371,7 @@ const INITIAL_SKILLS: Record<string, Skill> = {
     id: 'vigor-1',
     name: 'Fôlego de Rua',
     category: 'Vigor',
-    level: 1,
+    level: 0,
     maxLevel: 20,
     baseCost: 5000,
     baseTime: 3600,
@@ -466,36 +466,23 @@ export const useInvestmentSkillTreeStore = create<InvestmentSkillTreeState>()(
           if (s.upgrading) return false;
         }
 
-        // Get all skills in the same category
-        const categorySkills = Object.values(state.skills)
-          .filter((s) => s.category === skill.category)
-          .sort((a, b) => {
-            const aNum = parseInt(a.id.split('-')[1]);
-            const bNum = parseInt(b.id.split('-')[1]);
-            return aNum - bNum;
-          });
-
-        const skillIndex = categorySkills.findIndex((s) => s.id === skillId);
-
-        // For the first skill in a category (index 0), it's always available
-        if (skillIndex === 0) {
+        // All level 1 skills are always available (level 0 means not started yet)
+        if (skill.level === 0) {
           // Check money
           const cost = skill.baseCost * Math.pow(skill.level + 1, 1.8);
           if (state.dirtyMoney < cost) return false;
           return true;
         }
 
-        // For other skills, check if the previous skill has reached level 1
-        const previousSkill = categorySkills[skillIndex - 1];
-        if (!previousSkill || previousSkill.level < 1) {
-          return false;
+        // For level 2+, the skill can continue upgrading (no blocking between levels)
+        if (skill.level > 0) {
+          // Check money
+          const cost = skill.baseCost * Math.pow(skill.level + 1, 1.8);
+          if (state.dirtyMoney < cost) return false;
+          return true;
         }
 
-        // Check money
-        const cost = skill.baseCost * Math.pow(skill.level + 1, 1.8);
-        if (state.dirtyMoney < cost) return false;
-
-        return true;
+        return false;
       },
 
       upgradeSkill: (skillId) => {
