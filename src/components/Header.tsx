@@ -61,7 +61,6 @@ export default function Header() {
         backgroundImage:
           'linear-gradient(rgba(0,0,0,0.9), rgba(10,10,10,0.95)), url("https://www.transparenttextures.com/patterns/concrete-wall.png")',
         borderBottom: '2px solid #d4af37',
-        boxShadow: '0 0 25px rgba(212,175,55,0.4)',
       }}
     >
       <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
