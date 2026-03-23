@@ -11,7 +11,7 @@ import {
   BusinessType,
 } from '@/store/commercialCenterStore';
 import { motion } from 'framer-motion';
-import { AlertCircle, Clock, TrendingUp, DollarSign } from 'lucide-react';
+import { AlertCircle, Clock, TrendingUp, DollarSign, Zap, Percent } from 'lucide-react';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
 
@@ -36,13 +36,18 @@ export default function CommercialCenterPage() {
   // Get skill bonuses
   const intelligenceLevel = intelligenceStore.totalLevel || 0;
   const respeitLevel = respeitStore.totalLevel || 0;
-  const vigorLevel = vigorStore.totalLevel || 0;
 
   // Calculate risk reduction from intelligence (1% per level)
   const riskReduction = intelligenceLevel * 0.01;
 
-  // Calculate max simultaneous operations from vigor (1 per 20 levels)
-  const maxOperations = Math.floor(1 + vigorLevel / 20);
+  // Get upgrades from store
+  const upgrades = commercialStore.upgrades;
+  
+  // Calculate max operations per day
+  const maxOperations = upgrades.operationsPerDay;
+  
+  // Count operations completed today
+  const operationsCompletedToday = commercialStore.getOperationsToday().length;
 
   // Load player data on mount
   useEffect(() => {
@@ -115,8 +120,8 @@ export default function CommercialCenterPage() {
       return;
     }
 
-    if (operations.length >= maxOperations) {
-      alert(`Você pode ter no máximo ${maxOperations} operação(ões) simultânea(s)`);
+    if (operationsCompletedToday >= maxOperations) {
+      alert(`Você já fez ${maxOperations} operação(ões) hoje. Volte amanhã!`);
       return;
     }
 
@@ -124,17 +129,26 @@ export default function CommercialCenterPage() {
 
     try {
       const business = BUSINESSES[selectedBusiness];
-      const returnAmount = amount * business.conversion;
+      
+      // Calculate effective conversion with upgrades
+      const effectiveConversion = business.baseConversion + (upgrades.conversionBonus / 100);
+      const returnAmount = amount * effectiveConversion;
+      
+      // Calculate effective tax
+      const effectiveTax = Math.max(0, business.baseTax - (upgrades.taxReduction / 100));
+      const taxAmount = returnAmount * effectiveTax;
+      const finalReturn = returnAmount - taxAmount;
 
       const operation: LaunderingOperation = {
         id: crypto.randomUUID(),
         businessType: selectedBusiness,
         amount,
-        returnAmount,
+        returnAmount: finalReturn,
         startTime: Date.now(),
         endTime: Date.now() + business.time,
         risk: business.risk,
         status: 'running',
+        date: commercialStore.getTodayDate(),
       };
 
       // Optimistic update
@@ -225,7 +239,9 @@ export default function CommercialCenterPage() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-6xl mx-auto mb-12"
       >
-        <h1 className="font-heading text-5xl mb-8 text-center">Centro Comercial</h1>
+        <h1 className="font-heading text-5xl mb-8 text-center bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end bg-clip-text text-transparent">
+          🏪 Centro Comercial
+        </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Dirty Money */}
@@ -263,11 +279,24 @@ export default function CommercialCenterPage() {
 
         {/* Skill Bonuses Info */}
         <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 mb-8">
-          <p className="text-sm text-slate-300 font-paragraph">
-            <span className="text-blue-400">Inteligência:</span> -{(riskReduction * 100).toFixed(0)}% risco |{' '}
-            <span className="text-purple-400">Respeito:</span> Nível {respeitLevel} |{' '}
-            <span className="text-yellow-400">Vigor:</span> Máx {maxOperations} operação(ões)
-          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm font-paragraph">
+            <div>
+              <span className="text-blue-400 block text-xs mb-1">Inteligência</span>
+              <span className="text-slate-300">-{(riskReduction * 100).toFixed(0)}% risco</span>
+            </div>
+            <div>
+              <span className="text-purple-400 block text-xs mb-1">Respeito</span>
+              <span className="text-slate-300">Nível {respeitLevel}</span>
+            </div>
+            <div>
+              <span className="text-yellow-400 block text-xs mb-1">Operações Hoje</span>
+              <span className="text-slate-300">{operationsCompletedToday}/{maxOperations}</span>
+            </div>
+            <div>
+              <span className="text-green-400 block text-xs mb-1">Upgrades</span>
+              <span className="text-slate-300">Taxa: -{(upgrades.taxReduction).toFixed(1)}%</span>
+            </div>
+          </div>
         </div>
       </motion.div>
 
@@ -290,14 +319,23 @@ export default function CommercialCenterPage() {
                 return (
                   <motion.div
                     key={key}
-                    whileHover={isUnlocked ? { scale: 1.05 } : {}}
+                    whileHover={isUnlocked ? { scale: 1.05, y: -5 } : {}}
                     onClick={() => isUnlocked && setSelectedBusiness(key)}
-                    className={`rounded-lg p-6 cursor-pointer transition-all border-2 ${
+                    className={`rounded-lg p-6 cursor-pointer transition-all border-2 relative overflow-hidden ${
                       isSelected
-                        ? 'border-logo-gold bg-slate-800/80 shadow-lg shadow-logo-gold/30'
-                        : 'border-slate-700 bg-slate-800/40'
+                        ? 'border-logo-gold bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-lg shadow-logo-gold/30'
+                        : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
                     } ${!isUnlocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
+                    {/* Background animation */}
+                    {isSelected && (
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-logo-gradient-start/10 to-transparent"
+                        animate={{ opacity: [0.3, 0.6, 0.3] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                      />
+                    )}
+
                     {!isUnlocked && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
                         <p className="text-sm text-slate-300">
@@ -306,37 +344,60 @@ export default function CommercialCenterPage() {
                       </div>
                     )}
 
-                    <h3 className="font-heading text-xl mb-3">{business.name}</h3>
-                    <p className="text-slate-300 text-sm mb-4 font-paragraph">
-                      {business.description}
-                    </p>
+                    <div className="relative z-10">
+                      <div className="text-4xl mb-2">{business.emoji}</div>
+                      <h3 className="font-heading text-lg mb-2">{business.name}</h3>
+                      <p className="text-slate-300 text-xs mb-4 font-paragraph">
+                        {business.description}
+                      </p>
 
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Risco:</span>
-                        <span
-                          className={
+                      <div className="space-y-2 text-xs">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 flex items-center gap-1">
+                            <Percent className="w-3 h-3" /> Taxa
+                          </span>
+                          <span className="text-red-400 font-heading">
+                            {(business.baseTax * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" /> Retorno
+                          </span>
+                          <span className="text-blue-400 font-heading">
+                            {(business.baseConversion * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className={`flex items-center gap-1 ${
                             business.risk === 'low'
                               ? 'text-green-400'
                               : business.risk === 'medium'
                                 ? 'text-yellow-400'
                                 : 'text-red-400'
-                          }
-                        >
-                          {business.risk === 'low'
-                            ? 'Baixo'
-                            : business.risk === 'medium'
-                              ? 'Médio'
-                              : 'Alto'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Conversão:</span>
-                        <span className="text-blue-400">{(business.conversion * 100).toFixed(0)}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Tempo:</span>
-                        <span className="text-purple-400">{formatTime(business.time)}</span>
+                          }`}>
+                            <Zap className="w-3 h-3" /> Risco
+                          </span>
+                          <span className={
+                            business.risk === 'low'
+                              ? 'text-green-400'
+                              : business.risk === 'medium'
+                                ? 'text-yellow-400'
+                                : 'text-red-400'
+                          }>
+                            {business.risk === 'low'
+                              ? 'Baixo'
+                              : business.risk === 'medium'
+                                ? 'Médio'
+                                : 'Alto'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> Tempo
+                          </span>
+                          <span className="text-purple-400 font-heading">{formatTime(business.time)}</span>
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -370,16 +431,16 @@ export default function CommercialCenterPage() {
 
               <button
                 onClick={handleLaunderMoney}
-                disabled={isProcessing || !inputAmount || operations.length >= maxOperations}
+                disabled={isProcessing || !inputAmount || operationsCompletedToday >= maxOperations}
                 className="w-full bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end hover:from-orange-600 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-heading py-3 rounded-lg transition-all"
               >
                 {isProcessing ? 'Processando...' : 'Lavar Dinheiro'}
               </button>
 
-              {operations.length >= maxOperations && (
+              {operationsCompletedToday >= maxOperations && (
                 <div className="flex items-center gap-2 text-yellow-400 text-sm">
                   <AlertCircle className="w-4 h-4" />
-                  <span>Limite de operações simultâneas atingido</span>
+                  <span>Limite de operações diárias atingido. Volte amanhã!</span>
                 </div>
               )}
             </div>
