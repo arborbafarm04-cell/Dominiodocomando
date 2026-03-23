@@ -113,6 +113,10 @@ export default function CommercialCenterPage() {
         overflow: hidden;
         border-bottom: 3px solid #00f0ff;
         box-shadow: 0 0 30px rgba(0, 240, 255, 0.3), inset 0 0 20px rgba(0, 240, 255, 0.1);
+        min-height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .banner-container::after {
@@ -144,11 +148,11 @@ export default function CommercialCenterPage() {
 
       {/* BANNER */}
       <div className="w-full pt-[120px] relative z-10">
-        <div className="banner-container w-full bg-black flex items-center justify-center">
+        <div className="banner-container w-full bg-black">
           <Image
             src="https://static.wixstatic.com/media/50f4bf_fd64ac461d5d41c2a6bc7639af7590ac~mv2.png"
             alt="Centro Comercial"
-            className="w-full h-auto object-cover"
+            className="h-auto w-auto"
             style={{ maxHeight: 'none' }}
           />
         </div>
