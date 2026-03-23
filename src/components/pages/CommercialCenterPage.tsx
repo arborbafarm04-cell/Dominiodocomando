@@ -115,7 +115,7 @@ export default function CommercialCenterPage() {
         box-shadow: 0 0 30px rgba(0, 240, 255, 0.3), inset 0 0 20px rgba(0, 240, 255, 0.1);
         min-height: 600px;
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         justify-content: center;
       }
 
