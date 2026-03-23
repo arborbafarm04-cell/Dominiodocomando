@@ -11,11 +11,10 @@ import {
   BusinessType,
 } from '@/store/commercialCenterStore';
 import { motion } from 'framer-motion';
-import { Clock, TrendingUp, DollarSign, Zap, Percent, ChevronRight } from 'lucide-react';
+import { DollarSign, TrendingUp, ChevronRight } from 'lucide-react';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
-import { CountdownTimer, CinematicBackground } from '@/components/CommercialCenterNeon';
-import { Image } from '@/components/ui/image';
+import { CinematicBackground, CountdownTimer, NeonSign, RiskIndicator } from '@/components/CommercialCenterNeonV2';
 
 export default function CommercialCenterPage() {
   const playerStore = usePlayerStore();
@@ -210,24 +209,6 @@ export default function CommercialCenterPage() {
     }
   };
 
-  const formatTime = (ms: number): string => {
-    const seconds = Math.floor((ms / 1000) % 60);
-    const minutes = Math.floor((ms / (1000 * 60)) % 60);
-    const hours = Math.floor(ms / (1000 * 60 * 60));
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${seconds}s`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${seconds}s`;
-    } else {
-      return `${seconds}s`;
-    }
-  };
-
-  const isBusinessUnlocked = (business: BusinessType): boolean => {
-    return true; // All businesses are now unlocked
-  };
-
   return (
     <CinematicBackground>
       <div className="min-h-screen text-white p-6">
@@ -311,7 +292,7 @@ export default function CommercialCenterPage() {
           </div>
         </motion.div>
 
-        {/* Commercial Center Building with Storefronts */}
+        {/* Commercial Center - 5 Storefronts Grid */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -322,112 +303,129 @@ export default function CommercialCenterPage() {
             COMÉRCIOS DISPONÍVEIS
           </h2>
 
-          {/* Building Container */}
-          <div className="relative max-w-6xl mx-auto mb-12">
-            {/* Background Building Image */}
-            <div className="relative rounded-lg overflow-hidden shadow-2xl shadow-orange-500/30 border-2 border-orange-500/40">
-              <Image
-                src="https://static.wixstatic.com/media/50f4bf_1452b172deb341eba2b065aa044ee8ce~mv2.png"
-                alt="Centro Comercial do Vale - Fachada Principal"
-                width={1200}
-                height={600}
-                className="w-full h-auto object-cover"
-              />
+          {/* 5 Storefronts Grid - Cyber Noir Theme */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12 max-w-7xl mx-auto">
+            {(Object.entries(BUSINESSES) as [BusinessType, typeof BUSINESSES[BusinessType]][]).map(
+              ([key, business], index) => {
+                const isSelected = selectedBusiness === key;
+                const activeOpsCount = getActiveOperationsForBusiness(key);
 
-              {/* Storefronts Overlay Grid */}
-              <div className="absolute inset-0 grid grid-cols-5 gap-2 p-8 pointer-events-none">
-                {(Object.entries(BUSINESSES) as [BusinessType, typeof BUSINESSES[BusinessType]][]).map(
-                  ([key, business], index) => {
-                    const isSelected = selectedBusiness === key;
-                    const activeOpsCount = getActiveOperationsForBusiness(key);
+                // Color mapping for each business
+                const colorMap: Record<BusinessType, { neon: string; glow: string; border: string }> = {
+                  'pizzaria-mama': { neon: '#ff6b35', glow: 'shadow-orange-500/40', border: 'border-orange-500/60' },
+                  'lavanderia-povao': { neon: '#00f0ff', glow: 'shadow-cyan-500/40', border: 'border-cyan-500/60' },
+                  'restaurante-fino': { neon: '#00ff88', glow: 'shadow-green-500/40', border: 'border-green-500/60' },
+                  'boate-luxo': { neon: '#ff00aa', glow: 'shadow-pink-500/40', border: 'border-pink-500/60' },
+                  'consultoria-elite': { neon: '#9d00ff', glow: 'shadow-purple-500/40', border: 'border-purple-500/60' },
+                };
 
-                    return (
-                      <motion.div
-                        key={key}
-                        whileHover={{ scale: 1.05 }}
-                        onClick={() => setSelectedBusiness(key)}
-                        className="pointer-events-auto cursor-pointer h-full flex flex-col"
-                      >
-                        {/* Storefront Card */}
+                const colors = colorMap[key];
+
+                return (
+                  <motion.div
+                    key={key}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    onClick={() => setSelectedBusiness(key)}
+                    className="cursor-pointer group"
+                  >
+                    {/* Storefront Card */}
+                    <motion.div
+                      className={`relative rounded-lg border-2 backdrop-blur-md overflow-hidden transition-all ${
+                        isSelected
+                          ? `${colors.border} bg-gradient-to-b from-slate-900/80 to-slate-950/80 ${colors.glow} shadow-lg`
+                          : `border-slate-600/40 bg-gradient-to-b from-slate-800/60 to-slate-900/60 hover:${colors.border} shadow-lg shadow-slate-900/30`
+                      }`}
+                    >
+                      {/* Neon Sign Header */}
+                      <div className="p-4 text-center border-b border-slate-700/50">
+                        <NeonSign text={business.name} color={colors.neon} />
+                      </div>
+
+                      {/* Business Image/Icon Area */}
+                      <div className="relative h-32 bg-gradient-to-b from-slate-800/50 to-slate-900/50 flex items-center justify-center overflow-hidden">
+                        {/* Animated background pattern */}
                         <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className={`relative flex-1 rounded-lg border-2 transition-all backdrop-blur-sm overflow-hidden group ${
-                            isSelected
-                              ? 'border-logo-gradient-start bg-gradient-to-b from-orange-900/80 to-red-900/80 shadow-lg shadow-orange-500/60'
-                              : 'border-slate-600/60 bg-gradient-to-b from-slate-800/60 to-slate-900/60 hover:border-orange-500/80 shadow-lg shadow-slate-900/40'
-                          }`}
-                        >
-                          {/* Storefront Header - Sign */}
-                          <div className="bg-gradient-to-r from-orange-600 to-red-600 px-3 py-2 text-center border-b-2 border-orange-400/50">
-                            <h3 className="font-heading text-sm text-white truncate">
-                              {business.name}
-                            </h3>
+                          className="absolute inset-0 opacity-20"
+                          animate={{ rotate: [0, 360] }}
+                          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                          style={{
+                            background: `conic-gradient(from 0deg, ${colors.neon}, transparent)`,
+                          }}
+                        />
+                        <div className="relative z-10 text-center">
+                          <div className="text-4xl mb-2">
+                            {key === 'pizzaria-mama' && '🍕'}
+                            {key === 'lavanderia-povao' && '🧺'}
+                            {key === 'restaurante-fino' && '🍽️'}
+                            {key === 'boate-luxo' && '🎵'}
+                            {key === 'consultoria-elite' && '💼'}
                           </div>
+                        </div>
+                      </div>
 
-                          {/* Storefront Content */}
-                          <div className="flex-1 p-3 flex flex-col justify-between">
-                            {/* Tagline */}
-                            <p className="text-xs text-slate-200 font-paragraph italic text-center mb-2 line-clamp-2">
-                              {business.tagline}
-                            </p>
+                      {/* Business Stats */}
+                      <div className="p-4 space-y-3">
+                        {/* Taxa */}
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-slate-400 font-paragraph">TAXA</span>
+                          <span className="font-heading text-sm" style={{ color: colors.neon }}>
+                            {(business.baseTax * 100).toFixed(0)}%
+                          </span>
+                        </div>
 
-                            {/* Business Stats */}
-                            <div className="space-y-1 text-xs">
-                              <div className="flex justify-between items-center">
-                                <span className="text-slate-300">Taxa:</span>
-                                <span className="text-red-300 font-heading">
-                                  {(business.baseTax * 100).toFixed(0)}%
-                                </span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-slate-300">Tempo:</span>
-                                <span className="text-purple-300 font-heading">
-                                  {Math.floor(business.time / (60 * 60 * 1000))}h
-                                </span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-slate-300">Risco:</span>
-                                <span className={`font-heading ${
-                                  business.risk === 'low'
-                                    ? 'text-green-300'
-                                    : business.risk === 'medium'
-                                      ? 'text-yellow-300'
-                                      : 'text-red-300'
-                                }`}>
-                                  {business.risk === 'low'
-                                    ? 'Baixo'
-                                    : business.risk === 'medium'
-                                      ? 'Médio'
-                                      : 'Alto'}
-                                </span>
-                              </div>
-                            </div>
+                        {/* Valor */}
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-slate-400 font-paragraph">VALOR MÁX</span>
+                          <span className="font-heading text-sm text-green-400">
+                            ${(business.baseAmount || 1000).toLocaleString()}
+                          </span>
+                        </div>
 
-                            {/* Active Operations Badge */}
-                            {activeOpsCount > 0 && (
-                              <div className="mt-2 pt-2 border-t border-slate-600/50">
-                                <span className="text-xs text-blue-300 font-heading block text-center">
-                                  {activeOpsCount} ativa{activeOpsCount !== 1 ? 's' : ''}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                        {/* Tempo */}
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-slate-400 font-paragraph">TEMPO</span>
+                          <span className="font-heading text-sm text-blue-400">
+                            {Math.floor(business.time / (60 * 60 * 1000))}h
+                          </span>
+                        </div>
 
-                          {/* Storefront Door Indicator */}
-                          <div className={`h-1 transition-all ${
-                            isSelected
-                              ? 'bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end'
-                              : 'bg-slate-600/40'
-                          }`} />
-                        </motion.div>
-                      </motion.div>
-                    );
-                  }
-                )}
-              </div>
-            </div>
+                        {/* Risk Indicator */}
+                        <div className="flex justify-between items-center pt-2 border-t border-slate-700/50">
+                          <span className="text-xs text-slate-400 font-paragraph">RISCO</span>
+                          <RiskIndicator risk={business.risk} />
+                        </div>
+
+                        {/* Active Operations Badge */}
+                        {activeOpsCount > 0 && (
+                          <motion.div
+                            className="mt-3 pt-3 border-t border-slate-700/50 text-center"
+                            animate={{ opacity: [0.7, 1, 0.7] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          >
+                            <span className="text-xs font-heading" style={{ color: colors.neon }}>
+                              {activeOpsCount} OPERAÇÃO{activeOpsCount !== 1 ? 'S' : ''} ATIVA{activeOpsCount !== 1 ? 'S' : ''}
+                            </span>
+                          </motion.div>
+                        )}
+                      </div>
+
+                      {/* Selection Indicator */}
+                      {isSelected && (
+                        <motion.div
+                          className="absolute top-2 right-2 w-3 h-3 rounded-full"
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 1, repeat: Infinity }}
+                          style={{ backgroundColor: colors.neon }}
+                        />
+                      )}
+                    </motion.div>
+                  </motion.div>
+                );
+              }
+            )}
           </div>
 
           {/* Input and Launch */}
