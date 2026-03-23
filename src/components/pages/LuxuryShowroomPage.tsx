@@ -1,19 +1,18 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Image } from '@/components/ui/image';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import BlingModal from '@/components/BlingModal';
-import LuxuryNPCDialog from '@/components/LuxuryNPCDialog';
-import Luxury3DShowroom from '@/components/Luxury3DShowroom';
 import CreditCardPurchaseAnimation from '@/components/CreditCardPurchaseAnimation';
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
 import LiveNPC from '@/components/LiveNPC';
-import { usePlayerStore } from '@/store/playerStore';
-import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
-import { BaseCrudService } from '@/integrations';
+import Luxury3DShowroom from '@/components/Luxury3DShowroom';
+import LuxuryNPCDialog from '@/components/LuxuryNPCDialog';
+import { Image } from '@/components/ui/image';
 import { Players } from '@/entities';
+import { BaseCrudService } from '@/integrations';
+import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
+import { usePlayerStore } from '@/store/playerStore';
+import { useEffect, useState } from 'react';
 
-import { getLuxurySystem, getBackgroundColorByLevel, getBackgroundByLevel } from '../../data/luxoItems';
+import { getBackgroundByLevel, getLuxurySystem } from '../../data/luxoItems';
 
 export default function LuxuryShowroomPage() {
   const [showItemsModal, setShowItemsModal] = useState(false);
