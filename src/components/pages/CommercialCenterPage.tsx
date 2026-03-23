@@ -411,7 +411,7 @@ export default function CommercialCenterPage() {
               {/* Image on left */}
               <div className="commerce-image">
                 <Image
-                  src="https://static.wixstatic.com/media/50f4bf_99e20883912b406585ce129ac5b8e885~mv2.png?originWidth=192&originHeight=256"
+                  src="https://static.wixstatic.com/media/50f4bf_cbb8816f8c7c4767a24851c30377a5aa~mv2.png"
                   alt={op.name}
                   className="w-full h-full object-cover"
                   width={220}
