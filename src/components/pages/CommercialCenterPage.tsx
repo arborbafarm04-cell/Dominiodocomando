@@ -26,6 +26,14 @@ interface CompletedOperation {
 export default function CommercialCenterPage() {
   const [operations, setOperations] = useState<CommerceOperation[]>([
     {
+      id: 'commerce1',
+      name: 'Administradora de Bens',
+      value: 5000,
+      tax: 50,
+      duration: 18000, // 5 hours
+      isActive: false,
+    },
+    {
       id: 'commerce2',
       name: 'Administradora de Bens',
       value: 5000,
