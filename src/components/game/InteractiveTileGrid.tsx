@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { useNavigate } from 'react-router-dom';
 import { usePlayerStore } from '@/store/playerStore';
+import { AAA3DVisualSystem } from '@/systems/AAA3DVisualSystem';
 
 interface TileData {
   id: number;
@@ -97,6 +98,8 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
   const navigate = useNavigate();
   const { level } = usePlayerStore();
   const [sceneReady, setSceneReady] = useState(false);
+  const aaa3dSystemRef = useRef<AAA3DVisualSystem | null>(null);
+  const lastHoveredBuildingRef = useRef<THREE.Group | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -155,6 +158,10 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     pointLight.position.set(gridTotalWidth / 2, maxDim * 1.2, gridTotalHeight / 2);
     pointLight.castShadow = true;
     scene.add(pointLight);
+
+    // Initialize AAA 3D Visual System
+    const aaa3dSystem = new AAA3DVisualSystem(scene, camera, renderer);
+    aaa3dSystemRef.current = aaa3dSystem;
 
     // ===== CREATE REALISTIC GROUND TEXTURE =====
     // Create canvas texture for beaten earth with variations
@@ -450,6 +457,12 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
 
         luxuryStoreRef.current.model = storeGroup;
         luxuryStoreGroupRef.current = storeGroup;
+
+        // Apply AAA visuals
+        if (aaa3dSystemRef.current) {
+          aaa3dSystemRef.current.applyBuildingVisuals(storeGroup, 'luxury');
+          aaa3dSystemRef.current.addGroundShadow(storeGroup, 4);
+        }
       },
       undefined,
       (error) => {
@@ -541,6 +554,12 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
 
         qgRef.current.model = qgGroup;
         qgGroupRef.current = qgGroup;
+
+        // Apply AAA visuals
+        if (aaa3dSystemRef.current) {
+          aaa3dSystemRef.current.applyBuildingVisuals(qgGroup, 'qg');
+          aaa3dSystemRef.current.addGroundShadow(qgGroup, 4);
+        }
       },
       undefined,
       (error) => {
@@ -766,6 +785,12 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
         scene.add(delegaciaGroup);
 
         delegaciaGroupRef.current = delegaciaGroup;
+
+        // Apply AAA visuals
+        if (aaa3dSystemRef.current) {
+          aaa3dSystemRef.current.applyBuildingVisuals(delegaciaGroup, 'delegacia');
+          aaa3dSystemRef.current.addGroundShadow(delegaciaGroup, 2);
+        }
       },
       undefined,
       (error) => {
@@ -918,6 +943,12 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     const animate = () => {
       requestAnimationFrame(animate);
       controls.update();
+
+      // Update AAA 3D visual effects
+      if (aaa3dSystemRef.current) {
+        aaa3dSystemRef.current.update(0.016); // ~60fps delta time
+      }
+
       renderer.render(scene, camera);
     };
     animate();
@@ -956,6 +987,11 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
       instancedMesh.dispose();
       controls.dispose();
       renderer.dispose();
+
+      // Dispose AAA 3D system
+      if (aaa3dSystemRef.current) {
+        aaa3dSystemRef.current.dispose();
+      }
 
       setSceneReady(false);
     };
