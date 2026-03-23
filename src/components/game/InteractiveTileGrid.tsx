@@ -94,6 +94,8 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
   const delegaciaGroupRef = useRef<THREE.Group | null>(null);
   const customObjectsRef = useRef<Map<number, THREE.Group>>(new Map());
   const giroAsfaltoGroupRef = useRef<THREE.Group | null>(null);
+  const centroComercialGroupRef = useRef<THREE.Group | null>(null);
+  const centroComunitarioGroupRef = useRef<THREE.Group | null>(null);
   const blockedTilesRef = useRef<Set<string>>(new Set());
   const navigate = useNavigate();
   const { level } = usePlayerStore();
@@ -807,6 +809,178 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
       }
     );
 
+    // ===== LOAD CENTRO COMERCIAL 3D MODEL (8 tiles - right margin) =====
+    // Position the centro comercial on the right margin of the grid
+    const centroComercialSize = 4; // 4 tiles wide
+    const centroComercialDepth = 2; // 2 tiles deep (8 tiles total)
+    const centroComercialGridX = 32; // Right margin
+    const centroComercialGridZ = 2; // Upper area
+
+    // Convert grid coordinates to world coordinates
+    const centroComercialCenterGridX = centroComercialGridX + centroComercialSize / 2;
+    const centroComercialCenterGridZ = centroComercialGridZ + centroComercialDepth / 2;
+
+    const centroComercialWorldX = startX + centroComercialCenterGridX * tileSize;
+    const centroComercialWorldZ = startZ + centroComercialCenterGridZ * tileSize;
+
+    console.log('Centro Comercial Position:', {
+      gridX: centroComercialGridX,
+      gridZ: centroComercialGridZ,
+      worldX: centroComercialWorldX,
+      worldZ: centroComercialWorldZ,
+      gridSize: `${centroComercialSize}x${centroComercialDepth}`,
+    });
+
+    gltfLoader.load(
+      'https://static.wixstatic.com/3d/50f4bf_8b894931f3c241f285c4292c4842c4f0.glb',
+      (gltf) => {
+        const model = gltf.scene;
+
+        // Create a group for the centro comercial
+        const centroComercialGroup = new THREE.Group();
+
+        // Position at center of platform
+        centroComercialGroup.position.set(centroComercialWorldX, 0, centroComercialWorldZ);
+
+        // Calculate bounding box to determine proper scale
+        const bbox = new THREE.Box3().setFromObject(model);
+        const size = bbox.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+
+        // Scale to fit exactly 8 tiles
+        const targetSize = Math.max(centroComercialSize * tileSize, centroComercialDepth * tileSize);
+        const scale = targetSize / maxDim;
+        model.scale.set(scale, scale, scale);
+
+        // Center the model within the group
+        bbox.setFromObject(model);
+        const center = bbox.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+
+        // Ensure model sits on the ground (y = 0)
+        bbox.setFromObject(model);
+        const bottomY = bbox.min.y;
+        model.position.y -= bottomY;
+
+        // Apply shadow properties recursively to all children
+        model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            if (child.material instanceof THREE.Material) {
+              if (child.material instanceof THREE.MeshStandardMaterial) {
+                child.material.emissiveIntensity = 0.3;
+                child.material.metalness = Math.max(0, child.material.metalness - 0.2);
+                child.material.roughness = Math.min(1, child.material.roughness + 0.1);
+              }
+            }
+          }
+        });
+
+        centroComercialGroup.add(model);
+        centroComercialGroup.userData = { clickable: true, type: 'centro-comercial' };
+        scene.add(centroComercialGroup);
+
+        centroComercialGroupRef.current = centroComercialGroup;
+
+        // Apply AAA visuals
+        if (aaa3dSystemRef.current) {
+          aaa3dSystemRef.current.applyBuildingVisuals(centroComercialGroup, 'centro-comercial');
+          aaa3dSystemRef.current.addGroundShadow(centroComercialGroup, 4);
+        }
+      },
+      undefined,
+      (error) => {
+        console.warn('Failed to load Centro Comercial 3D model:', error);
+      }
+    );
+
+    // ===== LOAD CENTRO COMUNITÁRIO 3D MODEL (8 tiles - right margin, next to Centro Comercial) =====
+    // Position the centro comunitário next to the centro comercial
+    const centroComunitarioSize = 4; // 4 tiles wide
+    const centroComunitarioDepth = 2; // 2 tiles deep (8 tiles total)
+    const centroComunitarioGridX = 32; // Right margin (same as centro comercial)
+    const centroComunitarioGridZ = 5; // Below centro comercial with spacing
+
+    // Convert grid coordinates to world coordinates
+    const centroComunitarioCenterGridX = centroComunitarioGridX + centroComunitarioSize / 2;
+    const centroComunitarioCenterGridZ = centroComunitarioGridZ + centroComunitarioDepth / 2;
+
+    const centroComunitarioWorldX = startX + centroComunitarioCenterGridX * tileSize;
+    const centroComunitarioWorldZ = startZ + centroComunitarioCenterGridZ * tileSize;
+
+    console.log('Centro Comunitário Position:', {
+      gridX: centroComunitarioGridX,
+      gridZ: centroComunitarioGridZ,
+      worldX: centroComunitarioWorldX,
+      worldZ: centroComunitarioWorldZ,
+      gridSize: `${centroComunitarioSize}x${centroComunitarioDepth}`,
+    });
+
+    gltfLoader.load(
+      'https://static.wixstatic.com/3d/50f4bf_1641be50f6a74954848cfaae281d6b15.glb',
+      (gltf) => {
+        const model = gltf.scene;
+
+        // Create a group for the centro comunitário
+        const centroComunitarioGroup = new THREE.Group();
+
+        // Position at center of platform
+        centroComunitarioGroup.position.set(centroComunitarioWorldX, 0, centroComunitarioWorldZ);
+
+        // Calculate bounding box to determine proper scale
+        const bbox = new THREE.Box3().setFromObject(model);
+        const size = bbox.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+
+        // Scale to fit exactly 8 tiles
+        const targetSize = Math.max(centroComunitarioSize * tileSize, centroComunitarioDepth * tileSize);
+        const scale = targetSize / maxDim;
+        model.scale.set(scale, scale, scale);
+
+        // Center the model within the group
+        bbox.setFromObject(model);
+        const center = bbox.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+
+        // Ensure model sits on the ground (y = 0)
+        bbox.setFromObject(model);
+        const bottomY = bbox.min.y;
+        model.position.y -= bottomY;
+
+        // Apply shadow properties recursively to all children
+        model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            if (child.material instanceof THREE.Material) {
+              if (child.material instanceof THREE.MeshStandardMaterial) {
+                child.material.emissiveIntensity = 0.3;
+                child.material.metalness = Math.max(0, child.material.metalness - 0.2);
+                child.material.roughness = Math.min(1, child.material.roughness + 0.1);
+              }
+            }
+          }
+        });
+
+        centroComunitarioGroup.add(model);
+        centroComunitarioGroup.userData = { clickable: true, type: 'centro-comunitario' };
+        scene.add(centroComunitarioGroup);
+
+        centroComunitarioGroupRef.current = centroComunitarioGroup;
+
+        // Apply AAA visuals
+        if (aaa3dSystemRef.current) {
+          aaa3dSystemRef.current.applyBuildingVisuals(centroComunitarioGroup, 'centro-comunitario');
+          aaa3dSystemRef.current.addGroundShadow(centroComunitarioGroup, 4);
+        }
+      },
+      undefined,
+      (error) => {
+        console.warn('Failed to load Centro Comunitário 3D model:', error);
+      }
+    );
+
     // ===== ORBIT CONTROLS WITH CUSTOM CONFIGURATION =====
     const controls = new OrbitControls(camera, renderer.domElement);
 
@@ -870,6 +1044,26 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
           } else if (level >= 20) {
             navigate('/bribery-delegado');
           }
+          return;
+        }
+      }
+
+      // Check if centro comercial was clicked
+      if (centroComercialGroupRef.current) {
+        const centroComercialIntersects = raycasterRef.current.intersectObject(centroComercialGroupRef.current, true);
+        if (centroComercialIntersects.length > 0) {
+          console.log('Centro Comercial clicked from grid!');
+          navigate('/centro-comercial');
+          return;
+        }
+      }
+
+      // Check if centro comunitário was clicked
+      if (centroComunitarioGroupRef.current) {
+        const centroComunitarioIntersects = raycasterRef.current.intersectObject(centroComunitarioGroupRef.current, true);
+        if (centroComunitarioIntersects.length > 0) {
+          console.log('Centro Comunitário clicked from grid!');
+          navigate('/investment-center');
           return;
         }
       }
