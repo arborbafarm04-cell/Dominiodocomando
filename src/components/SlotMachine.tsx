@@ -572,4 +572,4 @@ function SlotsDisplay() {
   );
 }
 
-export default
+export default SlotsDisplay;
