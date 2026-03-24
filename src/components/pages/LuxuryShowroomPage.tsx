@@ -342,7 +342,6 @@ export default function LuxuryShowroomPage() {
   return (
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
-
       <div className="relative flex-1 overflow-hidden" style={{ background: getBackgroundByLevel(level) }}>
         <div className="absolute inset-0">
           <Image src={SHOWROOM_BG} alt="showroom" className="absolute h-full w-full object-cover opacity-90" width={1920} height={1080} />
@@ -399,14 +398,7 @@ export default function LuxuryShowroomPage() {
                     <p className="text-[11px] uppercase tracking-[0.35em] text-white/48">Dinheiro limpo</p>
                     <p className="mt-2 text-2xl font-black text-white">R$ {money(cleanMoney)}</p>
                   </div>
-                  <div className="rounded-3xl border p-4 backdrop-blur-md" style={{ borderColor: theme.accentSoft, background: 'rgba(0,0,0,.28)' }}>
-                    <p className="text-[11px] uppercase tracking-[0.35em] text-white/48">Itens comprados</p>
-                    <p className="mt-2 text-2xl font-black text-white">{ownedCount}/6</p>
-                  </div>
-                  <div className="rounded-3xl border p-4 backdrop-blur-md" style={{ borderColor: theme.accentSoft, background: 'rgba(0,0,0,.28)' }}>
-                    <p className="text-[11px] uppercase tracking-[0.35em] text-white/48">Presença total</p>
-                    <p className="mt-2 text-2xl font-black text-white">+{totalBonus}%</p>
-                  </div>
+
                 </div>
 
                 <div className="relative mt-4 flex min-h-[500px] items-end justify-between gap-6 overflow-hidden rounded-[30px] border border-white/10 bg-black/18 px-3 sm:px-6">
@@ -648,7 +640,6 @@ export default function LuxuryShowroomPage() {
           </div>
         </div>
       </div>
-
       {/* MOBILE DIALOG */}
       <AnimatePresence>
         {showDialog && (
@@ -703,7 +694,6 @@ export default function LuxuryShowroomPage() {
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* HINT */}
       <AnimatePresence>
         {showHint && !showDialog && (
@@ -731,7 +721,6 @@ export default function LuxuryShowroomPage() {
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* ITEM SHOWCASE */}
       <AnimatePresence>
         {showItemShowcase && selectedItem && (
@@ -852,7 +841,6 @@ export default function LuxuryShowroomPage() {
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* CARD */}
       <AnimatePresence>
         {showCard && selectedItem && (
@@ -949,7 +937,6 @@ export default function LuxuryShowroomPage() {
           </motion.div>
         )}
       </AnimatePresence>
-
       <Footer />
     </div>
   );
