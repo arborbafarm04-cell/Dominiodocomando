@@ -447,13 +447,14 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     // ===== LOAD LUXURY STORE 3D MODEL =====
     const gltfLoader = new GLTFLoader();
 
-    // Calculate position for 4x4 luxury store (16 tiles) - REPOSITIONED to upper-left area
+    // Calculate position for 4x4 luxury store (16 tiles) - POSITIONED at tile 10
     const storeSize = 4; // 4x4 tiles
 
-    // Position the store in the upper-left quadrant (leaving center for another building)
-    // Grid is 40x20, so we place it at approximately grid position (6, 3)
-    const storeGridX = 6;
-    const storeGridZ = 3;
+    // Position the store at tile 10
+    // Tile 10 in a linear grid corresponds to grid position (10, 0) when counting from left to right
+    // For a 40-wide grid: tile 10 = x:10, z:0
+    const storeGridX = 10;
+    const storeGridZ = 0;
 
     // Convert grid coordinates to world coordinates
     // Grid position (6, 3) means starting at tile 6,3
