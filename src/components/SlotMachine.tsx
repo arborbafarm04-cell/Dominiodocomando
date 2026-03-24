@@ -5,7 +5,6 @@ import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
 import { useSpinVaultStore } from '@/store/spinVaultStore';
 import { usePlayerStore } from '@/store/playerStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { applySlotReward } from '@/game/gameCore';
 
 export const SLOT_ITEMS = [
   {
@@ -47,6 +46,7 @@ export const SLOT_ITEMS = [
 
 const MULTIPLIER_OPTIONS = [1, 2, 5, 10];
 const REEL_STOP_TIMES = [1600, 2200, 2800];
+
 const TIER_STYLES = {
   dead: 'text-white/70',
   low: 'text-green-400',
@@ -268,7 +268,9 @@ function SpinButton() {
     if (spins <= 0 || isSpinning) return;
     if (!deductSpins(selectedMultiplier)) return;
     setIsSpinning(true);
-    window.dispatchEvent(new CustomEvent('spinSlots', { detail: { multiplier: selectedMultiplier } }));
+    window.dispatchEvent(
+      new CustomEvent('spinSlots', { detail: { multiplier: selectedMultiplier } }),
+    );
   };
 
   return (
@@ -276,7 +278,9 @@ function SpinButton() {
       <div className="flex w-full flex-col items-center gap-3">
         <div className="text-secondary font-heading text-sm md:text-base">
           Multiplicador:{' '}
-          <span className="font-bold text-lg text-logo-gradient-start">x{selectedMultiplier}</span>
+          <span className="font-bold text-lg text-logo-gradient-start">
+            x{selectedMultiplier}
+          </span>
         </div>
 
         <div className="flex flex-wrap justify-center gap-2">
@@ -323,30 +327,36 @@ function SlotsDisplay() {
     multiplier,
     setDirtMoney,
     setMultiplier,
-    addDirtMoney,
-    isSpinning,
     setIsSpinning,
   } = useGameStore();
 
-  const { addDirtyMoney } = useDirtyMoneyStore();
-  const { barracoLevel } = usePlayerStore();
-
+  const { dirtyMoney, setDirtyMoney } = useDirtyMoneyStore();
   const [slots, setSlots] = useState([0, 1, 2]);
   const [spinningIndices, setSpinningIndices] = useState([false, false, false]);
   const [resultMessage, setResultMessage] = useState('');
   const [resultTier, setResultTier] = useState<ResultTier>('dead');
   const [showPrisonModal, setShowPrisonModal] = useState(false);
-  const [animatedMoneys, setAnimatedMoneys] = useState<{ id: string; amount: number; tier: ResultTier }[]>([]);
+  const [animatedMoneys, setAnimatedMoneys] = useState<
+    { id: string; amount: number; tier: ResultTier }[]
+  >([]);
   const [machinePulse, setMachinePulse] = useState<ResultTier>('dead');
 
-  const intervalsRef = useRef<Array<ReturnType<typeof setInterval> | null>>([null, null, null]);
+  const intervalsRef = useRef<Array<ReturnType<typeof setInterval> | null>>([
+    null,
+    null,
+    null,
+  ]);
   const timeoutsRef = useRef<Array<ReturnType<typeof setTimeout> | null>>([]);
 
   const currentFrameGlow = useMemo(() => {
-    if (machinePulse === 'mega') return 'shadow-[0_0_45px_rgba(255,215,0,0.55)] border-yellow-300';
-    if (machinePulse === 'high') return 'shadow-[0_0_35px_rgba(255,140,0,0.45)] border-orange-400';
-    if (machinePulse === 'medium') return 'shadow-[0_0_28px_rgba(255,105,180,0.32)] border-fuchsia-400';
-    if (machinePulse === 'prison') return 'shadow-[0_0_28px_rgba(255,0,0,0.4)] border-red-500';
+    if (machinePulse === 'mega')
+      return 'shadow-[0_0_45px_rgba(255,215,0,0.55)] border-yellow-300';
+    if (machinePulse === 'high')
+      return 'shadow-[0_0_35px_rgba(255,140,0,0.45)] border-orange-400';
+    if (machinePulse === 'medium')
+      return 'shadow-[0_0_28px_rgba(255,105,180,0.32)] border-fuchsia-400';
+    if (machinePulse === 'prison')
+      return 'shadow-[0_0_28px_rgba(255,0,0,0.4)] border-red-500';
     return 'shadow-[0_0_18px_rgba(255,255,255,0.12)] border-secondary';
   }, [machinePulse]);
 
@@ -371,7 +381,7 @@ function SlotsDisplay() {
       const customEvent = event as CustomEvent;
       const selectedMultiplier = customEvent.detail?.multiplier || 1;
       const outcome = generateOutcome(selectedMultiplier, multiplier);
-      const tempSlots = [...slots];
+      const tempSlots = [0, 1, 2];
 
       setResultMessage('');
       setResultTier('dead');
@@ -389,8 +399,9 @@ function SlotsDisplay() {
 
       REEL_STOP_TIMES.forEach((time, index) => {
         const timeout = setTimeout(() => {
-          if (intervalsRef.current[index]) {
-            clearInterval(intervalsRef.current[index] as ReturnType<typeof setInterval>);
+          const interval = intervalsRef.current[index];
+          if (interval) {
+            clearInterval(interval);
             intervalsRef.current[index] = null;
           }
 
@@ -403,32 +414,19 @@ function SlotsDisplay() {
             setResultTier(outcome.tier);
             setMachinePulse(outcome.tier);
 
+            const currentDirty = Math.max(dirtMoney, dirtyMoney);
+
             if (outcome.prison) {
-              const lostMoney = Math.floor(dirtMoney * 0.3);
-              setDirtMoney(Math.max(0, dirtMoney - lostMoney));
+              const lostMoney = Math.floor(currentDirty * 0.3);
+              const nextDirty = Math.max(0, currentDirty - lostMoney);
+              setDirtMoney(nextDirty);
+              setDirtyMoney(nextDirty);
               setShowPrisonModal(true);
             } else {
               if (outcome.moneyReward > 0) {
-                const corePlayer = {
-                  dirtyMoney: dirtMoney,
-                  cleanMoney: 0,
-                  skills: {
-                    ataque: 0,
-                    defesa: 0,
-                    inteligencia: 0,
-                    agilidade: 0,
-                    respeito: 0,
-                    vigor: 0,
-                  },
-                  barracoLevel: barracoLevel || 1,
-                  investments: 0,
-                };
-
-                const coreResult = applySlotReward(corePlayer, outcome.moneyReward);
-
-                setDirtMoney(coreResult.dirtyMoney);
-                addDirtMoney(outcome.moneyReward);
-                addDirtyMoney(outcome.moneyReward);
+                const nextDirty = currentDirty + outcome.moneyReward;
+                setDirtMoney(nextDirty);
+                setDirtyMoney(nextDirty);
                 showMoney(outcome.moneyReward, outcome.tier);
               }
 
@@ -454,13 +452,11 @@ function SlotsDisplay() {
       window.removeEventListener('spinSlots', handleSpinEvent);
     };
   }, [
-    slots,
     multiplier,
     dirtMoney,
-    barracoLevel,
-    addDirtMoney,
-    addDirtyMoney,
+    dirtyMoney,
     setDirtMoney,
+    setDirtyMoney,
     setMultiplier,
     setIsSpinning,
   ]);
@@ -483,7 +479,12 @@ function SlotsDisplay() {
 
       <AnimatePresence>
         {animatedMoneys.map((money) => (
-          <AnimatedMoney key={money.id} amount={money.amount} id={money.id} tier={money.tier} />
+          <AnimatedMoney
+            key={money.id}
+            amount={money.amount}
+            id={money.id}
+            tier={money.tier}
+          />
         ))}
       </AnimatePresence>
 
@@ -551,9 +552,13 @@ function SlotsDisplay() {
             style={{ filter: 'drop-shadow(0 0 30px rgba(255,0,0,0.8))' }}
           >
             <div className="mb-4 text-6xl animate-pulse">🚔</div>
-            <h2 className="mb-2 font-heading text-3xl font-black text-red-400">ENQUADRO</h2>
+            <h2 className="mb-2 font-heading text-3xl font-black text-red-400">
+              ENQUADRO
+            </h2>
             <p className="mb-4 font-paragraph text-white">A polícia te pegou no corre.</p>
-            <p className="mb-6 font-paragraph text-red-200">30% do dinheiro sujo foi embora.</p>
+            <p className="mb-6 font-paragraph text-red-200">
+              30% do dinheiro sujo foi embora.
+            </p>
             <button
               onClick={() => setShowPrisonModal(false)}
               className="rounded-xl bg-red-600 px-6 py-3 font-heading font-black text-white transition-all hover:bg-red-700"
@@ -567,19 +572,4 @@ function SlotsDisplay() {
   );
 }
 
-export default function SlotMachine() {
-  const { hasInitialized, setDirtMoney, setMultiplier, setHasInitialized } = useGameStore();
-  const { initializeVault } = useSpinVaultStore();
-  const { barracoLevel } = usePlayerStore();
-
-  useEffect(() => {
-    if (!hasInitialized) {
-      setDirtMoney(0);
-      setMultiplier(1);
-      initializeVault(barracoLevel);
-      setHasInitialized(true);
-    }
-  }, [hasInitialized, setDirtMoney, setMultiplier, setHasInitialized, initializeVault, barracoLevel]);
-
-  return (
-    <div className="flex flex-c
+export default
