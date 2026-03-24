@@ -35,14 +35,8 @@ export const CentroComercial3D = ({
         // Create a group for the centro comercial
         const group = new THREE.Group();
 
-        // Calculate center position between tiles 40, 80, 120, 160
-        // These tiles form a pattern, center should be at their midpoint
-        // Tile 40: (40, 0), Tile 80: (80, 0), Tile 120: (40, 80), Tile 160: (80, 80)
-        // Center: X = 60, Z = 40
-        const centerX = 60;
-        const centerZ = 40;
-        
-        group.position.set(centerX, 0, centerZ);
+        // Use the position prop passed from parent component
+        group.position.set(position.x, 0, position.z);
 
         // Calculate bounding box to determine proper scale
         const bbox = new THREE.Box3().setFromObject(model);
@@ -64,9 +58,6 @@ export const CentroComercial3D = ({
         bbox.setFromObject(model);
         const bottomY = bbox.min.y;
         model.position.y -= bottomY;
-
-        // Rotate 180 degrees so the front faces inward (toward the center of the grid)
-        model.rotation.y = Math.PI;
 
         // Apply shadow properties recursively to all children
         model.traverse((child) => {
