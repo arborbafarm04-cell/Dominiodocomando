@@ -35,16 +35,22 @@ export const CentroComercial3D = ({
         // Create a group for the centro comercial
         const group = new THREE.Group();
 
-        // Position at center of platform
-        group.position.set(position.x, 0, position.z);
+        // Calculate center position between tiles 40, 80, 120, 160
+        // These tiles form a pattern, center should be at their midpoint
+        // Tile 40: (40, 0), Tile 80: (80, 0), Tile 120: (40, 80), Tile 160: (80, 80)
+        // Center: X = 60, Z = 40
+        const centerX = 60;
+        const centerZ = 40;
+        
+        group.position.set(centerX, 0, centerZ);
 
         // Calculate bounding box to determine proper scale
         const bbox = new THREE.Box3().setFromObject(model);
         const modelSize = bbox.getSize(new THREE.Vector3());
         const maxDim = Math.max(modelSize.x, modelSize.y, modelSize.z);
 
-        // Scale to fit exactly 8 tiles (2x4 or 4x2 format)
-        const targetSize = size * 1; // 8 units in world space
+        // Scale to fit 4 tiles (2x2 format) - approximately 20 units in world space
+        const targetSize = size * 2; // 20 units for 4 tiles
         const scale = targetSize / maxDim;
         model.scale.set(scale, scale, scale);
         originalScaleRef.current = scale;
@@ -58,6 +64,9 @@ export const CentroComercial3D = ({
         bbox.setFromObject(model);
         const bottomY = bbox.min.y;
         model.position.y -= bottomY;
+
+        // Rotate 180 degrees so the front faces inward (toward the center of the grid)
+        model.rotation.y = Math.PI;
 
         // Apply shadow properties recursively to all children
         model.traverse((child) => {

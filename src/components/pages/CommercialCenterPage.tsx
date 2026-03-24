@@ -411,7 +411,7 @@ export default function CommercialCenterPage() {
           {/* Grid info */}
           <div className="mt-4 p-3 border border-cyan-500/50 rounded bg-cyan-500/5 text-center">
             <p className="text-cyan-300 text-sm font-paragraph">
-              Centro Comercial posicionado em: <span className="font-bold">X: 50, Z: 50</span>
+              Centro Comercial posicionado em: <span className="font-bold">Tiles 40, 80, 120, 160 (Centro: X: 60, Z: 40)</span>
             </p>
           </div>
         </div>
