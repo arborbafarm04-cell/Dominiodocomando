@@ -434,12 +434,7 @@ export default function LuxuryShowroomPage() {
                           >
                             Ver coleção
                           </button>
-                          <button
-                            onClick={handleNpcClick}
-                            className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-black uppercase tracking-[0.22em] text-white"
-                          >
-                            Ouvir mais
-                          </button>
+
                         </div>
                       </div>
                     </motion.div>
