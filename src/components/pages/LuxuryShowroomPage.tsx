@@ -393,7 +393,12 @@ export default function LuxuryShowroomPage() {
                 <div className="absolute bottom-[10%] left-[28%] h-64 w-64 rounded-full bg-white/5 blur-3xl" />
               </div>
 
-              <div className="relative z-10 flex min-h-[600px] flex-col justify-between px-4 py-6 sm:px-6">
+              <div 
+                className="relative z-10 flex min-h-[600px] flex-col justify-between px-4 py-6 sm:px-6 bg-cover bg-center bg-no-repeat"
+                style={{
+                  backgroundImage: 'url(https://static.wixstatic.com/media/50f4bf_d710f0b33bcd44e69598b9b3602b3bb9~mv2.png)',
+                }}
+              >
                 {/* DIALOG - TOP */}
                 <AnimatePresence mode="wait">
                   {showDialog && (
