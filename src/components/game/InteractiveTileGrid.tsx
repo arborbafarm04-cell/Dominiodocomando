@@ -113,7 +113,7 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     const scene = new THREE.Scene();
     scene.background = null; // Transparent background to show page background
     // Renovated dark layer with enhanced depth and atmosphere
-    scene.fog = new THREE.Fog(0x5f7aa6, 180,650); // Deeper, more sophisticated dark tone
+    scene.fog = new THREE.Fog(0x8faee0, 220,900); // Deeper, more sophisticated dark tone
     sceneRef.current = scene;
 
     // Initialize blocked tiles set
