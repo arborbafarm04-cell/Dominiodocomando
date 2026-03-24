@@ -3,12 +3,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Image } from '@/components/ui/image';
 
 import Footer from '@/components/Footer';
-import LuxuryDialogFrame from '@/components/LuxuryDialogFrame';
+import Header from '@/components/Header';
 import { usePlayerStore } from '@/store/playerStore';
 import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
-import { getLuxurySystem, getBackgroundByLevel, getBackgroundColorByLevel } from '../../data/luxoItems';
+import { getLuxurySystem, getBackgroundByLevel } from '@/data/luxoItems';
 
 type SkillKey = 'inteligencia' | 'agilidade' | 'ataque' | 'defesa' | 'respeito' | 'vigor';
 type PurchaseMap = Record<number, boolean>;
@@ -323,10 +323,10 @@ export default function LuxuryShowroomPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col bg-black">
-
+        <Header />
         <div
           className="relative flex flex-1 items-center justify-center overflow-hidden"
-          style={{ background: getBackgroundByLevel(level) }}
+          style={{ background: getBackgroundByLevel(1) }}
         >
           <Image src={SHOWROOM_BG} alt="showroom" className="absolute h-full w-full object-cover opacity-80" width={1920} height={1080} />
           <div className="absolute inset-0 bg-black/45" />
@@ -880,7 +880,7 @@ export default function LuxuryShowroomPage() {
                   animate={{ rotateY: [0, 8, -8, 0], rotateX: [0, 2, -2, 0], y: [0, -5, 0] }}
                   transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
                   className="relative h-[235px] w-[390px] overflow-hidden rounded-[30px] border border-white/15 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)]"
-                  style={{ background: 'linear-gradient(135deg,#0d0d0d 0%,#1a1a1a 24%,#2e2208 58%,#0e0e0e 100%)' }}
+                  style={{ background: 'linear-gradient(135deg,#0d0d0d 0%,#1a1a1a 24%,#2e2208 58%,#0e0e0e 100%)', perspective: '1000px' }}
                 >
                   <div className="absolute inset-0 opacity-70">
                     <div className="absolute -left-20 top-0 h-52 w-52 rounded-full bg-yellow-400/10 blur-3xl" />
