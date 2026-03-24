@@ -376,47 +376,11 @@ export default function LuxuryShowroomPage() {
               </p>
               <div className="mt-6 rounded-3xl border p-4 backdrop-blur-md" style={{ borderColor: theme.accentSoft, background: 'rgba(0,0,0,.28)' }}>
                 <p className="text-[11px] uppercase tracking-[0.35em] text-white/48">Dinheiro limpo disponível</p>
-                <p className="mt-2 text-3xl font-black text-white">R$ {money(cleanMoney)}</p>
+
               </div>
             </div>
-
             {/* RIGHT - PLAYER INFO & STATUS */}
-            <div className="flex flex-col gap-4">
-              <div
-                className="rounded-2xl border px-6 py-4"
-                style={{ borderColor: theme.accentSoft, background: 'rgba(0,0,0,.38)', boxShadow: `0 0 30px ${theme.accentSoft}` }}
-              >
-                <p className="text-[10px] uppercase tracking-[0.35em] text-white/45">Jogador</p>
-                <p className="mt-2 text-2xl font-black uppercase text-white">{playerName}</p>
-                <p className="mt-2 text-[10px] uppercase tracking-[0.3em] text-white/45">Barraco nível {level}</p>
-              </div>
 
-              <div className="rounded-[34px] border p-5" style={{ borderColor: theme.accentSoft, background: 'rgba(0,0,0,.46)' }}>
-                <p className="text-[11px] uppercase tracking-[0.35em] text-white/44">Assinatura de poder</p>
-                <h3 className="mt-2 text-xl font-black text-white">
-                  {totalBonus <= 1 ? 'Presença em ascensão' : totalBonus <= 3 ? 'Figura de respeito' : totalBonus <= 5 ? 'Luxo que impõe presença' : 'Domínio absoluto da ostentação'}
-                </h3>
-                <div className="mt-4 space-y-3">
-                  {(Object.entries(bonuses) as [SkillKey, number][]).slice(0, 3).map(([skill, value]) => (
-                    <div key={skill}>
-                      <div className="mb-1 flex items-center justify-between text-xs">
-                        <span className="text-white/82">{skillLabels[skill]}</span>
-                        <span className="font-black text-white">+{value}%</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${value * 100}%` }}
-                          transition={{ duration: 0.45 }}
-                          className="h-full rounded-full"
-                          style={{ background: `linear-gradient(90deg, ${theme.accent}, #ffffff)`, boxShadow: `0 0 18px ${theme.accentSoft}` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* MAIN SECTION - NPC & ITEMS */}
@@ -619,43 +583,6 @@ export default function LuxuryShowroomPage() {
                 </div>
               </div>
 
-              <div className="rounded-[34px] border p-5" style={{ borderColor: theme.accentSoft, background: 'rgba(0,0,0,.46)' }}>
-                <p className="text-[11px] uppercase tracking-[0.35em] text-white/44">Assinatura de poder</p>
-                <h3 className="mt-2 text-2xl font-black text-white">
-                  {totalBonus <= 1 ? 'Presença em ascensão' : totalBonus <= 3 ? 'Figura de respeito' : totalBonus <= 5 ? 'Luxo que impõe presença' : 'Domínio absoluto da ostentação'}
-                </h3>
-                <p className="mt-2 text-sm text-white/64">
-                  Cada peça comprada aumenta uma parte da sua força. Aqui o luxo vira estatística.
-                </p>
-
-                <div className="mt-6 space-y-4">
-                  {(Object.entries(bonuses) as [SkillKey, number][]).map(([skill, value]) => (
-                    <div key={skill}>
-                      <div className="mb-1.5 flex items-center justify-between text-sm">
-                        <span className="text-white/82">{skillLabels[skill]}</span>
-                        <span className="font-black text-white">+{value}%</span>
-                      </div>
-                      <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${value * 100}%` }}
-                          transition={{ duration: 0.45 }}
-                          className="h-full rounded-full"
-                          style={{ background: `linear-gradient(90deg, ${theme.accent}, #ffffff)`, boxShadow: `0 0 18px ${theme.accentSoft}` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={() => setShowHint((prev) => !prev)}
-                  className="mt-6 w-full rounded-2xl px-4 py-3 text-sm font-black uppercase tracking-[0.24em] text-black"
-                  style={{ background: theme.cardMetal, boxShadow: `0 14px 34px ${theme.accentSoft}` }}
-                >
-                  {showHint ? 'Ocultar aviso' : 'Exibir aviso da coleção'}
-                </button>
-              </div>
             </div>
           </div>
         </div>
