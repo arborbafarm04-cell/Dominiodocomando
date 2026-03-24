@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useMember } from '@/integrations';
 import { useNavigate } from 'react-router-dom';
 import { useGameScreenStore } from '@/store/gameScreenStore';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import GoogleLoginButton from '@/components/GoogleLoginButton';
 import { motion } from 'framer-motion';
@@ -21,7 +21,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+
 
       <main className="flex-1 w-full max-w-[120rem] mx-auto px-4 py-8 flex items-center justify-center">
         <motion.div

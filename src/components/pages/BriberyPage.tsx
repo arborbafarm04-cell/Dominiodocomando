@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
 import { usePlayerStore } from '@/store/playerStore';
@@ -79,7 +79,7 @@ export default function BriberyPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+
 
       <main className="flex-1 w-full max-w-[120rem] mx-auto px-4 py-8 pt-32 flex items-center justify-center">
         <div className="w-full max-w-2xl">

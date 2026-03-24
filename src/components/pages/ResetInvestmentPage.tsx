@@ -1,4 +1,4 @@
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 import { AlertTriangle, RotateCcw, Check } from 'lucide-react';
@@ -45,7 +45,7 @@ export default function ResetInvestmentPage() {
       </div>
 
       <div className="relative z-10">
-        <Header />
+
 
         <div className="flex-1 w-full max-w-[100rem] mx-auto px-4 py-12 flex items-center justify-center">
           <motion.div

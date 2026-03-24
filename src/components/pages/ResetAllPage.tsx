@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
@@ -91,7 +91,7 @@ export default function ResetAllPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950">
-      <Header />
+
       
       <main className="max-w-[100rem] mx-auto px-4 py-12 flex items-center justify-center min-h-[60vh]">
         <motion.div

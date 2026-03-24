@@ -4,7 +4,7 @@ import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import { SkillUpgradeAnimations, AnimatedConnection, CompletionBackgroundGlow } from '@/components/SkillUpgradeAnimations';
 
@@ -178,7 +178,7 @@ export default function InvestmentSkillTreePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-      <Header />
+
 
       <div className="relative w-full overflow-hidden bg-black/40">
         {/* Background glow effect */}

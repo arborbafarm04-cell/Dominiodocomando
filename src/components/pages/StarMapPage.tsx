@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import InteractiveTileGrid from '@/components/game/InteractiveTileGrid';
 import { useNavigate } from 'react-router-dom';

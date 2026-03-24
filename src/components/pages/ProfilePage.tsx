@@ -1,6 +1,6 @@
 import { useMember } from '@/integrations';
 import { MemberProtectedRoute } from '@/components/ui/member-protected-route';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 import { Image } from '@/components/ui/image';
@@ -27,7 +27,7 @@ function ProfilePageContent() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+
 
       <main className="flex-1 w-full max-w-[120rem] mx-auto px-4 py-8">
         <motion.div

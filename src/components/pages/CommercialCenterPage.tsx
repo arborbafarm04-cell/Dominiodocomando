@@ -1,4 +1,4 @@
-import Header from '@/components/Header';
+
 import { Image } from '@/components/ui/image';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -386,7 +386,7 @@ export default function CommercialCenterPage() {
   return (
     <div className="commercial-grid min-h-screen">
       {/* HEADER */}
-      <Header />
+
       {/* BANNER */}
       <div className="w-full pt-[120px] relative z-10">
         <div className="banner-container w-full bg-black flex items-center justify-center">

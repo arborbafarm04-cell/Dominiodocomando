@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Image } from '@/components/ui/image';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import LuxuryDialogFrame from '@/components/LuxuryDialogFrame';
 import { usePlayerStore } from '@/store/playerStore';
@@ -323,7 +323,7 @@ export default function LuxuryShowroomPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col bg-black">
-        <Header />
+
         <div
           className="relative flex flex-1 items-center justify-center overflow-hidden"
           style={{ background: getBackgroundByLevel(level) }}

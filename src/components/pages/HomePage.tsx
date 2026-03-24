@@ -1,6 +1,6 @@
 // HPI 1.7-V
 import Footer from '@/components/Footer';
-import Header from '@/components/Header';
+
 import { Button } from '@/components/ui/button';
 import { Image } from '@/components/ui/image';
 import { useMember } from '@/integrations';

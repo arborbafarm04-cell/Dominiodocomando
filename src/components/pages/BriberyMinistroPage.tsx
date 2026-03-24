@@ -7,7 +7,7 @@ import { useGameStore } from '@/store/gameStore';
 import { useGameScreenStore } from '@/store/gameScreenStore';
 import { usePlayerStore } from '@/store/playerStore';
 import { Image } from '@/components/ui/image';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 
 const CHARACTER_IMAGE = 'https://static.wixstatic.com/media/50f4bf_6927c8f7f68343cca4e468a9f7526b36~mv2.png';
@@ -122,7 +122,7 @@ export default function BriberyMinistroPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0f1419] to-[#1a1f2e] flex flex-col">
-      <Header />
+
       
       <div className="w-full h-96 md:h-[500px] overflow-hidden relative">
         <Image

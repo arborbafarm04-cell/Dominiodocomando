@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
 import { Image } from '@/components/ui/image';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
@@ -210,7 +210,6 @@ export default function BarracoPage() {
   if (!player) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950">
-        <Header />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <p className="text-foreground text-xl mb-4">{error || 'Jogador não encontrado'}</p>
@@ -242,7 +241,6 @@ export default function BarracoPage() {
           onComplete={() => setShowGreeting(false)}
         />
       )}
-      <Header />
       
       <main className="max-w-[100rem] mx-auto px-4 py-12">
         <motion.div

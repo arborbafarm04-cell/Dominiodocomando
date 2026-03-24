@@ -7,7 +7,7 @@ import { useGameStore } from '@/store/gameStore';
 import { useGameScreenStore } from '@/store/gameScreenStore';
 import { usePlayerStore } from '@/store/playerStore';
 import { Image } from '@/components/ui/image';
-import Header from '@/components/Header';
+
 import Footer from '@/components/Footer';
 import { getBackgroundByLevel } from '@/data/luxoItems';
 
@@ -123,7 +123,7 @@ export default function BriberyPromotorPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0f1419] to-[#1a1f2e] flex flex-col">
-      <Header />
+
       
       <div className="w-full h-96 md:h-[500px] overflow-hidden relative">
         <Image

@@ -1,6 +1,6 @@
 import DraggableContainer from '@/components/DraggableContainer';
 import Footer from '@/components/Footer';
-import Header from '@/components/Header';
+
 import SlotMachine from '@/components/SlotMachine';
 import SpinVaultNotification from '@/components/SpinVaultNotification';
 import { Image } from '@/components/ui/image';
@@ -86,7 +86,7 @@ export default function GiroNoAsfaltoPage() {
             onEdit={handleEdit}
             className="w-full"
           >
-            <Header />
+
           </DraggableContainer>
         )}
 
