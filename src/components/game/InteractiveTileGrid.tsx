@@ -880,12 +880,12 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
       }
     );
 
-    // ===== LOAD CENTRO COMERCIAL 3D MODEL (positioned at tiles 40, 80, 120, 160) =====
-    // Position the centro comercial at tile 40 (center position)
+    // ===== LOAD CENTRO COMERCIAL 3D MODEL (positioned at tile 40) =====
+    // Position the centro comercial at tile 40 (exact position marked with X)
     const centroComercialSize = 4; // 4 tiles wide
     const centroComercialDepth = 2; // 2 tiles deep (8 tiles total)
-    const centroComercialGridX = 40; // Tile 40
-    const centroComercialGridZ = 80; // Tile 80
+    const centroComercialGridX = 20; // Tile 40 X position (center)
+    const centroComercialGridZ = 10; // Tile 40 Z position (center)
 
     // Convert grid coordinates to world coordinates
     const centroComercialCenterGridX = centroComercialGridX;
@@ -894,7 +894,7 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     const centroComercialWorldX = startX + centroComercialCenterGridX * tileSize;
     const centroComercialWorldZ = startZ + centroComercialCenterGridZ * tileSize;
 
-    console.log('Centro Comercial Position:', {
+    console.log('Centro Comercial Position (Tile 40):', {
       gridX: centroComercialGridX,
       gridZ: centroComercialGridZ,
       worldX: centroComercialWorldX,
