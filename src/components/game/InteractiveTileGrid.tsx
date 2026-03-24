@@ -790,11 +790,13 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     );
 
     // ===== LOAD DELEGACIA 3D MODEL (8 tiles - 2x4 format) =====
-    // Position the delegacia in a strategic location (lower-right area)
+    // Position the delegacia at tile 5
     const delegaciaSize = 2; // 2 tiles wide
     const delegaciaDepth = 4; // 4 tiles deep
-    const delegaciaGridX = 28; // Right side of grid
-    const delegaciaGridZ = 12; // Lower-middle area
+    
+    // Tile 5 is at row 0, col 5 in the grid (40 columns × 20 rows)
+    const delegaciaGridX = 5; // Column 5
+    const delegaciaGridZ = 0; // Row 0
 
     // Convert grid coordinates to world coordinates
     const delegaciaCenterGridX = delegaciaGridX + delegaciaSize / 2;
@@ -809,6 +811,7 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
       worldX: delegaciaWorldX,
       worldZ: delegaciaWorldZ,
       gridSize: `${delegaciaSize}x${delegaciaDepth}`,
+      tile: 5,
     });
 
     gltfLoader.load(
