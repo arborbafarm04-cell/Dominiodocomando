@@ -111,9 +111,8 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
 
     // ===== SCENE SETUP - NIGHT URBAN ATMOSPHERE =====
     const scene = new THREE.Scene();
-    scene.background = null; // Transparent background to show page background
-    // Renovated dark layer with enhanced depth and atmosphere
-    scene.fog = new THREE.Fog(0x0d1117, 100, 280); // Deeper, more sophisticated dark tone
+    scene.background = null;
+    scene.fog = new THREE.Fog(0x2a3b5f, 120, 420);
     sceneRef.current = scene;
 
     // Initialize blocked tiles set
@@ -128,6 +127,8 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     const gridTotalWidth = gridWidth * tileSize;
     const gridTotalHeight = gridHeight * tileSize;
     const maxDim = Math.max(gridTotalWidth, gridTotalHeight);
+    const startX = -(gridTotalWidth) / 2;
+    const startZ = -(gridTotalHeight) / 2;
     camera.position.set(gridTotalWidth / 2, maxDim * 0.6, gridTotalHeight * 0.8);
     camera.lookAt(gridTotalWidth / 2, 0, gridTotalHeight / 2);
     cameraRef.current = camera;
@@ -135,20 +136,18 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     // ===== RENDERER SETUP =====
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap pixel ratio for performance
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowShadowMap;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     rendererRef.current = renderer;
     containerRef.current.appendChild(renderer.domElement);
 
-    // ===== LIGHTING - RENOVATED CINEMATIC NIGHT URBAN =====
-    // Enhanced dark ambient light for sophisticated night atmosphere
-    const ambientLight = new THREE.AmbientLight(0x1a2a4a, 0.6);
+    // ===== LIGHTING - BRIGHTER CINEMATIC NIGHT =====
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.1);
     scene.add(ambientLight);
 
-    // Directional light for dramatic shadows with enhanced contrast
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.8);
     directionalLight.position.set(gridTotalWidth / 2 + 30, maxDim * 0.9, gridTotalHeight / 2 + 20);
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.width = 4096;
@@ -161,56 +160,75 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     directionalLight.shadow.bias = -0.0001;
     scene.add(directionalLight);
 
-    // Warm fill light (orange/gold) - enhanced for depth
-    const fillLight = new THREE.DirectionalLight(0xFF6B35, 0.7);
+    const fillLight = new THREE.DirectionalLight(0xffd166, 0.9);
     fillLight.position.set(gridTotalWidth / 2 - 40, maxDim * 0.7, gridTotalHeight / 2 - 30);
     scene.add(fillLight);
 
-    // Rim light for edge definition - enhanced neon glow
-    const rimLight = new THREE.DirectionalLight(0x00EAFF, 0.8);
+    const rimLight = new THREE.DirectionalLight(0x7dd3fc, 0.9);
     rimLight.position.set(gridTotalWidth / 2, maxDim * 0.6, gridTotalHeight / 2 - 60);
     scene.add(rimLight);
 
-    // Additional point light for overall brightness
-    const pointLight = new THREE.PointLight(0xffffff, 0.6);
+    const pointLight = new THREE.PointLight(0xffffff, 1.2);
     pointLight.position.set(gridTotalWidth / 2, maxDim * 0.5, gridTotalHeight / 2);
     scene.add(pointLight);
+
+    // Lamp posts with strong warm lights
+    const createLampPost = (x: number, z: number) => {
+      const pole = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.08, 0.1, 4, 8),
+        new THREE.MeshStandardMaterial({ color: 0x2b2b2b, roughness: 0.9, metalness: 0.15 })
+      );
+      pole.position.set(x, 2, z);
+      pole.castShadow = true;
+      pole.receiveShadow = true;
+      scene.add(pole);
+
+      const lampHead = new THREE.Mesh(
+        new THREE.SphereGeometry(0.16, 12, 12),
+        new THREE.MeshStandardMaterial({ color: 0xffd166, emissive: 0xffd166, emissiveIntensity: 1.1 })
+      );
+      lampHead.position.set(x, 4.1, z);
+      scene.add(lampHead);
+
+      const lampLight = new THREE.PointLight(0xffd166, 3.8, 16, 2);
+      lampLight.position.set(x, 4.2, z);
+      lampLight.castShadow = true;
+      scene.add(lampLight);
+    };
+
+    for (let i = 3; i < gridWidth; i += 6) {
+      const worldX = startX + i * tileSize;
+      createLampPost(worldX, startZ + 1.5 * tileSize);
+      createLampPost(worldX, startZ + (gridHeight - 1.5) * tileSize);
+    }
 
     // Initialize AAA 3D Visual System
     const aaa3dSystem = new AAA3DVisualSystem(scene, camera, renderer);
     aaa3dSystemRef.current = aaa3dSystem;
 
     // ===== CREATE REALISTIC GROUND TEXTURE =====
-    // Create canvas texture for beaten earth with variations
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 512;
     const ctx = canvas.getContext('2d')!;
 
-    // Base color: grayish-brown (#6b5e4a)
     const baseColor = '#6b5e4a';
     ctx.fillStyle = baseColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Add subtle color variations to avoid repetition
     for (let i = 0; i < 200; i++) {
       const x = Math.random() * canvas.width;
       const y = Math.random() * canvas.height;
       const size = Math.random() * 40 + 10;
-      const variation = Math.random() * 0.15 - 0.075; // ±7.5% variation
-
-      // Create subtle patches of slightly different colors
+      const variation = Math.random() * 0.15 - 0.075;
       ctx.fillStyle = `rgba(107, 94, 74, ${0.3 + variation})`;
       ctx.fillRect(x, y, size, size);
     }
 
-    // Add sparse dry grass/vegetation (very light, sparse)
     for (let i = 0; i < 80; i++) {
       const x = Math.random() * canvas.width;
       const y = Math.random() * canvas.height;
       const grassLength = Math.random() * 8 + 3;
-
-      // Dry grass color - muted brownish-green
       ctx.strokeStyle = `rgba(100, 95, 70, ${0.4 + Math.random() * 0.3})`;
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -219,34 +237,27 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
       ctx.stroke();
     }
 
-    // Add small stones/pebbles scattered across
     for (let i = 0; i < 120; i++) {
       const x = Math.random() * canvas.width;
       const y = Math.random() * canvas.height;
       const stoneSize = Math.random() * 6 + 2;
-
-      // Stone colors - gray with slight variation
       const stoneShade = Math.floor(Math.random() * 30 + 80);
       ctx.fillStyle = `rgba(${stoneShade}, ${stoneShade - 5}, ${stoneShade - 10}, ${0.6 + Math.random() * 0.3})`;
       ctx.beginPath();
       ctx.arc(x, y, stoneSize, 0, Math.PI * 2);
       ctx.fill();
-
-      // Add subtle shadow to stones
       ctx.strokeStyle = `rgba(40, 40, 40, 0.3)`;
       ctx.lineWidth = 0.5;
       ctx.stroke();
     }
 
-    // Add wear marks and natural depressions
     for (let i = 0; i < 50; i++) {
       const x = Math.random() * canvas.width;
       const y = Math.random() * canvas.height;
-      const width = Math.random() * 30 + 15;
-      const height = Math.random() * 8 + 3;
-
+      const widthMark = Math.random() * 30 + 15;
+      const heightMark = Math.random() * 8 + 3;
       ctx.fillStyle = `rgba(60, 55, 45, ${0.2 + Math.random() * 0.2})`;
-      ctx.fillRect(x, y, width, height);
+      ctx.fillRect(x, y, widthMark, heightMark);
     }
 
     const groundTexture = new THREE.CanvasTexture(canvas);
@@ -254,26 +265,21 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     groundTexture.minFilter = THREE.LinearMipmapLinearFilter;
     groundTexture.wrapS = THREE.RepeatWrapping;
     groundTexture.wrapT = THREE.RepeatWrapping;
-    groundTexture.repeat.set(4, 4); // Repeat pattern to avoid obvious tiling
+    groundTexture.repeat.set(4, 4);
 
-    // ===== CREATE NORMAL MAP FOR DEPTH =====
-    // Create a simple normal map to simulate surface irregularity
     const normalCanvas = document.createElement('canvas');
     normalCanvas.width = 256;
     normalCanvas.height = 256;
     const normalCtx = normalCanvas.getContext('2d')!;
 
-    // Base normal color (neutral blue - 0.5, 0.5, 1.0 in normalized space)
     normalCtx.fillStyle = '#8080ff';
     normalCtx.fillRect(0, 0, normalCanvas.width, normalCanvas.height);
 
-    // Add subtle bumps and depressions
     for (let i = 0; i < 150; i++) {
       const x = Math.random() * normalCanvas.width;
       const y = Math.random() * normalCanvas.height;
       const size = Math.random() * 20 + 5;
 
-      // Create subtle normal variations
       const gradient = normalCtx.createRadialGradient(x, y, 0, x, y, size);
       gradient.addColorStop(0, '#9090ff');
       gradient.addColorStop(1, '#7070ff');
@@ -288,48 +294,41 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     normalMap.wrapT = THREE.RepeatWrapping;
     normalMap.repeat.set(4, 4);
 
-    // ===== CREATE TILE GRID (40x20 = 800 tiles) =====
     const totalTiles = gridWidth * gridHeight;
 
-    // Create 3D box geometry for tiles
     const geometry = new THREE.BoxGeometry(tileSize * 0.9, tileSize * 0.05, tileSize * 0.9);
 
-    // Base material - realistic beaten earth with texture
     const baseMaterial = new THREE.MeshStandardMaterial({
-      map: groundTexture,
+
+map: groundTexture,
       normalMap: normalMap,
-      color: 0x6b5e4a, // Grayish-brown base color
-      metalness: 0.05, // Minimal metallic shine
-      roughness: 0.85, // Very rough, dry earth appearance
+      color: 0x6b5e4a,
+      metalness: 0.05,
+      roughness: 0.85,
       side: THREE.FrontSide,
       emissive: 0x000000,
       emissiveIntensity: 0.0,
-      normalScale: new THREE.Vector2(0.5, 0.5), // Subtle normal map effect
+      normalScale: new THREE.Vector2(0.5, 0.5),
     });
 
-    // Create instanced mesh for performance
     const instancedMesh = new THREE.InstancedMesh(geometry, baseMaterial, totalTiles);
     instancedMesh.castShadow = true;
     instancedMesh.receiveShadow = true;
     instancedMeshRef.current = instancedMesh;
 
-    // Position all tiles
     const dummy = new THREE.Object3D();
-    const startX = -(gridTotalWidth) / 2;
-    const startZ = -(gridTotalHeight) / 2;
 
     let tileIndex = 0;
     for (let row = 0; row < gridHeight; row++) {
       for (let col = 0; col < gridWidth; col++) {
         const x = startX + col * tileSize + tileSize / 2;
         const z = startZ + row * tileSize + tileSize / 2;
-        const y = tileSize * 0.025; // Position box so bottom sits at y=0
+        const y = tileSize * 0.025;
 
         dummy.position.set(x, y, z);
         dummy.updateMatrix();
         instancedMesh.setMatrixAt(tileIndex, dummy.matrix);
 
-        // Store tile data
         tilesRef.current.set(tileIndex, {
           id: tileIndex,
           x,
@@ -345,30 +344,20 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     scene.add(instancedMesh);
 
     // ===== ADD TILE NUMBERS FOR ORIENTATION =====
-    // Create canvas texture for tile numbers
-    const numberCanvasTemplate = document.createElement('canvas');
-    numberCanvasTemplate.width = 256;
-    numberCanvasTemplate.height = 256;
-    const numberCtxTemplate = numberCanvasTemplate.getContext('2d')!;
-
-    // Create a function to generate number texture for a specific tile
     const createNumberTexture = (tileNumber: number) => {
       const numberCanvas = document.createElement('canvas');
       numberCanvas.width = 256;
       numberCanvas.height = 256;
       const numberCtx = numberCanvas.getContext('2d')!;
 
-      // Transparent background
       numberCtx.clearRect(0, 0, numberCanvas.width, numberCanvas.height);
 
-      // Draw number
       numberCtx.fillStyle = '#00eaff';
       numberCtx.font = 'bold 120px Arial';
       numberCtx.textAlign = 'center';
       numberCtx.textBaseline = 'middle';
       numberCtx.fillText(tileNumber.toString(), 128, 128);
 
-      // Add glow effect
       numberCtx.strokeStyle = '#00eaff';
       numberCtx.lineWidth = 3;
       numberCtx.strokeText(tileNumber.toString(), 128, 128);
@@ -376,7 +365,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
       return new THREE.CanvasTexture(numberCanvas);
     };
 
-    // Add text labels for every 5th tile to avoid clutter
     const labelInterval = 5;
     tileIndex = 0;
     for (let row = 0; row < gridHeight; row++) {
@@ -384,24 +372,20 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
         if (tileIndex % labelInterval === 0) {
           const x = startX + col * tileSize + tileSize / 2;
           const z = startZ + row * tileSize + tileSize / 2;
-          const y = tileSize * 0.15; // Slightly above the tile
+          const y = tileSize * 0.15;
 
-          // Create a plane with the number texture
           const numberTexture = createNumberTexture(tileIndex);
           const numberMaterial = new THREE.MeshBasicMaterial({
             map: numberTexture,
             transparent: true,
             side: THREE.DoubleSide,
-            emissive: 0x00eaff,
-            emissiveIntensity: 0.5,
           });
 
           const numberGeometry = new THREE.PlaneGeometry(tileSize * 0.8, tileSize * 0.8);
           const numberMesh = new THREE.Mesh(numberGeometry, numberMaterial);
 
-          // Position the number above the tile
           numberMesh.position.set(x, y, z);
-          numberMesh.rotation.x = -Math.PI / 2.5; // Tilt to be visible from camera angle
+          numberMesh.rotation.x = -Math.PI / 2.5;
 
           scene.add(numberMesh);
         }
@@ -415,7 +399,7 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     const groundMaterial = new THREE.MeshStandardMaterial({
       map: groundTexture,
       normalMap: normalMap,
-      color: 0x6b5e4a, // Match tile color for consistency
+      color: 0x6b5e4a,
       metalness: 0.0,
       roughness: 0.9,
       normalScale: new THREE.Vector2(0.5, 0.5),
@@ -428,17 +412,20 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
 
     // ===== ADD SUBTLE GRID LINES =====
     const gridLinesGeometry = new THREE.BufferGeometry();
-    const gridLinesMaterial = new THREE.LineBasicMaterial({ color: 0x00eaff, linewidth: 1, transparent: true, opacity: 0.3 });
+    const gridLinesMaterial = new THREE.LineBasicMaterial({
+      color: 0x00eaff,
+      linewidth: 1,
+      transparent: true,
+      opacity: 0.28
+    });
     const gridLinesPoints: number[] = [];
 
-    // Vertical lines
     for (let i = 0; i <= gridWidth; i++) {
       const pos = startX + i * tileSize;
       gridLinesPoints.push(pos, 0.02, startZ);
       gridLinesPoints.push(pos, 0.02, startZ + gridTotalHeight);
     }
 
-    // Horizontal lines
     for (let i = 0; i <= gridHeight; i++) {
       const pos = startZ + i * tileSize;
       gridLinesPoints.push(startX, 0.02, pos);
@@ -449,21 +436,42 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     const gridLines = new THREE.LineSegments(gridLinesGeometry, gridLinesMaterial);
     scene.add(gridLines);
 
-    // ===== LOAD LUXURY STORE 3D MODEL =====
+    // ===== EXTRA STONES / SMALL CLUTTER =====
+    const clutterGroup = new THREE.Group();
+    for (let i = 0; i < 60; i++) {
+      const rock = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(Math.random() * 0.18 + 0.08),
+        new THREE.MeshStandardMaterial({
+          color: 0x5a5a5a,
+          roughness: 1,
+          metalness: 0.0
+        })
+      );
+
+      rock.position.set(
+        startX + Math.random() * gridTotalWidth,
+        0.08,
+        startZ + Math.random() * gridTotalHeight
+      );
+      rock.rotation.set(
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+        Math.random() * Math.PI
+      );
+      rock.castShadow = true;
+      rock.receiveShadow = true;
+      clutterGroup.add(rock);
+    }
+    scene.add(clutterGroup);
+
+    // ===== LOADERS =====
     const gltfLoader = new GLTFLoader();
 
-    // Calculate position for 4x4 luxury store (16 tiles) - POSITIONED at tile 10
-    const storeSize = 4; // 4x4 tiles
-
-    // Position the store at tile 10
-    // Tile 10 in a linear grid corresponds to grid position (10, 0) when counting from left to right
-    // For a 40-wide grid: tile 10 = x:10, z:0
+    // ===== LUXURY STORE 3D MODEL =====
+    const storeSize = 4;
     const storeGridX = 10;
     const storeGridZ = 0;
 
-    // Convert grid coordinates to world coordinates
-    // Grid position (6, 3) means starting at tile 6,3
-    // Center of a 4x4 store at grid position (6,3) is at (6+2, 3+2) = (8, 5)
     const storeCenterGridX = storeGridX + storeSize / 2;
     const storeCenterGridZ = storeGridZ + storeSize / 2;
 
@@ -479,59 +487,38 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
       isClickable: true,
     };
 
-    // Debug: Log the store position
-    console.log('Luxury Store Position:', {
-      gridX: storeGridX,
-      gridZ: storeGridZ,
-      worldX: storeWorldX,
-      worldZ: storeWorldZ,
-      gridSize: storeSize,
-    });
-
     gltfLoader.load(
       'https://static.wixstatic.com/3d/50f4bf_55eda8581fc04c02a39a33c94b588afc.glb',
       (gltf) => {
         const model = gltf.scene;
-
-        // Create a group for the luxury store
         const storeGroup = new THREE.Group();
 
-        // Position at center of platform
         storeGroup.position.set(storeWorldX, 0, storeWorldZ);
 
-        // Calculate bounding box to determine proper scale
         const bbox = new THREE.Box3().setFromObject(model);
         const size = bbox.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
 
-        // Scale to fit exactly 4x4 tiles (4 units in world space)
-        const targetSize = storeSize * tileSize; // 4 units
+        const targetSize = storeSize * tileSize;
         const scale = targetSize / maxDim;
         model.scale.set(scale, scale, scale);
 
-        // Center the model within the group
         bbox.setFromObject(model);
         const center = bbox.getCenter(new THREE.Vector3());
         model.position.sub(center);
 
-        // Ensure model sits on the ground (y = 0)
-        // Get the bottom of the model
         bbox.setFromObject(model);
         const bottomY = bbox.min.y;
-        model.position.y -= bottomY; // Lift model so bottom is at y = 0
+        model.position.y -= bottomY;
 
-        // Apply shadow properties recursively to all children
         model.traverse((child) => {
           if (child instanceof THREE.Mesh) {
             child.castShadow = true;
             child.receiveShadow = true;
-            // Enhance material brightness for better visibility
-            if (child.material instanceof THREE.Material) {
-              if (child.material instanceof THREE.MeshStandardMaterial) {
-                child.material.emissiveIntensity = 0.3;
-                child.material.metalness = Math.max(0, child.material.metalness - 0.2);
-                child.material.roughness = Math.min(1, child.material.roughness + 0.1);
-              }
+            if (child.material instanceof THREE.MeshStandardMaterial) {
+              child.material.emissiveIntensity = 0.22;
+              child.material.metalness = Math.max(0, child.material.metalness - 0.2);
+              child.material.roughness = Math.min(1, child.material.roughness + 0.1);
             }
           }
         });
@@ -542,25 +529,84 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
         luxuryStoreRef.current.model = storeGroup;
         luxuryStoreGroupRef.current = storeGroup;
 
-        // Apply AAA visuals
-        if (aaa3dSystemRef.current) {
-          aaa3dSystemRef.current.applyBuildingVisuals(storeGroup, 'luxury');
-          aaa3dSystemRef.current.addGroundShadow(storeGroup, 4);
+        for (let x = 0; x < storeSize; x++) {
+          for (let z = 0; z < storeSize; z++) {
+            blockedTilesRef.current.add(`${storeGridX + x}-${storeGridZ + z}`);
+          }
         }
       },
       undefined,
       (error) => {
-        console.warn('Failed to load luxury store 3D model:', error);
+        console.error('Erro ao carregar Luxury Store:', error);
       }
     );
 
-    // ===== LOAD QG 3D MODEL (4x4 tiles in center) =====
-    // Position the QG in the center of the grid (16 central tiles)
-    const qgSize = 4; // 4x4 tiles
-    const qgGridX = (gridWidth / 2) - (qgSize / 2); // Center horizontally
-    const qgGridZ = (gridHeight / 2) - (qgSize / 2); // Center vertically
+    // ===== CENTRO COMERCIAL 3D MODEL - LATERAL DIREITA VIRADO PARA O CENTRO =====
+    const centroSize = 4;
+    const centroGridX = gridWidth - 6;
+    const centroGridZ = Math.floor(gridHeight / 2) - 2;
 
-    // Convert grid coordinates to world coordinates
+    const centroCenterGridX = centroGridX + centroSize / 2;
+    const centroCenterGridZ = centroGridZ + centroSize / 2;
+
+    const centroWorldX = startX + centroCenterGridX * tileSize;
+    const centroWorldZ = startZ + centroCenterGridZ * tileSize;
+
+    gltfLoader.load(
+      'https://static.wixstatic.com/3d/50f4bf_55eda8581fc04c02a39a33c94b588afc.glb',
+      (gltf) => {
+        const model = gltf.scene;
+        const group = new THREE.Group();
+
+        group.position.set(centroWorldX, 0, centroWorldZ);
+
+        const bbox = new THREE.Box3().setFromObject(model);
+        const size = bbox.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+
+        const targetSize = centroSize * tileSize;
+        const scale = targetSize / maxDim;
+        model.scale.set(scale, scale, scale);
+
+        bbox.setFromObject(model);
+        const center = bbox.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+
+        bbox.setFromObject(model);
+        model.position.y -= bbox.min.y;
+
+        model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            if (child.material instanceof THREE.MeshStandardMaterial) {
+              child.material.emissiveIntensity = 0.18;
+            }
+          }
+        });
+
+        group.add(model);
+        group.lookAt(new THREE.Vector3(0, 0, 0));
+
+        scene.add(group);
+        centroComercialGroupRef.current = group;
+
+        for (let x = 0; x < centroSize; x++) {
+          for (let z = 0; z < centroSize; z++) {
+            blockedTilesRef.current.add(`${centroGridX + x}-${centroGridZ + z}`);
+          }
+        }
+      },
+      undefined,
+      (error) => {
+        console.error('Erro ao carregar Centro Comercial:', error);
+      }
+    );
+// ===== QG 3D MODEL =====
+    const qgSize = 4;
+    const qgGridX = Math.floor(gridWidth / 2) - 2;
+    const qgGridZ = Math.floor(gridHeight / 2) - 2;
+
     const qgCenterGridX = qgGridX + qgSize / 2;
     const qgCenterGridZ = qgGridZ + qgSize / 2;
 
@@ -576,719 +622,442 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
       isClickable: true,
     };
 
-    // Debug: Log the QG position
-    console.log('QG Position:', {
-      gridX: qgGridX,
-      gridZ: qgGridZ,
-      worldX: qgWorldX,
-      worldZ: qgWorldZ,
-      gridSize: qgSize,
-    });
-
     gltfLoader.load(
-      'https://static.wixstatic.com/3d/50f4bf_938928189a844f56ac340bada0b551bd.glb',
+      'https://static.wixstatic.com/3d/50f4bf_abe964c8ae1f4e6dbf9e77f25b9fd535.glb',
       (gltf) => {
         const model = gltf.scene;
+        const group = new THREE.Group();
 
-        // Create a group for the QG
-        const qgGroup = new THREE.Group();
+        group.position.set(qgWorldX, 0, qgWorldZ);
 
-        // Position at center of platform
-        qgGroup.position.set(qgWorldX, 0, qgWorldZ);
-
-        // Calculate bounding box to determine proper scale
         const bbox = new THREE.Box3().setFromObject(model);
         const size = bbox.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
 
-        // Scale to fit exactly 4x4 tiles (4 units in world space)
-        const targetSize = qgSize * tileSize; // 4 units
+        const targetSize = 6 * tileSize;
         const scale = targetSize / maxDim;
         model.scale.set(scale, scale, scale);
 
-        // Center the model within the group
         bbox.setFromObject(model);
         const center = bbox.getCenter(new THREE.Vector3());
         model.position.sub(center);
 
-        // Ensure model sits on the ground (y = 0)
-        // Get the bottom of the model
         bbox.setFromObject(model);
-        const bottomY = bbox.min.y;
-        model.position.y -= bottomY; // Lift model so bottom is at y = 0
+        model.position.y -= bbox.min.y;
 
-        // Apply shadow properties recursively to all children
         model.traverse((child) => {
           if (child instanceof THREE.Mesh) {
             child.castShadow = true;
             child.receiveShadow = true;
-            // Enhance material brightness for better visibility
-            if (child.material instanceof THREE.Material) {
-              if (child.material instanceof THREE.MeshStandardMaterial) {
-                child.material.emissiveIntensity = 0.3;
-                child.material.metalness = Math.max(0, child.material.metalness - 0.2);
-                child.material.roughness = Math.min(1, child.material.roughness + 0.1);
-              }
+            if (child.material instanceof THREE.MeshStandardMaterial) {
+              child.material.emissiveIntensity = 0.25;
+              child.material.roughness = Math.min(1, child.material.roughness + 0.08);
             }
           }
         });
 
-        qgGroup.add(model);
-        scene.add(qgGroup);
+        group.add(model);
+        scene.add(group);
 
-        qgRef.current.model = qgGroup;
-        qgGroupRef.current = qgGroup;
+        qgRef.current.model = group;
+        qgGroupRef.current = group;
 
-        // Apply AAA visuals
-        if (aaa3dSystemRef.current) {
-          aaa3dSystemRef.current.applyBuildingVisuals(qgGroup, 'qg');
-          aaa3dSystemRef.current.addGroundShadow(qgGroup, 4);
+        for (let x = 0; x < qgSize; x++) {
+          for (let z = 0; z < qgSize; z++) {
+            blockedTilesRef.current.add(`${qgGridX + x}-${qgGridZ + z}`);
+          }
         }
       },
       undefined,
       (error) => {
-        console.warn('Failed to load QG 3D model:', error);
+        console.error('Erro ao carregar QG:', error);
       }
     );
 
-    // ===== LOAD CUSTOM 3D OBJECTS =====
-    customObjects.forEach((customObj, index) => {
+    // ===== DELEGACIA =====
+    gltfLoader.load(
+      'https://static.wixstatic.com/3d/50f4bf_55eda8581fc04c02a39a33c94b588afc.glb',
+      (gltf) => {
+        const model = gltf.scene;
+        const group = new THREE.Group();
+
+        const delegaciaGridX = 4;
+        const delegaciaGridZ = gridHeight - 6;
+
+        const delegaciaWorldX = startX + (delegaciaGridX + 2) * tileSize;
+        const delegaciaWorldZ = startZ + (delegaciaGridZ + 2) * tileSize;
+
+        group.position.set(delegaciaWorldX, 0, delegaciaWorldZ);
+
+        const bbox = new THREE.Box3().setFromObject(model);
+        const size = bbox.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 4 / maxDim;
+
+        model.scale.set(scale, scale, scale);
+
+        bbox.setFromObject(model);
+        const center = bbox.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+
+        bbox.setFromObject(model);
+        model.position.y -= bbox.min.y;
+
+        model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+
+        group.add(model);
+        scene.add(group);
+
+        delegaciaGroupRef.current = group;
+      },
+      undefined,
+      (error) => {
+        console.error('Erro ao carregar Delegacia:', error);
+      }
+    );
+
+    // ===== CUSTOM OBJECTS =====
+    customObjects.forEach((customObject, index) => {
       gltfLoader.load(
-        customObj.modelUrl,
+        customObject.modelUrl,
         (gltf) => {
           const model = gltf.scene;
+          const group = new THREE.Group();
 
-          // Create a group for the custom object
-          const objGroup = new THREE.Group();
+          const worldX = startX + (customObject.gridX + customObject.size / 2) * tileSize;
+          const worldZ = startZ + (customObject.gridZ + customObject.size / 2) * tileSize;
 
-          // Position at center of platform
-          objGroup.position.set(customObj.position.x, 0, customObj.position.z);
+          group.position.set(worldX, 0, worldZ);
 
-          // Calculate bounding box to determine proper scale
           const bbox = new THREE.Box3().setFromObject(model);
           const size = bbox.getSize(new THREE.Vector3());
           const maxDim = Math.max(size.x, size.y, size.z);
 
-          // Scale to fit the specified size
-          const targetSize = customObj.size * tileSize;
+          const targetSize = customObject.size * tileSize;
           const scale = targetSize / maxDim;
           model.scale.set(scale, scale, scale);
 
-          // Center the model within the group
           bbox.setFromObject(model);
           const center = bbox.getCenter(new THREE.Vector3());
           model.position.sub(center);
 
-          // Ensure model sits on the ground (y = 0)
           bbox.setFromObject(model);
-          const bottomY = bbox.min.y;
-          model.position.y -= bottomY;
+          model.position.y -= bbox.min.y;
 
-          // Apply shadow properties recursively to all children
           model.traverse((child) => {
             if (child instanceof THREE.Mesh) {
               child.castShadow = true;
               child.receiveShadow = true;
-              if (child.material instanceof THREE.Material) {
-                if (child.material instanceof THREE.MeshStandardMaterial) {
-                  child.material.emissiveIntensity = 0.3;
-                  child.material.metalness = Math.max(0, child.material.metalness - 0.2);
-                  child.material.roughness = Math.min(1, child.material.roughness + 0.1);
-                }
-              }
             }
           });
 
-          objGroup.add(model);
-          scene.add(objGroup);
+          group.add(model);
+          scene.add(group);
 
-          customObjectsRef.current.set(index, objGroup);
+          customObjectsRef.current.set(index, group);
+
+          for (let x = 0; x < customObject.size; x++) {
+            for (let z = 0; z < customObject.size; z++) {
+              blockedTilesRef.current.add(`${customObject.gridX + x}-${customObject.gridZ + z}`);
+            }
+          }
         },
         undefined,
         (error) => {
-          console.warn(`Failed to load custom object ${index}:`, error);
+          console.error(`Erro ao carregar objeto customizado ${index}:`, error);
         }
       );
     });
 
-    // ===== LOAD GIRO NO ASFALTO 3D MODEL (4x2 format) =====
-    // Position the giro no asfalto in a strategic location
-    const giroWidth = 4; // tiles wide
-    const giroDepth = 2; // tiles deep
-    const giroGridX = 8; // Starting grid position X
-    const giroGridZ = 9; // Starting grid position Z
-
-    // Calculate center position in world coordinates
-    const giroCenterGridX = giroGridX + giroWidth / 2;
-    const giroCenterGridZ = giroGridZ + giroDepth / 2;
-
-    const giroWorldX = startX + giroCenterGridX * tileSize;
-    const giroWorldZ = startZ + giroCenterGridZ * tileSize;
-
-    console.log('Giro no Asfalto Position:', {
-      gridX: giroGridX,
-      gridZ: giroGridZ,
-      worldX: giroWorldX,
-      worldZ: giroWorldZ,
-      gridSize: `${giroWidth}x${giroDepth}`,
-    });
-
-    gltfLoader.load(
-      'https://static.wixstatic.com/3d/50f4bf_54abdb76d21c4aa0995035679f4f632b.glb',
-      (gltf) => {
-        const model = gltf.scene;
-
-        // Create a group for the giro no asfalto object
-        const giroGroup = new THREE.Group();
-
-        // Position at center of platform
-        giroGroup.position.set(giroWorldX, 0, giroWorldZ);
-
-        // Calculate bounding box to determine proper scale
-        const bbox = new THREE.Box3().setFromObject(model);
-        const size = bbox.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-
-        // Scale to fit exactly 8 tiles (4x2 format)
-        const targetWidth = giroWidth * tileSize; // 4 units
-        const targetDepth = giroDepth * tileSize; // 2 units
-        const targetSize = Math.max(targetWidth, targetDepth); // 4 units
-        const scale = targetSize / maxDim;
-        model.scale.set(scale, scale, scale);
-
-        // Center the model within the group
-        bbox.setFromObject(model);
-        const center = bbox.getCenter(new THREE.Vector3());
-        model.position.sub(center);
-
-        // Ensure model sits on the ground (y = 0)
-        bbox.setFromObject(model);
-        const bottomY = bbox.min.y;
-        model.position.y -= bottomY;
-
-        // Apply shadow properties recursively to all children
-        model.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-            // Enhance material brightness for better visibility
-            if (child.material instanceof THREE.Material) {
-              if (child.material instanceof THREE.MeshStandardMaterial) {
-                child.material.emissiveIntensity = 0.3;
-                child.material.metalness = Math.max(0, child.material.metalness - 0.2);
-                child.material.roughness = Math.min(1, child.material.roughness + 0.15);
-              }
-            }
-          }
-        });
-
-        giroGroup.add(model);
-        giroGroup.userData = { clickable: true, type: 'giro-no-asfalto' };
-        scene.add(giroGroup);
-
-        giroAsfaltoGroupRef.current = giroGroup;
-        console.log('Giro no Asfalto 3D model loaded successfully');
-      },
-      undefined,
-      (error) => {
-        console.warn('Failed to load Giro no Asfalto 3D model:', error);
-      }
-    );
-
-    // ===== LOAD DELEGACIA 3D MODEL (8 tiles - 2x4 format) =====
-    // Position the delegacia at tile 5
-    const delegaciaSize = 2; // 2 tiles wide
-    const delegaciaDepth = 4; // 4 tiles deep
-    
-    // Tile 5 is at row 0, col 5 in the grid (40 columns × 20 rows)
-    const delegaciaGridX = 5; // Column 5
-    const delegaciaGridZ = 0; // Row 0
-
-    // Convert grid coordinates to world coordinates
-    const delegaciaCenterGridX = delegaciaGridX + delegaciaSize / 2;
-    const delegaciaCenterGridZ = delegaciaGridZ + delegaciaDepth / 2;
-
-    const delegaciaWorldX = startX + delegaciaCenterGridX * tileSize;
-    const delegaciaWorldZ = startZ + delegaciaCenterGridZ * tileSize;
-
-    console.log('Delegacia Position:', {
-      gridX: delegaciaGridX,
-      gridZ: delegaciaGridZ,
-      worldX: delegaciaWorldX,
-      worldZ: delegaciaWorldZ,
-      gridSize: `${delegaciaSize}x${delegaciaDepth}`,
-      tile: 5,
-    });
-
-    gltfLoader.load(
-      'https://static.wixstatic.com/3d/50f4bf_6dad7dc336a548d1b45d2a925a05b458.glb',
-      (gltf) => {
-        const model = gltf.scene;
-
-        // Create a group for the delegacia
-        const delegaciaGroup = new THREE.Group();
-
-        // Position at center of platform
-        delegaciaGroup.position.set(delegaciaWorldX, 0, delegaciaWorldZ);
-
-        // Calculate bounding box to determine proper scale
-        const bbox = new THREE.Box3().setFromObject(model);
-        const size = bbox.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-
-        // Scale to fit exactly 8 tiles (2x4 format)
-        const targetSize = Math.max(delegaciaSize * tileSize, delegaciaDepth * tileSize);
-        const scale = targetSize / maxDim;
-        model.scale.set(scale, scale, scale);
-
-        // Center the model within the group
-        bbox.setFromObject(model);
-        const center = bbox.getCenter(new THREE.Vector3());
-        model.position.sub(center);
-
-        // Ensure model sits on the ground (y = 0)
-        bbox.setFromObject(model);
-        const bottomY = bbox.min.y;
-        model.position.y -= bottomY;
-
-        // Apply shadow properties recursively to all children
-        model.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-            // Enhance material brightness for better visibility
-            if (child.material instanceof THREE.Material) {
-              if (child.material instanceof THREE.MeshStandardMaterial) {
-                child.material.emissiveIntensity = 0.2;
-                child.material.metalness = Math.max(0, child.material.metalness - 0.2);
-                child.material.roughness = Math.min(1, child.material.roughness + 0.1);
-              }
-            }
-          }
-        });
-
-        delegaciaGroup.add(model);
-        delegaciaGroup.userData = { clickable: true, type: 'delegacia' };
-        scene.add(delegaciaGroup);
-
-        delegaciaGroupRef.current = delegaciaGroup;
-
-        // Apply AAA visuals
-        if (aaa3dSystemRef.current) {
-          aaa3dSystemRef.current.applyBuildingVisuals(delegaciaGroup, 'delegacia');
-          aaa3dSystemRef.current.addGroundShadow(delegaciaGroup, 2);
-        }
-      },
-      undefined,
-      (error) => {
-        console.warn('Failed to load delegacia 3D model:', error);
-      }
-    );
-
-    // ===== LOAD CENTRO COMERCIAL 3D MODEL (positioned in center of grid) =====
-    // Position the centro comercial in the center of the grid (X: 60, Z: 40)
-    const centroComercialSize = 4; // 4 tiles wide
-    const centroComercialDepth = 2; // 2 tiles deep (8 tiles total)
-    const centroComercialGridX = 60; // Center X position
-    const centroComercialGridZ = 40; // Center Z position
-
-    // Convert grid coordinates to world coordinates
-    const centroComercialCenterGridX = centroComercialGridX;
-    const centroComercialCenterGridZ = centroComercialGridZ;
-
-    const centroComercialWorldX = startX + centroComercialCenterGridX * tileSize;
-    const centroComercialWorldZ = startZ + centroComercialCenterGridZ * tileSize;
-
-    console.log('Centro Comercial Position (Center of Grid):', {
-      gridX: centroComercialGridX,
-      gridZ: centroComercialGridZ,
-      worldX: centroComercialWorldX,
-      worldZ: centroComercialWorldZ,
-      gridSize: `${centroComercialSize}x${centroComercialDepth}`,
-    });
-
-    gltfLoader.load(
-      'https://static.wixstatic.com/3d/50f4bf_8b894931f3c241f285c4292c4842c4f0.glb',
-      (gltf) => {
-        const model = gltf.scene;
-
-        // Create a group for the centro comercial
-        const centroComercialGroup = new THREE.Group();
-
-        // Position at center of platform
-        centroComercialGroup.position.set(centroComercialWorldX, 0, centroComercialWorldZ);
-
-        // No rotation - face forward (towards positive Z direction)
-
-        // Calculate bounding box to determine proper scale
-        const bbox = new THREE.Box3().setFromObject(model);
-        const size = bbox.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-
-        // Scale to fit exactly 8 tiles
-        const targetSize = Math.max(centroComercialSize * tileSize, centroComercialDepth * tileSize);
-        const scale = targetSize / maxDim;
-        model.scale.set(scale, scale, scale);
-
-        // Center the model within the group
-        bbox.setFromObject(model);
-        const center = bbox.getCenter(new THREE.Vector3());
-        model.position.sub(center);
-
-        // Ensure model sits on the ground (y = 0)
-        bbox.setFromObject(model);
-        const bottomY = bbox.min.y;
-        model.position.y -= bottomY;
-
-        // Apply shadow properties recursively to all children
-        model.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-            if (child.material instanceof THREE.Material) {
-              if (child.material instanceof THREE.MeshStandardMaterial) {
-                child.material.emissiveIntensity = 0.3;
-                child.material.metalness = Math.max(0, child.material.metalness - 0.2);
-                child.material.roughness = Math.min(1, child.material.roughness + 0.1);
-              }
-            }
-          }
-        });
-
-        centroComercialGroup.add(model);
-        centroComercialGroup.userData = { clickable: true, type: 'centro-comercial' };
-        scene.add(centroComercialGroup);
-
-        centroComercialGroupRef.current = centroComercialGroup;
-
-        // Apply AAA visuals
-        if (aaa3dSystemRef.current) {
-          aaa3dSystemRef.current.applyBuildingVisuals(centroComercialGroup, 'centro-comercial');
-          aaa3dSystemRef.current.addGroundShadow(centroComercialGroup, 4);
-        }
-      },
-      undefined,
-      (error) => {
-        console.warn('Failed to load Centro Comercial 3D model:', error);
-      }
-    );
-
-    // ===== LOAD CENTRO COMUNITÁRIO 3D MODEL (8 tiles - right margin, investment center) =====
-    // Position the centro comunitário (investment center) on the right margin
-    const centroComunitarioSize = 4; // 4 tiles wide
-    const centroComunitarioDepth = 2; // 2 tiles deep (8 tiles total)
-    const centroComunitarioGridX = 32; // Right margin
-    const centroComunitarioGridZ = 5; // Below centro comercial with spacing
-
-    // Convert grid coordinates to world coordinates
-    const centroComunitarioCenterGridX = centroComunitarioGridX + centroComunitarioSize / 2;
-    const centroComunitarioCenterGridZ = centroComunitarioGridZ + centroComunitarioDepth / 2;
-
-    const centroComunitarioWorldX = startX + centroComunitarioCenterGridX * tileSize;
-    const centroComunitarioWorldZ = startZ + centroComunitarioCenterGridZ * tileSize;
-
-    console.log('Centro Comunitário Position:', {
-      gridX: centroComunitarioGridX,
-      gridZ: centroComunitarioGridZ,
-      worldX: centroComunitarioWorldX,
-      worldZ: centroComunitarioWorldZ,
-      gridSize: `${centroComunitarioSize}x${centroComunitarioDepth}`,
-    });
-
-    gltfLoader.load(
-      'https://static.wixstatic.com/3d/50f4bf_1641be50f6a74954848cfaae281d6b15.glb',
-      (gltf) => {
-        const model = gltf.scene;
-
-        // Create a group for the centro comunitário
-        const centroComunitarioGroup = new THREE.Group();
-
-        // Position at center of platform
-        centroComunitarioGroup.position.set(centroComunitarioWorldX, 0, centroComunitarioWorldZ);
-
-        // Calculate bounding box to determine proper scale
-        const bbox = new THREE.Box3().setFromObject(model);
-        const size = bbox.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-
-        // Scale to fit exactly 8 tiles
-        const targetSize = Math.max(centroComunitarioSize * tileSize, centroComunitarioDepth * tileSize);
-        const scale = targetSize / maxDim;
-        model.scale.set(scale, scale, scale);
-
-        // Center the model within the group
-        bbox.setFromObject(model);
-        const center = bbox.getCenter(new THREE.Vector3());
-        model.position.sub(center);
-
-        // Ensure model sits on the ground (y = 0)
-        bbox.setFromObject(model);
-        const bottomY = bbox.min.y;
-        model.position.y -= bottomY;
-
-        // Apply shadow properties recursively to all children
-        model.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-            if (child.material instanceof THREE.Material) {
-              if (child.material instanceof THREE.MeshStandardMaterial) {
-                child.material.emissiveIntensity = 0.3;
-                child.material.metalness = Math.max(0, child.material.metalness - 0.2);
-                child.material.roughness = Math.min(1, child.material.roughness + 0.1);
-              }
-            }
-          }
-        });
-
-        centroComunitarioGroup.add(model);
-        centroComunitarioGroup.userData = { clickable: true, type: 'centro-comunitario' };
-        scene.add(centroComunitarioGroup);
-
-        centroComunitarioGroupRef.current = centroComunitarioGroup;
-
-        // Apply AAA visuals
-        if (aaa3dSystemRef.current) {
-          aaa3dSystemRef.current.applyBuildingVisuals(centroComunitarioGroup, 'centro-comunitario');
-          aaa3dSystemRef.current.addGroundShadow(centroComunitarioGroup, 4);
-        }
-      },
-      undefined,
-      (error) => {
-        console.warn('Failed to load Centro Comunitário 3D model:', error);
-      }
-    );
-
-    // ===== ORBIT CONTROLS WITH CUSTOM CONFIGURATION =====
-    const controls = new OrbitControls(camera, renderer.domElement);
-
-    // ===== CAMERA CONTROLS - Configuração conforme solicitado =====
-    controls.enablePan = true;          // permite mover lateralmente
-    controls.enableZoom = true;         // permite zoom
-    controls.enableRotate = true;       // permite girar em torno do grid
-    controls.target.set(0, 0, 0);       // centraliza no grid fixo
-    controls.maxPolarAngle = Math.PI/2; // impede câmera passar pelo chão
-    controls.minDistance = 10;          // zoom mínimo
-    controls.maxDistance = 100;         // zoom máximo
-
-    // ===== DAMPING CONFIGURATION (Smooth Movement) =====
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08; // Smooth deceleration
-    controls.autoRotate = false;
-    controls.autoRotateSpeed = 0;
-
-    // ===== ZOOM CONFIGURATION =====
-    controls.zoomSpeed = 1.2; // Sensitivity for scroll/pinch
-
-    // ===== ROTATION CONFIGURATION =====
-    controls.rotateSpeed = 0.8; // Rotation sensitivity
-
-    // ===== AZIMUTH LOCK (Horizontal rotation only) =====
-    // Allow free rotation around Y-axis (no restrictions)
-    controls.minAzimuthAngle = -Infinity;
-    controls.maxAzimuthAngle = Infinity;
-
-    // ===== TOUCH SUPPORT =====
-    controls.touchDollyRotate = true; // Enable pinch-to-zoom on mobile
-    controls.touchDollySpeed = 8; // Pinch zoom sensitivity
-
-    controls.update();
+    // ===== ORBIT CONTROLS =====
     controlsRef.current = controls;
+    controls.target.set(gridTotalWidth / 2 - gridTotalWidth / 2, 0, gridTotalHeight / 2 - gridTotalHeight / 2);
+    controls.enablePan = true;
+    controls.enableRotate = true;
+    controls.enableZoom = true;
+    controls.minDistance = 8;
+    controls.maxDistance = 50;
+    controls.maxPolarAngle = Math.PI / 2.15;
+    controls.minPolarAngle = Math.PI / 5;
+    controls.panSpeed = 0.8;
+    controls.rotateSpeed = 0.6;
+    controls.zoomSpeed = 0.9;
+    controls.update();
 
+    // ===== HOVER HIGHLIGHT =====
+    const setBuildingHover = (group: THREE.Group | null, hovered: boolean) => {
+      if (!group) return;
 
-
-    // ===== MOUSE INTERACTION FOR TILE SELECTION =====
-    const onMouseMove = (event: MouseEvent) => {
-      const rect = renderer.domElement.getBoundingClientRect();
-      mouseRef.current.x = ((event.clientX - rect.left) / width) * 2 - 1;
-      mouseRef.current.y = -((event.clientY - rect.top) / height) * 2 + 1;
+      group.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+          child.material.emissive = new THREE.Color(hovered ? 0x223344 : 0x000000);
+          child.material.emissiveIntensity = hovered ? 0.45 : 0.18;
+        }
+      });
     };
 
-    const onMouseClick = (event: MouseEvent) => {
+    const handlePointerMove = (event: MouseEvent) => {
+      if (!rendererRef.current || !cameraRef.current) return;
+
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouseRef.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseRef.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
       raycasterRef.current.setFromCamera(mouseRef.current, camera);
+      const intersects = raycasterRef.current.intersectObjects(scene.children, true);
 
-      // Check if delegacia was clicked
-      if (delegaciaGroupRef.current) {
-        const delegaciaIntersects = raycasterRef.current.intersectObject(delegaciaGroupRef.current, true);
-        if (delegaciaIntersects.length > 0) {
-          // Handle delegacia click based on player level
-          if (level < 10) {
-            console.warn('Nível insuficiente para acessar a delegacia');
-            return;
-          }
-
-          if (level >= 10 && level < 20) {
-            navigate('/bribery-investigador');
-          } else if (level >= 20) {
-            navigate('/bribery-delegado');
-          }
-          return;
-        }
-      }
-
-      // Check if centro comercial was clicked
-      if (centroComercialGroupRef.current) {
-        const centroComercialIntersects = raycasterRef.current.intersectObject(centroComercialGroupRef.current, true);
-        if (centroComercialIntersects.length > 0) {
-          console.log('Centro Comercial clicked from grid!');
-          navigate('/centro-comercial');
-          return;
-        }
-      }
-
-      // Check if centro comunitário was clicked
-      if (centroComunitarioGroupRef.current) {
-        const centroComunitarioIntersects = raycasterRef.current.intersectObject(centroComunitarioGroupRef.current, true);
-        if (centroComunitarioIntersects.length > 0) {
-          console.log('Centro Comunitário clicked from grid!');
-          navigate('/investment-center');
-          return;
-        }
-      }
-
-      // Check if giro no asfalto was clicked
-      if (giroAsfaltoGroupRef.current) {
-        const giroIntersects = raycasterRef.current.intersectObject(giroAsfaltoGroupRef.current, true);
-        if (giroIntersects.length > 0) {
-          console.log('Giro no Asfalto clicked from grid!');
-          navigate('/giro-no-asfalto');
-          return;
-        }
-      }
-
-      // Check if custom objects were clicked
-      for (let i = 0; i < customObjects.length; i++) {
-        const customObjGroup = customObjectsRef.current.get(i);
-        if (customObjGroup) {
-          const customIntersects = raycasterRef.current.intersectObject(customObjGroup, true);
-          if (customIntersects.length > 0) {
-            if (customObjects[i].onClickCallback) {
-              customObjects[i].onClickCallback!();
-            }
-            return;
-          }
-        }
-      }
-
-      // Check if QG was clicked
-      if (qgGroupRef.current) {
-        const qgIntersects = raycasterRef.current.intersectObject(qgGroupRef.current, true);
-        if (qgIntersects.length > 0) {
-          if (onQGClick) {
-            onQGClick();
-          }
-          return;
-        }
-      }
-
-      // Check if luxury store was clicked
-      if (luxuryStoreGroupRef.current) {
-        const storeIntersects = raycasterRef.current.intersectObject(luxuryStoreGroupRef.current, true);
-        if (storeIntersects.length > 0) {
-          if (onLuxuryStoreClick) {
-            onLuxuryStoreClick();
-          }
-          return;
-        }
-      }
-
-      const intersects = raycasterRef.current.intersectObject(instancedMesh);
+      let hoveredGroup: THREE.Group | null = null;
 
       if (intersects.length > 0) {
-        const intersection = intersects[0];
-        const instanceId = intersection.instanceId;
+        let obj: THREE.Object3D | null = intersects[0].object;
 
-        if (instanceId !== undefined) {
-          // Deselect previous tile
-          if (selectedTileRef.current !== null && selectedTileRef.current !== instanceId) {
-            instancedMesh.setColorAt(selectedTileRef.current, new THREE.Color(0x3a3a3a));
+        while (obj?.parent) {
+          if (obj === luxuryStoreGroupRef.current) {
+            hoveredGroup = luxuryStoreGroupRef.current;
+            break;
+          }
+          if (obj === centroComercialGroupRef.current) {
+            hoveredGroup = centroComercialGroupRef.current;
+            break;
+          }
+          if (obj === qgGroupRef.current) {
+            hoveredGroup = qgGroupRef.current;
+            break;
+          }
+          if (obj === delegaciaGroupRef.current) {
+            hoveredGroup = delegaciaGroupRef.current;
+            break;
+          }
+          obj = obj.parent;
+        }
+      }
+
+      if (lastHoveredBuildingRef.current !== hoveredGroup) {
+        if (lastHoveredBuildingRef.current) {
+          setBuildingHover(lastHoveredBuildingRef.current, false);
+        }
+        if (hoveredGroup) {
+          setBuildingHover(hoveredGroup, true);
+        }
+        lastHoveredBuildingRef.current = hoveredGroup;
+      }
+    };
+
+    // ===== CLICK =====
+    const handleClick = (event: MouseEvent) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouseRef.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseRef.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycasterRef.current.setFromCamera(mouseRef.current, camera);
+      const intersects = raycasterRef.current.intersectObjects(scene.children, true);
+
+      if (intersects.length > 0) {
+        let obj: THREE.Object3D | null = intersects[0].object;
+
+        while (obj?.parent) {
+          if (obj === luxuryStoreGroupRef.current) {
+            onLuxuryStoreClick?.();
+            return;
           }
 
-          // Select new tile
-          selectedTileRef.current = instanceId;
-          instancedMesh.setColorAt(instanceId, new THREE.Color(0x00eaff));
-          instancedMesh.instanceColor!.needsUpdate = true;
+          if (obj === centroComercialGroupRef.current) {
+            navigate('/commercial-center');
+            return;
+          }
 
-          const tileData = tilesRef.current.get(instanceId);
-          if (tileData && onTileSelect) {
-            onTileSelect(instanceId, { x: tileData.x, z: tileData.z });
+          if (obj === qgGroupRef.current) {
+            onQGClick?.();
+            return;
+          }
+
+          if (obj === delegaciaGroupRef.current) {
+            console.log('Delegacia clicada');
+            return;
+          }
+
+          obj = obj.parent;
+        }
+      }
+
+      const intersectsTiles = raycasterRef.current.intersectObject(instancedMesh, false);
+      if (intersectsTiles.length > 0) {
+        const instanceId = intersectsTiles[0].instanceId;
+        if (instanceId !== undefined) {
+          selectedTileRef.current = instanceId;
+          const tile = tilesRef.current.get(instanceId);
+          if (tile && onTileSelect) {
+            onTileSelect(instanceId, { x: tile.x, z: tile.z });
           }
         }
       }
     };
+// ===== MOBILE TOUCH SUPPORT =====
+    const handleTouchEnd = (event: TouchEvent) => {
+      if (!rendererRef.current || !cameraRef.current) return;
+      if (event.changedTouches.length === 0) return;
 
-    renderer.domElement.addEventListener('mousemove', onMouseMove);
-    renderer.domElement.addEventListener('click', onMouseClick);
+      const touch = event.changedTouches[0];
+      const rect = renderer.domElement.getBoundingClientRect();
+
+      mouseRef.current.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseRef.current.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycasterRef.current.setFromCamera(mouseRef.current, camera);
+      const intersects = raycasterRef.current.intersectObjects(scene.children, true);
+
+      if (intersects.length > 0) {
+        let obj: THREE.Object3D | null = intersects[0].object;
+
+        while (obj?.parent) {
+          if (obj === luxuryStoreGroupRef.current) {
+            onLuxuryStoreClick?.();
+            return;
+          }
+
+          if (obj === centroComercialGroupRef.current) {
+            navigate('/commercial-center');
+            return;
+          }
+
+          if (obj === qgGroupRef.current) {
+            onQGClick?.();
+            return;
+          }
+
+          if (obj === delegaciaGroupRef.current) {
+            console.log('Delegacia clicada');
+            return;
+          }
+
+          obj = obj.parent;
+        }
+      }
+    };
+
+    window.addEventListener('mousemove', handlePointerMove);
+    window.addEventListener('click', handleClick);
+    renderer.domElement.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     // ===== ANIMATION LOOP =====
+    let animationFrameId: number;
+
     const animate = () => {
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
+
       controls.update();
 
-      // Update AAA 3D visual effects
-      if (aaa3dSystemRef.current) {
-        aaa3dSystemRef.current.update(0.016); // ~60fps delta time
+      if (aaa3dSystemRef.current && typeof aaa3dSystemRef.current.update === 'function') {
+        aaa3dSystemRef.current.update();
       }
 
       renderer.render(scene, camera);
     };
+
     animate();
-
-    // ===== HANDLE WINDOW RESIZE =====
-    const onWindowResize = () => {
-      if (!containerRef.current) return;
-      const newWidth = containerRef.current.clientWidth;
-      const newHeight = containerRef.current.clientHeight;
-
-      camera.aspect = newWidth / newHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(newWidth, newHeight);
-    };
-
-    window.addEventListener('resize', onWindowResize);
 
     // ===== CLEANUP =====
     return () => {
-      window.removeEventListener('resize', onWindowResize);
-      renderer.domElement.removeEventListener('mousemove', onMouseMove);
-      renderer.domElement.removeEventListener('click', onMouseClick);
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', handlePointerMove);
+      window.removeEventListener('click', handleClick);
+      renderer.domElement.removeEventListener('touchend', handleTouchEnd);
+
+      if (lastHoveredBuildingRef.current) {
+        setBuildingHover(lastHoveredBuildingRef.current, false);
+        lastHoveredBuildingRef.current = null;
+      }
+
+      controls.dispose();
+
+      if (instancedMeshRef.current) {
+        instancedMeshRef.current.geometry.dispose();
+        if (Array.isArray(instancedMeshRef.current.material)) {
+          instancedMeshRef.current.material.forEach((m) => m.dispose());
+        } else {
+          instancedMeshRef.current.material.dispose();
+        }
+      }
+
+      scene.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.geometry?.dispose();
+
+          if (Array.isArray(child.material)) {
+            child.material.forEach((material) => material.dispose());
+          } else if (child.material) {
+            child.material.dispose();
+          }
+        }
+      });
+
+      renderer.dispose();
 
       if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
         containerRef.current.removeChild(renderer.domElement);
       }
 
-      geometry.dispose();
-      baseMaterial.dispose();
-      groundGeometry.dispose();
-      groundMaterial.dispose();
-      gridLinesGeometry.dispose();
-      gridLinesMaterial.dispose();
-      groundTexture.dispose();
-      normalMap.dispose();
-      instancedMesh.dispose();
-      controls.dispose();
-      renderer.dispose();
+      tilesRef.current.clear();
+      customObjectsRef.current.clear();
+      blockedTilesRef.current.clear();
 
-      // Dispose AAA 3D system
-      if (aaa3dSystemRef.current) {
-        aaa3dSystemRef.current.dispose();
-      }
+      luxuryStoreGroupRef.current = null;
+      qgGroupRef.current = null;
+      delegaciaGroupRef.current = null;
+      giroAsfaltoGroupRef.current = null;
+      centroComercialGroupRef.current = null;
+      centroComunitarioGroupRef.current = null;
 
-      setSceneReady(false);
+      sceneRef.current = null;
+      cameraRef.current = null;
+      rendererRef.current = null;
+      controlsRef.current = null;
+      aaa3dSystemRef.current = null;
     };
-  }, [gridWidth, gridHeight, tileSize, onTileSelect, onLuxuryStoreClick, onQGClick, customObjects, level, navigate]);
+  }, [
+    onTileSelect,
+    onLuxuryStoreClick,
+    onQGClick,
+    customObjects,
+    gridWidth,
+    gridHeight,
+    tileSize,
+    navigate,
+    level,
+  ]);
 
   return (
     <div
       ref={containerRef}
+      className="w-full h-full touch-none"
       style={{
-        width: '100%',
-        height: '100%',
         position: 'relative',
         overflow: 'hidden',
+        minHeight: '100%',
+        minWidth: '100%',
       }}
-    />
+    >
+      {!sceneReady && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="text-center">
+            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-cyan-400 border-t-transparent" />
+            <p className="mt-4 text-sm font-bold uppercase tracking-[0.2em] text-white">
+              Carregando complexo...
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
 export default InteractiveTileGrid;
+
+
+
