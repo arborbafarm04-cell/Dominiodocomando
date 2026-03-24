@@ -22,6 +22,8 @@ export default function HomePage() {
   const { setPlayerId, setPlayerName, setIsGuest, setLevel } = usePlayerStore();
 
   useEffect(() => {
+    localStorage.removeItem('hasSeenHomeIntro');
+localStorage.removeItem('playerLoggedIn');
     const updateTime = () => {
       const now = new Date();
       setSystemTime(
