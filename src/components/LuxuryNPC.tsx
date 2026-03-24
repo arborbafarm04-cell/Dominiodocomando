@@ -71,7 +71,7 @@ export default function LuxuryNPC({ onNPCLoaded }: LuxuryNPCProps) {
         // Position at center, slightly behind counter area
         npc.position.set(0, 0, 0.5);
         // Scale appropriately for full body visibility
-        npc.scale.set(1.5, 1.5, 1.5);
+        npc.scale.set(1.65, 1.65, 1.65);
 
         // Enable shadows on all meshes and optimize materials
         npc.traverse((child) => {
