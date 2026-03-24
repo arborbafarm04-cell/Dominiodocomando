@@ -339,6 +339,72 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     instancedMesh.instanceMatrix.needsUpdate = true;
     scene.add(instancedMesh);
 
+    // ===== ADD TILE NUMBERS FOR ORIENTATION =====
+    // Create canvas texture for tile numbers
+    const numberCanvasTemplate = document.createElement('canvas');
+    numberCanvasTemplate.width = 256;
+    numberCanvasTemplate.height = 256;
+    const numberCtxTemplate = numberCanvasTemplate.getContext('2d')!;
+
+    // Create a function to generate number texture for a specific tile
+    const createNumberTexture = (tileNumber: number) => {
+      const numberCanvas = document.createElement('canvas');
+      numberCanvas.width = 256;
+      numberCanvas.height = 256;
+      const numberCtx = numberCanvas.getContext('2d')!;
+
+      // Transparent background
+      numberCtx.clearRect(0, 0, numberCanvas.width, numberCanvas.height);
+
+      // Draw number
+      numberCtx.fillStyle = '#00eaff';
+      numberCtx.font = 'bold 120px Arial';
+      numberCtx.textAlign = 'center';
+      numberCtx.textBaseline = 'middle';
+      numberCtx.fillText(tileNumber.toString(), 128, 128);
+
+      // Add glow effect
+      numberCtx.strokeStyle = '#00eaff';
+      numberCtx.lineWidth = 3;
+      numberCtx.strokeText(tileNumber.toString(), 128, 128);
+
+      return new THREE.CanvasTexture(numberCanvas);
+    };
+
+    // Add text labels for every 5th tile to avoid clutter
+    const labelInterval = 5;
+    tileIndex = 0;
+    for (let row = 0; row < gridHeight; row++) {
+      for (let col = 0; col < gridWidth; col++) {
+        if (tileIndex % labelInterval === 0) {
+          const x = startX + col * tileSize + tileSize / 2;
+          const z = startZ + row * tileSize + tileSize / 2;
+          const y = tileSize * 0.15; // Slightly above the tile
+
+          // Create a plane with the number texture
+          const numberTexture = createNumberTexture(tileIndex);
+          const numberMaterial = new THREE.MeshBasicMaterial({
+            map: numberTexture,
+            transparent: true,
+            side: THREE.DoubleSide,
+            emissive: 0x00eaff,
+            emissiveIntensity: 0.5,
+          });
+
+          const numberGeometry = new THREE.PlaneGeometry(tileSize * 0.8, tileSize * 0.8);
+          const numberMesh = new THREE.Mesh(numberGeometry, numberMaterial);
+
+          // Position the number above the tile
+          numberMesh.position.set(x, y, z);
+          numberMesh.rotation.x = -Math.PI / 2.5; // Tilt to be visible from camera angle
+
+          scene.add(numberMesh);
+        }
+
+        tileIndex++;
+      }
+    }
+
     // ===== ADD GROUND PLANE WITH REALISTIC TEXTURE =====
     const groundGeometry = new THREE.PlaneGeometry(gridTotalWidth * 1.3, gridTotalHeight * 1.3);
     const groundMaterial = new THREE.MeshStandardMaterial({
