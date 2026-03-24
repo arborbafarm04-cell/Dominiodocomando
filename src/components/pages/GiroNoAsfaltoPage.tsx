@@ -7,8 +7,12 @@ import { useSpinVault } from '@/hooks/useSpinVault';
 import { useState, useEffect } from 'react';
 import { usePlayerStore } from '@/store/playerStore';
 import { getBackgroundByLevel } from '@/data/luxoItems';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Home, Zap } from 'lucide-react';
 
 export default function GiroNoAsfaltoPage() {
+  const navigate = useNavigate();
   const { showNotification, lastGainAmount } = useSpinVault();
   const barracoLevel = usePlayerStore((state) => state.barracoLevel);
   const [dynamicBackground, setDynamicBackground] = useState('');
@@ -24,6 +28,28 @@ export default function GiroNoAsfaltoPage() {
       
       {/* Spin Vault Notification */}
       <SpinVaultNotification show={showNotification} amount={lastGainAmount} />
+
+      {/* Navigation Buttons */}
+      <div className="absolute top-24 left-6 z-20 flex gap-3">
+        <Button
+          onClick={() => navigate('/')}
+          variant="outline"
+          size="sm"
+          className="bg-[#FF4500]/20 border-[#FF4500] text-white hover:bg-[#FF4500]/40"
+        >
+          <Home className="w-4 h-4 mr-2" />
+          Home
+        </Button>
+        <Button
+          onClick={() => navigate(-1)}
+          variant="outline"
+          size="sm"
+          className="bg-[#00eaff]/20 border-[#00eaff] text-white hover:bg-[#00eaff]/40"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Voltar
+        </Button>
+      </div>
 
       {/* Slot Machine Section */}
       <div className="w-full relative overflow-hidden bg-gradient-to-b from-[#0a0d14] to-[#0f1419] flex items-center justify-center min-h-screen bg-fixed">
