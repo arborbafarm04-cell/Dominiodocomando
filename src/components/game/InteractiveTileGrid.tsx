@@ -885,12 +885,12 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
       }
     );
 
-    // ===== LOAD CENTRO COMERCIAL 3D MODEL (positioned next to Centro Comunitário) =====
-    // Position the centro comercial next to the centro comunitário (investment center)
+    // ===== LOAD CENTRO COMERCIAL 3D MODEL (positioned in center of grid) =====
+    // Position the centro comercial in the center of the grid (X: 60, Z: 40)
     const centroComercialSize = 4; // 4 tiles wide
     const centroComercialDepth = 2; // 2 tiles deep (8 tiles total)
-    const centroComercialGridX = 32; // Same X as centro comunitário
-    const centroComercialGridZ = 0; // Above centro comunitário with spacing
+    const centroComercialGridX = 60; // Center X position
+    const centroComercialGridZ = 40; // Center Z position
 
     // Convert grid coordinates to world coordinates
     const centroComercialCenterGridX = centroComercialGridX;
@@ -899,7 +899,7 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
     const centroComercialWorldX = startX + centroComercialCenterGridX * tileSize;
     const centroComercialWorldZ = startZ + centroComercialCenterGridZ * tileSize;
 
-    console.log('Centro Comercial Position (Next to Investment Center):', {
+    console.log('Centro Comercial Position (Center of Grid):', {
       gridX: centroComercialGridX,
       gridZ: centroComercialGridZ,
       worldX: centroComercialWorldX,
@@ -918,9 +918,7 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = (
         // Position at center of platform
         centroComercialGroup.position.set(centroComercialWorldX, 0, centroComercialWorldZ);
 
-        // Rotate to face inward (towards the center of the platform)
-        // Rotate 180 degrees around Y axis to face inward
-        centroComercialGroup.rotation.y = Math.PI;
+        // No rotation - face forward (towards positive Z direction)
 
         // Calculate bounding box to determine proper scale
         const bbox = new THREE.Box3().setFromObject(model);
