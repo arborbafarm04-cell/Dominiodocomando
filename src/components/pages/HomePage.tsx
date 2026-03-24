@@ -7,6 +7,7 @@ import { Image } from '@/components/ui/image';
 import { useMember } from '@/integrations';
 import { useGameStore } from '@/store/gameStore';
 import { usePlayerStore } from '@/store/playerStore';
+import { BaseCrudService } from '@/integrations';
 import { motion } from 'framer-motion';
 import { Chrome, Crosshair, Facebook, RotateCcw, ShieldAlert, Terminal, UserCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -16,10 +17,44 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [systemTime, setSystemTime] = useState<string>('');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const { actions } = useMember();
+  const { actions, member } = useMember();
   const navigate = useNavigate();
   const { playerLevel, setPlayerLevel } = useGameStore();
-  const { setLevel } = usePlayerStore();
+  const { setLevel, setPlayerId, setPlayerName, setIsGuest } = usePlayerStore();
+
+  const savePlayerData = async (memberId: string, playerNameValue: string) => {
+    try {
+      // Check if player already exists
+      const existingPlayers = await BaseCrudService.getAll<any>('players');
+      const existingPlayer = existingPlayers.items?.find((p: any) => p.memberId === memberId);
+
+      if (existingPlayer) {
+        // Update existing player
+        await BaseCrudService.update('players', {
+          _id: existingPlayer._id,
+          memberId,
+          playerName: playerNameValue,
+          lastSeen: new Date().toISOString(),
+          isOnline: true,
+        });
+      } else {
+        // Create new player
+        await BaseCrudService.create('players', {
+          _id: crypto.randomUUID(),
+          memberId,
+          playerName: playerNameValue,
+          cleanMoney: 0,
+          dirtyMoney: 0,
+          level: 1,
+          progress: 0,
+          isGuest: false,
+          lastUpdated: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      console.error('Error saving player data:', error);
+    }
+  };
 
   useEffect(() => {
     const updateTime = () => {
@@ -31,17 +66,47 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Check if user is already logged in and redirect to star-map
+  useEffect(() => {
+    if (member) {
+      const isFirstLogin = !localStorage.getItem('playerLoggedIn');
+      
+      // Save player data to database
+      const memberEmail = member.loginEmail || 'unknown';
+      const memberNickname = member.profile?.nickname || 'COMANDANTE';
+      
+      setPlayerName(memberNickname);
+      setPlayerId(member._id || '');
+      setIsGuest(false);
+      
+      // Save to local storage
+      localStorage.setItem('playerLoggedIn', 'true');
+      localStorage.setItem('playerName', memberNickname);
+      localStorage.setItem('memberId', member._id || '');
+      
+      // Save to database
+      savePlayerData(member._id || '', memberNickname);
+      
+      if (isFirstLogin) {
+        // First login - redirect to star-map
+        navigate('/star-map');
+      }
+    }
+  }, [member, navigate, setPlayerName, setPlayerId, setIsGuest]);
+
   const handleLogin = async (provider: string) => {
     setIsLoading(provider);
     try {
       if (provider === 'visitor') {
-        // For visitor access, navigate directly to star-map
+        // For visitor access, set guest mode and navigate
+        setIsGuest(true);
+        localStorage.setItem('isGuest', 'true');
+        localStorage.setItem('playerLoggedIn', 'true');
         navigate('/star-map');
       } else {
-        // Trigger actual authentication via Wix Members SDK for other providers
+        // Trigger actual authentication via Wix Members SDK
         await actions.login();
-        // After successful login, navigate to star-map
-        navigate('/star-map');
+        // The redirect will happen automatically via the useEffect above
       }
     } catch (error) {
       console.error(`Login failed for ${provider}:`, error);

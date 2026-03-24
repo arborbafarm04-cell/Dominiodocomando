@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Vault, Zap, Dice5, Menu, X } from 'lucide-react';
+import { Vault, Zap, Dice5, Menu, X, LogOut } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
 import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
 import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
 import { usePlayerStore } from '@/store/playerStore';
 import { useSpinVault } from '@/hooks/useSpinVault';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useMember } from '@/integrations';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -17,8 +18,11 @@ import {
 export default function Header() {
   const { dirtyMoney } = useDirtyMoneyStore();
   const { cleanMoney } = useCleanMoneyStore();
-  const { playerName, level, setPlayerName } = usePlayerStore();
+  const { playerName, setPlayerName, resetPlayer } = usePlayerStore();
+  const { level } = usePlayerStore();
   const { spins, timeUntilNextGain, formatTime } = useSpinVault();
+  const { actions, member } = useMember();
+  const navigate = useNavigate();
 
   const [customPlayerName, setCustomPlayerName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState(
@@ -51,6 +55,26 @@ export default function Header() {
       localStorage.setItem('playerAvatar', url);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleLogout = async () => {
+    // Clear local storage
+    localStorage.removeItem('playerLoggedIn');
+    localStorage.removeItem('isGuest');
+    localStorage.removeItem('playerName');
+    localStorage.removeItem('customPlayerName');
+    localStorage.removeItem('playerAvatar');
+    
+    // Reset player state
+    resetPlayer();
+    
+    // Logout from Wix Members
+    if (member) {
+      await actions.logout();
+    }
+    
+    // Navigate to home
+    navigate('/');
   };
 
   return (
@@ -162,6 +186,16 @@ export default function Header() {
         >
           PRÓXIMO GIRO: {formatTime(timeUntilNextGain)}
         </div>
+
+        {/* LOGOUT BUTTON */}
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 bg-destructive/20 hover:bg-destructive/30 text-destructive border border-destructive/50 hover:border-destructive font-heading text-xs uppercase tracking-widest rounded transition-all duration-300"
+          title="Sair do jogo"
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="hidden sm:inline">Sair</span>
+        </button>
       </div>
 
       {/* Hidden file input */}
