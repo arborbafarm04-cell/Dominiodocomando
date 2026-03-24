@@ -71,7 +71,7 @@ export default function LuxuryNPC({ onNPCLoaded }: LuxuryNPCProps) {
         // Position at center, slightly behind counter area
         npc.position.set(0, 0, 0.5);
         // Scale visibilityvisibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibilityibility
-        npc.scale.set(1.85, 1.85, 1.85);visibvisibvisibvisibilibilitbilit
+        npc.scale.set(2.20, 2.20, 1.85);visibvisibvisibvisibilibilitbilit
 
         // Enable shadows on all meshes and optimize materials
         npc.traverse((child) => {
