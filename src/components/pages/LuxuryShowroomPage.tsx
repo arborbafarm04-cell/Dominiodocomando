@@ -362,9 +362,66 @@ export default function LuxuryShowroomPage() {
           )}
         </AnimatePresence>
 
-        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-140px)] w-full max-w-[1700px] flex-col gap-6 px-4 pb-8 pt-5 lg:px-8">
-          <div className="grid gap-6 xl:grid-cols-[1.02fr_0.98fr]">
-            {/* LEFT */}
+        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-140px)] w-full max-w-[1800px] flex-col gap-6 px-4 pb-8 pt-5 lg:px-8">
+          {/* TOP SECTION - HEADER & PLAYER INFO */}
+          <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+            {/* LEFT - HEADER */}
+            <div className="rounded-[34px] border border-white/10 p-6 sm:p-8" style={{ background: 'linear-gradient(180deg, rgba(10,10,10,.36), rgba(0,0,0,.58))', boxShadow: '0 24px 100px rgba(0,0,0,.5), inset 0 0 50px rgba(255,255,255,.03)' }}>
+              <p className="text-xs font-semibold uppercase tracking-[0.45em] text-white/52">Showroom Privado</p>
+              <h1 className="mt-3 text-4xl font-black leading-none text-white sm:text-5xl">
+                Coleção {system.collectionName}
+              </h1>
+              <p className="mt-4 max-w-xl text-sm text-white/74 sm:text-base">
+                Luxo, provocação e presença. Aqui você não compra só peça. Você compra o jeito que o mundo vai te enxergar.
+              </p>
+              <div className="mt-6 rounded-3xl border p-4 backdrop-blur-md" style={{ borderColor: theme.accentSoft, background: 'rgba(0,0,0,.28)' }}>
+                <p className="text-[11px] uppercase tracking-[0.35em] text-white/48">Dinheiro limpo disponível</p>
+                <p className="mt-2 text-3xl font-black text-white">R$ {money(cleanMoney)}</p>
+              </div>
+            </div>
+
+            {/* RIGHT - PLAYER INFO & STATUS */}
+            <div className="flex flex-col gap-4">
+              <div
+                className="rounded-2xl border px-6 py-4"
+                style={{ borderColor: theme.accentSoft, background: 'rgba(0,0,0,.38)', boxShadow: `0 0 30px ${theme.accentSoft}` }}
+              >
+                <p className="text-[10px] uppercase tracking-[0.35em] text-white/45">Jogador</p>
+                <p className="mt-2 text-2xl font-black uppercase text-white">{playerName}</p>
+                <p className="mt-2 text-[10px] uppercase tracking-[0.3em] text-white/45">Barraco nível {level}</p>
+              </div>
+
+              <div className="rounded-[34px] border p-5" style={{ borderColor: theme.accentSoft, background: 'rgba(0,0,0,.46)' }}>
+                <p className="text-[11px] uppercase tracking-[0.35em] text-white/44">Assinatura de poder</p>
+                <h3 className="mt-2 text-xl font-black text-white">
+                  {totalBonus <= 1 ? 'Presença em ascensão' : totalBonus <= 3 ? 'Figura de respeito' : totalBonus <= 5 ? 'Luxo que impõe presença' : 'Domínio absoluto da ostentação'}
+                </h3>
+                <div className="mt-4 space-y-3">
+                  {(Object.entries(bonuses) as [SkillKey, number][]).slice(0, 3).map(([skill, value]) => (
+                    <div key={skill}>
+                      <div className="mb-1 flex items-center justify-between text-xs">
+                        <span className="text-white/82">{skillLabels[skill]}</span>
+                        <span className="font-black text-white">+{value}%</span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${value * 100}%` }}
+                          transition={{ duration: 0.45 }}
+                          className="h-full rounded-full"
+                          style={{ background: `linear-gradient(90deg, ${theme.accent}, #ffffff)`, boxShadow: `0 0 18px ${theme.accentSoft}` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* MAIN SECTION - NPC & ITEMS */}
+          <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+            {/* LEFT - NPC & DIALOG */}
             <div className="relative overflow-hidden rounded-[34px] border border-white/10" style={{ background: 'linear-gradient(180deg, rgba(10,10,10,.36), rgba(0,0,0,.58))', boxShadow: '0 24px 100px rgba(0,0,0,.5), inset 0 0 50px rgba(255,255,255,.03)' }}>
               <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute left-[8%] top-[8%] h-64 w-64 rounded-full blur-3xl" style={{ background: theme.aura }} />
@@ -372,133 +429,95 @@ export default function LuxuryShowroomPage() {
                 <div className="absolute bottom-[10%] left-[28%] h-64 w-64 rounded-full bg-white/5 blur-3xl" />
               </div>
 
-              <div className="relative z-10 flex min-h-[760px] flex-col justify-between px-6 py-6 sm:px-8 lg:px-10">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.45em] text-white/52">Showroom Privado</p>
-                    <h1 className="mt-2 text-3xl font-black leading-none text-white sm:text-5xl">
-                      Coleção {system.collectionName}
-                    </h1>
-                    <p className="mt-3 max-w-xl text-sm text-white/74 sm:text-base">
-                      Luxo, provocação e presença. Aqui você não compra só peça. Você compra o jeito que o mundo vai te enxergar.
-                    </p>
-                  </div>
-
-                  <div
-                    className="rounded-2xl border px-4 py-3 text-right"
-                    style={{ borderColor: theme.accentSoft, background: 'rgba(0,0,0,.38)', boxShadow: `0 0 30px ${theme.accentSoft}` }}
-                  >
-                    <p className="text-[10px] uppercase tracking-[0.35em] text-white/45">Jogador</p>
-                    <p className="mt-1 text-lg font-black uppercase text-white">{playerName}</p>
-                    <p className="mt-2 text-[10px] uppercase tracking-[0.3em] text-white/45">Barraco nível {level}</p>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="rounded-3xl border p-4 backdrop-blur-md" style={{ borderColor: theme.accentSoft, background: 'rgba(0,0,0,.28)' }}>
-                    <p className="text-[11px] uppercase tracking-[0.35em] text-white/48">Dinheiro limpo</p>
-                    <p className="mt-2 text-2xl font-black text-white">R$ {money(cleanMoney)}</p>
-                  </div>
-
-                </div>
-
-                <div className="relative mt-4 flex min-h-[500px] items-end justify-between gap-6 overflow-hidden rounded-[30px] border border-white/10 bg-black/18 px-3 sm:px-6">
-                  <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/88 to-transparent" />
-                    <div className="absolute bottom-0 left-0 h-full w-full bg-[radial-gradient(circle_at_50%_96%,rgba(255,215,0,0.2),transparent_36%)]" />
-                  </div>
-
-                  {/* DIALOG PANEL - LEFT SIDE */}
-                  <div className="relative z-10 hidden w-full max-w-[380px] self-end xl:block">
-                    <AnimatePresence mode="wait">
-                      {showDialog && (
-                        <motion.div
-                          key={`${dialogTitle}-${dialogMessage}`}
-                          initial={{ opacity: 0, x: -24, y: 10 }}
-                          animate={{ opacity: 1, x: 0, y: 0 }}
-                          exit={{ opacity: 0, x: -10, y: 8 }}
-                          transition={{ duration: 0.26, ease: 'easeOut' }}
-                          className="relative overflow-hidden rounded-[30px] border"
-                          style={{
-                            borderColor: theme.accent,
-                            background: 'linear-gradient(180deg, rgba(15,15,15,.94), rgba(0,0,0,.96))',
-                            boxShadow: `0 20px 70px rgba(0,0,0,.5), 0 0 24px ${theme.accentSoft}`,
-                          }}
-                        >
-                          <div className="absolute inset-0 opacity-75" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,.03), transparent 40%, rgba(255,215,0,.05))' }} />
-                          <motion.div
-                            className="absolute -inset-10 blur-3xl"
-                            animate={{ opacity: [0.22, 0.42, 0.22] }}
-                            transition={{ duration: 3.2, repeat: Infinity }}
-                            style={{ background: `radial-gradient(circle, ${theme.aura}, transparent 55%)` }}
-                          />
-                          <div className="relative p-6">
-                            <p className="text-[10px] uppercase tracking-[0.4em] text-white/38">Atendimento privado</p>
-                            <h2 className="mt-2 text-2xl font-black text-white">{dialogTitle}</h2>
-                            <p className="mt-4 text-base leading-relaxed text-white/82">{dialogMessage}</p>
-                            <div className="mt-6 flex gap-3">
-                              <button
-                                onClick={() => {
-                                  setShowDialog(false);
-                                  setShowHint(true);
-                                }}
-                                className="flex-1 rounded-2xl px-4 py-3 text-sm font-black uppercase tracking-[0.22em] text-black"
-                                style={{ background: theme.cardMetal, boxShadow: `0 12px 30px ${theme.accentSoft}` }}
-                              >
-                                Ver coleção
-                              </button>
-                              <button
-                                onClick={handleNpcClick}
-                                className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black uppercase tracking-[0.22em] text-white"
-                              >
-                                Ouvir mais
-                              </button>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* NPC - RIGHT SIDE */}
-                  <div className="relative z-10 flex h-full flex-1 items-end justify-end">
+              <div className="relative z-10 flex min-h-[600px] flex-col justify-between px-4 py-6 sm:px-6">
+                {/* DIALOG - TOP */}
+                <AnimatePresence mode="wait">
+                  {showDialog && (
                     <motion.div
-                      onMouseEnter={() => setNpcHover(true)}
-                      onMouseLeave={() => {
-                        setNpcHover(false);
-                        setNpcDrift({ x: 0, y: 0 });
+                      key={`${dialogTitle}-${dialogMessage}`}
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.26, ease: 'easeOut' }}
+                      className="relative overflow-hidden rounded-[28px] border mb-4"
+                      style={{
+                        borderColor: theme.accent,
+                        background: 'linear-gradient(180deg, rgba(15,15,15,.94), rgba(0,0,0,.96))',
+                        boxShadow: `0 20px 70px rgba(0,0,0,.5), 0 0 24px ${theme.accentSoft}`,
                       }}
-                      onMouseMove={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const dx = e.clientX - (rect.left + rect.width / 2);
-                        const dy = e.clientY - (rect.top + rect.height / 2);
-                        setNpcDrift({ x: Math.max(-4, Math.min(4, dx / 85)), y: Math.max(-3, Math.min(3, dy / 120)) });
-                      }}
-                      onClick={handleNpcClick}
-                      animate={{ y: [0, -1.2, 0] }}
-                      transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
-                      className="relative cursor-pointer"
-                      style={{ filter: npcHover ? 'brightness(1.08)' : 'brightness(1)' }}
                     >
-                      <motion.div animate={{ x: npcDrift.x, y: npcDrift.y, scale: npcHover ? 1.015 : 1 }} transition={{ duration: .22 }} className="relative">
-                        <div className="absolute -bottom-5 left-1/2 h-12 w-[72%] -translate-x-1/2 rounded-full blur-2xl" style={{ background: 'radial-gradient(ellipse, rgba(0,0,0,.58), transparent 70%)' }} />
-                        <div className="absolute inset-0 rounded-full blur-3xl opacity-45" style={{ background: 'radial-gradient(circle, rgba(255,94,162,.14), transparent 45%)' }} />
-                        <Image
-                          src={NPC_IMG}
-                          alt="NPC Luxury"
-                          className="relative z-10 h-[610px] w-auto object-contain drop-shadow-[0_0_46px_rgba(255,215,0,0.18)] sm:h-[700px]"
-                          width={520}
-                          height={940}
-                        />
-                        {blink && <div className="pointer-events-none absolute left-1/2 top-[22%] z-20 h-[5.4%] w-[24%] -translate-x-1/2 rounded-full" style={{ background: 'rgba(0,0,0,.16)' }} />}
-                      </motion.div>
+                      <div className="absolute inset-0 opacity-75" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,.03), transparent 40%, rgba(255,215,0,.05))' }} />
+                      <motion.div
+                        className="absolute -inset-10 blur-3xl"
+                        animate={{ opacity: [0.22, 0.42, 0.22] }}
+                        transition={{ duration: 3.2, repeat: Infinity }}
+                        style={{ background: `radial-gradient(circle, ${theme.aura}, transparent 55%)` }}
+                      />
+                      <div className="relative p-5">
+                        <p className="text-[10px] uppercase tracking-[0.4em] text-white/38">Atendimento privado</p>
+                        <h2 className="mt-2 text-xl font-black text-white">{dialogTitle}</h2>
+                        <p className="mt-3 text-sm leading-relaxed text-white/82">{dialogMessage}</p>
+                        <div className="mt-4 flex gap-2">
+                          <button
+                            onClick={() => {
+                              setShowDialog(false);
+                              setShowHint(true);
+                            }}
+                            className="flex-1 rounded-2xl px-3 py-2 text-xs font-black uppercase tracking-[0.22em] text-black"
+                            style={{ background: theme.cardMetal, boxShadow: `0 12px 30px ${theme.accentSoft}` }}
+                          >
+                            Ver coleção
+                          </button>
+                          <button
+                            onClick={handleNpcClick}
+                            className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-black uppercase tracking-[0.22em] text-white"
+                          >
+                            Ouvir mais
+                          </button>
+                        </div>
+                      </div>
                     </motion.div>
-                  </div>
+                  )}
+                </AnimatePresence>
+
+                {/* NPC - BOTTOM */}
+                <div className="relative flex flex-1 items-end justify-center">
+                  <motion.div
+                    onMouseEnter={() => setNpcHover(true)}
+                    onMouseLeave={() => {
+                      setNpcHover(false);
+                      setNpcDrift({ x: 0, y: 0 });
+                    }}
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const dx = e.clientX - (rect.left + rect.width / 2);
+                      const dy = e.clientY - (rect.top + rect.height / 2);
+                      setNpcDrift({ x: Math.max(-4, Math.min(4, dx / 85)), y: Math.max(-3, Math.min(3, dy / 120)) });
+                    }}
+                    onClick={handleNpcClick}
+                    animate={{ y: [0, -1.2, 0] }}
+                    transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
+                    className="relative cursor-pointer"
+                    style={{ filter: npcHover ? 'brightness(1.08)' : 'brightness(1)' }}
+                  >
+                    <motion.div animate={{ x: npcDrift.x, y: npcDrift.y, scale: npcHover ? 1.015 : 1 }} transition={{ duration: .22 }} className="relative">
+                      <div className="absolute -bottom-5 left-1/2 h-12 w-[72%] -translate-x-1/2 rounded-full blur-2xl" style={{ background: 'radial-gradient(ellipse, rgba(0,0,0,.58), transparent 70%)' }} />
+                      <div className="absolute inset-0 rounded-full blur-3xl opacity-45" style={{ background: 'radial-gradient(circle, rgba(255,94,162,.14), transparent 45%)' }} />
+                      <Image
+                        src={NPC_IMG}
+                        alt="NPC Luxury"
+                        className="relative z-10 h-[480px] w-auto object-contain drop-shadow-[0_0_46px_rgba(255,215,0,0.18)] sm:h-[540px]"
+                        width={520}
+                        height={940}
+                      />
+                      {blink && <div className="pointer-events-none absolute left-1/2 top-[22%] z-20 h-[5.4%] w-[24%] -translate-x-1/2 rounded-full" style={{ background: 'rgba(0,0,0,.16)' }} />}
+                    </motion.div>
+                  </motion.div>
                 </div>
               </div>
             </div>
 
-            {/* RIGHT */}
+            {/* RIGHT - ITEMS CATALOG */}
             <div className="flex flex-col gap-6">
               <div
                 className="rounded-[34px] border p-5"
