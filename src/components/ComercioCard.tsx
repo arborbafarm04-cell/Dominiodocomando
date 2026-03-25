@@ -1,5 +1,11 @@
 import { motion } from 'framer-motion';
-import { ComercioKey, COMERCIOS_CONFIG, calcularValorLavagem, calcularTempoLavagem, calcularTaxaAplicada } from '@/types/comercios';
+import {
+  ComercioKey,
+  COMERCIOS_CONFIG,
+  calcularValorLavagem,
+  calcularTempoLavagem,
+  calcularTaxaAplicada,
+} from '@/types/comercios';
 import { ComercioData } from '@/types/comercios';
 import { Button } from '@/components/ui/button';
 
@@ -24,12 +30,26 @@ export default function ComercioCard({
   const valorLavagem = calcularValorLavagem(comercioKey, data.nivelNegocio);
   const tempoLavagem = calcularTempoLavagem(comercioKey, data.nivelNegocio);
   const taxaAplicada = calcularTaxaAplicada(comercioKey, data.nivelTaxa);
-  const cleanMoneyGanho = Math.floor(data.valorAtual * (taxaAplicada / 100));
+
+  const cleanMoneyGanho = Math.floor(valorLavagem * (1 - taxaAplicada / 100));
 
   const tempoRestante = data.horarioFim ? Math.max(0, data.horarioFim - Date.now()) : 0;
-  const tempoRestanteFormatado = Math.ceil(tempoRestante / 1000);
 
-  const podeIniciar = !data.emAndamento && dirtyMoney >= valorLavagem;
+  const hoje = new Date().toDateString();
+  const jaUsouHoje = data.ultimaDataUso === hoje;
+
+  const podeIniciar = !data.emAndamento && !jaUsouHoje && dirtyMoney >= valorLavagem;
+
+  const formatarTempo = (ms: number) => {
+    const totalSegundos = Math.ceil(ms / 1000);
+    const horas = Math.floor(totalSegundos / 3600);
+    const minutos = Math.floor((totalSegundos % 3600) / 60);
+    const segundos = totalSegundos % 60;
+
+    if (horas > 0) return `${horas}h ${minutos}m ${segundos}s`;
+    if (minutos > 0) return `${minutos}m ${segundos}s`;
+    return `${segundos}s`;
+  };
 
   return (
     <motion.div
@@ -48,11 +68,11 @@ export default function ComercioCard({
       <div className="space-y-2 mb-4 text-sm">
         <div className="flex justify-between">
           <span className="text-gray-400">Valor de Lavagem:</span>
-          <span className="text-green-400 font-semibold">${valorLavagem}</span>
+          <span className="text-green-400 font-semibold">R$ {valorLavagem}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">Tempo:</span>
-          <span className="text-blue-400">{Math.floor(tempoLavagem / 60000)}m</span>
+          <span className="text-blue-400">{formatarTempo(tempoLavagem)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">Taxa:</span>
@@ -60,21 +80,21 @@ export default function ComercioCard({
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">Retorno:</span>
-          <span className="text-yellow-400">${cleanMoneyGanho}</span>
+          <span className="text-yellow-400">R$ {cleanMoneyGanho}</span>
         </div>
       </div>
 
       {data.emAndamento && (
         <div className="mb-4 p-3 bg-blue-900/30 border border-blue-500/50 rounded">
           <div className="text-sm text-blue-300 mb-2">
-            {tempoRestanteFormatado > 0 ? `Tempo restante: ${tempoRestanteFormatado}s` : 'Pronto para finalizar!'}
+            {tempoRestante > 0 ? `Tempo restante: ${formatarTempo(tempoRestante)}` : 'Pronto para finalizar!'}
           </div>
-          <div className="w-full bg-slate-700 rounded-full h-2">
+          <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
             <motion.div
               className="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full"
               initial={{ width: '100%' }}
-              animate={{ width: tempoRestante > 0 ? `${(tempoRestante / tempoLavagem) * 100}%` : '100%' }}
-              transition={{ duration: 1, ease: 'linear' }}
+              animate={{ width: `${Math.max(0, (tempoRestante / tempoLavagem) * 100)}%` }}
+              transition={{ duration: 0.3, ease: 'linear' }}
             />
           </div>
         </div>
@@ -102,7 +122,11 @@ export default function ComercioCard({
 
       {!podeIniciar && !data.emAndamento && (
         <div className="mt-3 text-xs text-red-400 text-center">
-          {dirtyMoney < valorLavagem ? 'Dinheiro sujo insuficiente' : 'Indisponível'}
+          {dirtyMoney < valorLavagem
+            ? 'Dinheiro sujo insuficiente'
+            : jaUsouHoje
+              ? 'Limite diário atingido'
+              : 'Indisponível'}
         </div>
       )}
     </motion.div>
