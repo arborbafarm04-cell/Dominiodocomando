@@ -1,7 +1,7 @@
 // Game default constants
 const INITIAL_LEVEL = 1;
 const INITIAL_MONEY = 100;
-const INITIAL_BARRACO_LEVEL = 0;
+const INITIAL_BARRACO_LEVEL = 1;
 const SPIN_GAIN_INTERVAL = 5000; // milliseconds
 const GRID_WIDTH = 10;
 const GRID_HEIGHT = 10;
