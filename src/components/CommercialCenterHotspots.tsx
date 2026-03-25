@@ -64,7 +64,7 @@ export default function CommercialCenterHotspots({
   const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
 
   return (
-    <div className="absolute inset-0 z-20 w-full h-full pointer-events-none">
+    <div className="absolute inset-0 z-30 w-full h-full pointer-events-none">
       {HOTSPOTS.map((hotspot) => (
         <button
           key={hotspot.id}
@@ -75,10 +75,12 @@ export default function CommercialCenterHotspots({
           }}
           onMouseEnter={() => setHoveredHotspot(hotspot.id)}
           onMouseLeave={() => setHoveredHotspot(null)}
-          className={`absolute pointer-events-auto transition-all duration-200 ${
+          onTouchStart={() => setHoveredHotspot(hotspot.id)}
+          onTouchEnd={() => setHoveredHotspot(null)}
+          className={`absolute pointer-events-auto bg-transparent outline-none transition-all duration-200 ${
             SHOW_HOTSPOTS
               ? 'border-2 border-cyan-300/80 bg-cyan-400/15'
-              : 'border-2 border-transparent bg-transparent'
+              : 'border-2 border-transparent'
           } ${
             hoveredHotspot === hotspot.id
               ? 'scale-[1.02] bg-cyan-400/25 border-cyan-200'
