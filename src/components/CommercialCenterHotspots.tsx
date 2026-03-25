@@ -13,44 +13,46 @@ interface CommercialCenterHotspotsProps {
   onCommerceClick: (commerceId: string) => void;
 }
 
+const SHOW_HOTSPOTS = true;
+
 const HOTSPOTS: Hotspot[] = [
   {
-    id: 'pizzaria',
-    name: 'Pizzaria da Mama',
-    left: '10%',
-    top: '15%',
-    width: '22%',
-    height: '28%',
-  },
-  {
-    id: 'admBens',
-    name: 'ADM. de Bens',
-    left: '38%',
-    top: '10%',
-    width: '24%',
-    height: '30%',
+    id: 'academia',
+    name: 'Academia Músculos',
+    left: '3%',
+    top: '12%',
+    width: '30%',
+    height: '20%',
   },
   {
     id: 'templo',
     name: 'Templo Ungí-vos',
     left: '68%',
     top: '12%',
-    width: '26%',
-    height: '32%',
+    width: '27%',
+    height: '18%',
   },
   {
-    id: 'academia',
-    name: 'Academia Músculos',
-    left: '12%',
+    id: 'pizzaria',
+    name: 'Pizzaria da Mama',
+    left: '4%',
     top: '55%',
-    width: '28%',
-    height: '26%',
+    width: '26%',
+    height: '24%',
+  },
+  {
+    id: 'admBens',
+    name: 'ADM. de Bens',
+    left: '31%',
+    top: '58%',
+    width: '33%',
+    height: '18%',
   },
   {
     id: 'lavanderia',
     name: 'Lavanderia Povão',
-    left: '68%',
-    top: '53%',
+    left: '69%',
+    top: '54%',
     width: '25%',
     height: '24%',
   },
@@ -62,17 +64,22 @@ export default function CommercialCenterHotspots({
   const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
 
   return (
-    <div className="absolute inset-0 w-full h-full">
+    <div className="absolute inset-0 z-20 w-full h-full pointer-events-none">
       {HOTSPOTS.map((hotspot) => (
         <button
           key={hotspot.id}
+          type="button"
           onClick={() => onCommerceClick(hotspot.id)}
           onMouseEnter={() => setHoveredHotspot(hotspot.id)}
           onMouseLeave={() => setHoveredHotspot(null)}
-          className={`absolute transition-all duration-200 cursor-pointer group ${
+          className={`absolute pointer-events-auto transition-all duration-200 ${
+            SHOW_HOTSPOTS
+              ? 'border-2 border-cyan-300/80 bg-cyan-400/15'
+              : 'border-2 border-transparent bg-transparent'
+          } ${
             hoveredHotspot === hotspot.id
-              ? 'bg-cyan-400/30 border-2 border-cyan-300'
-              : 'bg-transparent border-2 border-transparent hover:border-cyan-300/50'
+              ? 'scale-[1.02] bg-cyan-400/25 border-cyan-200'
+              : ''
           }`}
           style={{
             left: hotspot.left,
@@ -83,9 +90,16 @@ export default function CommercialCenterHotspots({
           title={hotspot.name}
           aria-label={hotspot.name}
         >
-          {/* Tooltip on hover */}
-          {hoveredHotspot === hotspot.id && (
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-cyan-900/90 text-cyan-100 text-sm rounded whitespace-nowrap pointer-events-none z-50">
+          {SHOW_HOTSPOTS && (
+            <div className="absolute inset-0 flex items-start justify-center pt-1">
+              <span className="bg-black/75 text-cyan-100 text-[10px] md:text-xs px-2 py-1 rounded">
+                {hotspot.name}
+              </span>
+            </div>
+          )}
+
+          {hoveredHotspot === hotspot.id && !SHOW_HOTSPOTS && (
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-cyan-900/90 text-cyan-100 text-sm rounded whitespace-nowrap pointer-events-none z-50">
               {hotspot.name}
             </div>
           )}
