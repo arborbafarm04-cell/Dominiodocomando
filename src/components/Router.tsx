@@ -26,8 +26,6 @@ const ResetInvestmentPage = lazy(() => import('@/components/pages/ResetInvestmen
 const InvestmentSkillTreePage = lazy(() => import('@/components/pages/InvestmentSkillTreePage'));
 const CommercialCenterPage = lazy(() => import('@/components/pages/CommercialCenterPage'));
 const ProfilePage = lazy(() => import('@/components/pages/ProfilePage'));
-const MoneyLaunderingPage = lazy(() => import('@/components/pages/MoneyLaunderingPage'));
-const TestMoneyLaunderingPage = lazy(() => import('@/components/pages/TestMoneyLaunderingPage'));
 {/* ... keep existing code (other lazy imports) ... */}
 
 
@@ -194,20 +192,6 @@ const router = createBrowserRouter([
         element: <ProfilePage />,
         routeMetadata: {
           pageIdentifier: 'profile',
-        },
-      },
-      {
-        path: "money-laundering",
-        element: <MoneyLaunderingPage />,
-        routeMetadata: {
-          pageIdentifier: 'money-laundering',
-        },
-      },
-      {
-        path: "test-money-laundering",
-        element: <TestMoneyLaunderingPage />,
-        routeMetadata: {
-          pageIdentifier: 'test-money-laundering',
         },
       },
 
