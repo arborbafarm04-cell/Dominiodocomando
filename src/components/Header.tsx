@@ -16,6 +16,7 @@ export default function Header() {
   const { playerName, setPlayerName, level } = usePlayerStore();
   const { spins, timeUntilNextGain, formatTime } = useSpinVault();
   const navigate = useNavigate();
+  const { member } = useMember();
   
   // Inicializar dados do jogador
   usePlayerInitialization();
@@ -91,15 +92,17 @@ export default function Header() {
 
             </div>
 
-            {/* Lavagem Button */}
-            <button
-              onClick={() => navigate('/money-laundering')}
-              className="flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 px-4 py-2 rounded-lg text-white font-semibold transition-all text-sm"
-              title="Operações de Lavagem"
-            >
-              <Droplet className="w-4 h-4" />
-              Lavagem
-            </button>
+            {/* Lavagem Button - Only show if authenticated */}
+            {member?._id && (
+              <button
+                onClick={() => navigate('/money-laundering')}
+                className="flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 px-4 py-2 rounded-lg text-white font-semibold transition-all text-sm"
+                title="Operações de Lavagem"
+              >
+                <Droplet className="w-4 h-4" />
+                Lavagem
+              </button>
+            )}
           </div>
 
           {/* 🔥 DIREITA - TIMER */}
