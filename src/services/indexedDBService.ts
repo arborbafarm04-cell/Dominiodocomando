@@ -10,6 +10,10 @@ const SESSION_STORE = 'playerSession';
 
 let db: IDBDatabase | null = null;
 
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 /**
  * Initialize IndexedDB connection
  */
@@ -34,12 +38,10 @@ export async function initializeDB(): Promise<IDBDatabase> {
     request.onupgradeneeded = (event) => {
       const database = (event.target as IDBOpenDBRequest).result;
 
-      // Create credentials store
       if (!database.objectStoreNames.contains(CREDENTIALS_STORE)) {
         database.createObjectStore(CREDENTIALS_STORE, { keyPath: 'email' });
       }
 
-      // Create session store
       if (!database.objectStoreNames.contains(SESSION_STORE)) {
         database.createObjectStore(SESSION_STORE, { keyPath: 'id' });
       }
@@ -56,13 +58,14 @@ export async function storeCredential(
   playerId: string
 ): Promise<void> {
   const database = await initializeDB();
+  const normalizedEmail = normalizeEmail(email);
 
   return new Promise((resolve, reject) => {
     const transaction = database.transaction([CREDENTIALS_STORE], 'readwrite');
     const store = transaction.objectStore(CREDENTIALS_STORE);
 
     const credential = {
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       playerId,
       createdAt: new Date().toISOString(),
@@ -83,17 +86,20 @@ export async function storeCredential(
 /**
  * Retrieve player credentials from IndexedDB
  */
-export async function getCredential(email: string): Promise<{
+export async function getCredential(
+  email: string
+): Promise<{
   password: string;
   playerId: string;
   createdAt: string;
 } | null> {
   const database = await initializeDB();
+  const normalizedEmail = normalizeEmail(email);
 
   return new Promise((resolve, reject) => {
     const transaction = database.transaction([CREDENTIALS_STORE], 'readonly');
     const store = transaction.objectStore(CREDENTIALS_STORE);
-    const request = store.get(email);
+    const request = store.get(normalizedEmail);
 
     request.onerror = () => {
       reject(new Error('Failed to retrieve credential'));
@@ -117,11 +123,9 @@ export async function credentialExists(email: string): Promise<boolean> {
 /**
  * Store current session in IndexedDB
  */
-export async function storeSession(
-  playerId: string,
-  email: string
-): Promise<void> {
+export async function storeSession(playerId: string, email: string): Promise<void> {
   const database = await initializeDB();
+  const normalizedEmail = normalizeEmail(email);
 
   return new Promise((resolve, reject) => {
     const transaction = database.transaction([SESSION_STORE], 'readwrite');
@@ -130,7 +134,7 @@ export async function storeSession(
     const session = {
       id: 'current',
       playerId,
-      email,
+      email: normalizedEmail,
       timestamp: new Date().toISOString(),
     };
 
@@ -217,11 +221,13 @@ export async function clearAllCredentials(): Promise<void> {
 /**
  * Get all stored credentials (for debugging)
  */
-export async function getAllCredentials(): Promise<Array<{
-  email: string;
-  playerId: string;
-  createdAt: string;
-}>> {
+export async function getAllCredentials(): Promise<
+  Array<{
+    email: string;
+    playerId: string;
+    createdAt: string;
+  }>
+> {
   const database = await initializeDB();
 
   return new Promise((resolve, reject) => {
