@@ -49,16 +49,8 @@ export default function LocalLoginForm() {
 
     try {
       setIsLoading(true);
-      const player = await registerLocalPlayer(email, password, playerName);
+      await registerLocalPlayer(email, password, playerName);
       setSuccess('Conta criada com sucesso! Fazendo login...');
-      
-      // Store player data in localStorage for quick access
-      localStorage.setItem('lastPlayerData', JSON.stringify({
-        playerId: player._id,
-        playerName: player.playerName,
-        level: player.level,
-        progress: player.progress,
-      }));
       
       setTimeout(() => {
         navigate('/star-map');
@@ -82,16 +74,8 @@ export default function LocalLoginForm() {
 
     try {
       setIsLoading(true);
-      const player = await loginLocalPlayer(email, password);
+      await loginLocalPlayer(email, password);
       setSuccess('Login realizado com sucesso!');
-      
-      // Store player data in localStorage for quick access
-      localStorage.setItem('lastPlayerData', JSON.stringify({
-        playerId: player._id,
-        playerName: player.playerName,
-        level: player.level,
-        progress: player.progress,
-      }));
       
       setTimeout(() => {
         navigate('/star-map');

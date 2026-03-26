@@ -1,6 +1,14 @@
 import { BaseCrudService } from "@/integrations";
 import { Players } from "@/entities";
 import { getInitialComercioData } from "@/types/comercios";
+import {
+  storeCredential,
+  getCredential,
+  storeSession,
+  getSession,
+  clearSession,
+  credentialExists,
+} from "./indexedDBService";
 
 const COLLECTION_ID = "players";
 
@@ -47,22 +55,22 @@ export async function registerPlayer(email: string, playerName: string, nickname
   return BaseCrudService.create(COLLECTION_ID, newPlayer);
 }
 
-// Local authentication - store hashed passwords in localStorage
+// Local authentication - store hashed passwords in IndexedDB
 export async function registerLocalPlayer(email: string, password: string, playerName: string) {
   const playerId = crypto.randomUUID();
   const comercios = getInitialComercioData();
   
+  // Check if email already exists
+  const exists = await credentialExists(email);
+  if (exists) {
+    throw new Error('Email já registrado');
+  }
+  
   // Hash password (simple hash for demo - use proper hashing in production)
   const hashedPassword = btoa(password);
   
-  // Store credentials in localStorage
-  const credentials = JSON.parse(localStorage.getItem('playerCredentials') || '{}');
-  credentials[email] = {
-    password: hashedPassword,
-    playerId,
-    createdAt: new Date().toISOString(),
-  };
-  localStorage.setItem('playerCredentials', JSON.stringify(credentials));
+  // Store credentials in IndexedDB (persistent)
+  await storeCredential(email, hashedPassword, playerId);
   
   // Create player in database
   const newPlayer: Players = {
@@ -79,68 +87,53 @@ export async function registerLocalPlayer(email: string, password: string, playe
   
   const createdPlayer = await BaseCrudService.create(COLLECTION_ID, newPlayer);
   
-  // Store current session immediately after registration
-  localStorage.setItem('currentPlayerId', playerId);
-  localStorage.setItem('currentPlayerEmail', email);
-  localStorage.setItem('playerAuthToken', JSON.stringify({
-    playerId,
-    email,
-    timestamp: new Date().toISOString(),
-  }));
+  // Store current session in IndexedDB (persistent)
+  await storeSession(playerId, email);
   
   return createdPlayer;
 }
 
 export async function loginLocalPlayer(email: string, password: string) {
-  const credentials = JSON.parse(localStorage.getItem('playerCredentials') || '{}');
+  const credential = await getCredential(email);
   
-  if (!credentials[email]) {
+  if (!credential) {
     throw new Error('Email não encontrado');
   }
   
   const hashedPassword = btoa(password);
-  if (credentials[email].password !== hashedPassword) {
+  if (credential.password !== hashedPassword) {
     throw new Error('Senha incorreta');
   }
   
-  const playerId = credentials[email].playerId;
+  const playerId = credential.playerId;
   const player = await getPlayerById(playerId);
   
   if (!player) {
     throw new Error('Jogador não encontrado');
   }
   
-  // Store current session
-  localStorage.setItem('currentPlayerId', playerId);
-  localStorage.setItem('currentPlayerEmail', email);
-  localStorage.setItem('playerAuthToken', JSON.stringify({
-    playerId,
-    email,
-    timestamp: new Date().toISOString(),
-  }));
+  // Store current session in IndexedDB (persistent)
+  await storeSession(playerId, email);
   
   return player;
 }
 
 export async function logoutLocalPlayer() {
-  localStorage.removeItem('currentPlayerId');
-  localStorage.removeItem('currentPlayerEmail');
-  localStorage.removeItem('playerAuthToken');
+  await clearSession();
 }
 
 export async function getCurrentLocalPlayer() {
-  const playerId = localStorage.getItem('currentPlayerId');
-  if (!playerId) return null;
-  return getPlayerById(playerId);
+  const session = await getSession();
+  if (!session) return null;
+  return getPlayerById(session.playerId);
 }
 
 export async function isPlayerAuthenticated(): Promise<boolean> {
-  const token = localStorage.getItem('playerAuthToken');
-  if (!token) return false;
+  const session = await getSession();
+  if (!session) return false;
   
   try {
-    const auth = JSON.parse(token);
-    const player = await getPlayerById(auth.playerId);
+    const player = await getPlayerById(session.playerId);
     return !!player;
   } catch {
     return false;
