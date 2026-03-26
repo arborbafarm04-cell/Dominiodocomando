@@ -204,6 +204,8 @@ export default function CommercialCenterPage() {
 
     if (comercioKey) {
       setActiveCommerceModal(comercioKey);
+    } else {
+      console.error(`ID de comércio desconhecido: ${commerceId}`);
     }
   };
 
