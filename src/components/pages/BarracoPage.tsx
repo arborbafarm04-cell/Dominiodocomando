@@ -1,16 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { BaseCrudService } from '@/integrations';
-import { Players } from '@/entities';
 import { Image } from '@/components/ui/image';
-import { useMember } from '@/integrations';
 import { useNavigate } from 'react-router-dom';
-
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 import { usePlayerStore } from '@/store/playerStore';
 import RoyalGreeting from '@/components/RoyalGreeting';
 import { getBackgroundByLevel } from '@/data/luxoItems';
 import { removeCleanMoney } from '@/services/playerEconomyService';
+import { getPlayer, savePlayer } from '@/services/playerCoreService';
+import { Players } from '@/entities';
 
 const BARRACO_LEVELS = [
   { level: 10, milestone: 'Casa de Alvenaria' },
@@ -24,12 +22,14 @@ const BARRACO_LEVELS = [
   { level: 90, milestone: 'Mansão Blindada com Heliporto' },
   { level: 100, milestone: null },
 ];
+
 const BASE_EVOLUTION_COST = 500;
 const COST_MULTIPLIER = 1.1;
 
 export default function BarracoPage() {
   const navigate = useNavigate();
-  const { member, isAuthenticated, isLoading: isAuthLoading } = useMember();
+  const { player, setPlayer } = usePlayerStore();
+
   const [loading, setLoading] = useState(true);
   const [evolving, setEvolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,142 +38,118 @@ export default function BarracoPage() {
   const [imageKey, setImageKey] = useState(0);
   const [levelUpAnimation, setLevelUpAnimation] = useState(false);
   const [previousLevel, setPreviousLevel] = useState<number | null>(null);
-  const { player, setPlayer } = usePlayerStore();
-  const initRef = useRef(false); // Prevent double initialization
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      navigate('/login');
-    }
-  }, [isAuthenticated, isAuthLoading, navigate]);
+  const initRef = useRef(false);
 
-  // Get player ID from store (unique permanent identifier from players collection)
-  const getPlayerId = () => {
-    if (player?._id) return player._id;
-    const urlParams = new URLSearchParams(window.location.search);
-    const idFromUrl = urlParams.get('playerId');
-    if (idFromUrl) return idFromUrl;
-    return '';
+  const calculateEvolutionCost = (currentLevel: number): number => {
+    return Math.round(BASE_EVOLUTION_COST * Math.pow(COST_MULTIPLIER, currentLevel - 1));
   };
 
-  useEffect(() => {
-    // Skip if already initialized or not authenticated
-    if (initRef.current || !isAuthenticated) return;
-    initRef.current = true;
+  const checkAllItemsAtLevel = (_level: number) => {
+    // Placeholder para futura validação real dos itens
+    setAllItemsAtLevel(true);
+  };
 
-    loadPlayerData();
-  }, [isAuthenticated]);
+  const getBarracoImage = (level: number): string => {
+    if (level >= 100) {
+      return 'https://static.wixstatic.com/media/50f4bf_9683cd5787de47bf883c2453384fd2ae~mv2.png';
+    }
+    if (level >= 90) {
+      return 'https://static.wixstatic.com/media/50f4bf_dacc94520dfa449384a529f15de074f6~mv2.png';
+    }
+    if (level >= 80) {
+      return 'https://static.wixstatic.com/media/50f4bf_b57bffd9299941ae84ea8d7589a9eda8~mv2.png';
+    }
+    if (level >= 70) {
+      return 'https://static.wixstatic.com/media/50f4bf_9b7bbc6679924b529acd7428f28e817d~mv2.png';
+    }
+    if (level >= 60) {
+      return 'https://static.wixstatic.com/media/50f4bf_f36ccf79521242ab8518cf871e9f6a16~mv2.png';
+    }
+    if (level >= 50) {
+      return 'https://static.wixstatic.com/media/50f4bf_f363ec9d5ca846c4990f7730c5bf479c~mv2.png';
+    }
+    if (level >= 40) {
+      return 'https://static.wixstatic.com/media/50f4bf_86c3183c0550490fab41c5a8a8f6184b~mv2.png';
+    }
+    if (level >= 30) {
+      return 'https://static.wixstatic.com/media/50f4bf_b538b42955634d7190d28507d4b05023~mv2.png';
+    }
+    if (level >= 20) {
+      return 'https://static.wixstatic.com/media/50f4bf_b23aee963b00465fa534f7705505b5b9~mv2.png';
+    }
+    if (level >= 10) {
+      return 'https://static.wixstatic.com/media/50f4bf_6527240d26e94ca782357743f0ddddd7~mv2.png';
+    }
+
+    return 'https://static.wixstatic.com/media/50f4bf_99aa35fbb009493a96d4ede6c1af056b~mv2.png';
+  };
 
   const loadPlayerData = async () => {
     try {
       setLoading(true);
-      let currentPlayerId = getPlayerId();
+      setError(null);
 
-      // If still no player ID, try to get the first player from the collection
-      if (!currentPlayerId) {
-        const result = await BaseCrudService.getAll<Players>('players', [], { limit: 1 });
-        if (result.items && result.items.length > 0) {
-          currentPlayerId = result.items[0]._id;
-        } else {
-          setError('Nenhum jogador encontrado');
-          return;
-        }
+      if (!player?._id) {
+        setError('Jogador não encontrado');
+        return;
       }
 
-      const playerData = await BaseCrudService.getById<Players>('players', currentPlayerId);
-      
-      // Check if level increased and trigger level up animation
-      if (previousLevel !== null && playerData?.level && playerData.level > previousLevel) {
+      const playerData = await getPlayer(player._id);
+
+      if (!playerData) {
+        setError('Falha ao carregar dados do jogador');
+        return;
+      }
+
+      const currentBarracoLevel = playerData.barracoLevel || 1;
+
+      if (previousLevel !== null && currentBarracoLevel > previousLevel) {
         setLevelUpAnimation(true);
         setTimeout(() => setLevelUpAnimation(false), 1500);
       }
-      
-      setPreviousLevel(playerData?.level || 1);
+
+      setPreviousLevel(currentBarracoLevel);
       setPlayer(playerData);
-      setImageKey(prev => prev + 1); // Trigger image change animation
-      
-      // Check if all items are at the same level
-      checkAllItemsAtLevel(playerData?.level || 1);
+      setImageKey((prev) => prev + 1);
+      checkAllItemsAtLevel(currentBarracoLevel);
     } catch (err) {
-      setError('Falha ao carregar dados do jogador');
       console.error(err);
+      setError('Falha ao carregar dados do jogador');
     } finally {
       setLoading(false);
     }
   };
-
-  const checkAllItemsAtLevel = (level: number) => {
-    // This checks if all game items are at the same level as the barraco
-    // For now, we'll assume all items are at the same level
-    // In a full implementation, you'd fetch all game items and verify their levels
-    setAllItemsAtLevel(true);
-  };
-
-  const calculateEvolutionCost = (currentLevel: number): number => {
-    // Cost = 500 * 1.5^(level-1)
-    return Math.round(BASE_EVOLUTION_COST * Math.pow(COST_MULTIPLIER, currentLevel - 1));
-  };
-
-  const getBarracoImage = (level: number): string => {
-    // Return the level 100 image for level 100
-    if (level >= 100) {
-      return 'https://static.wixstatic.com/media/50f4bf_9683cd5787de47bf883c2453384fd2ae~mv2.png';
-    }
-    // Return the Mansão Blindada com Heliporto image for level 90 and above
-    if (level >= 90) {
-      return 'https://static.wixstatic.com/media/50f4bf_dacc94520dfa449384a529f15de074f6~mv2.png';
-    }
-    // Return the Mansão Luxuosa Blindada image for level 80 and above
-    if (level >= 80) {
-      return 'https://static.wixstatic.com/media/50f4bf_b57bffd9299941ae84ea8d7589a9eda8~mv2.png';
-    }
-    // Return the Mansão do Complexo image for level 70 and above
-    if (level >= 70) {
-      return 'https://static.wixstatic.com/media/50f4bf_9b7bbc6679924b529acd7428f28e817d~mv2.png';
-    }
-    // Return the Triplex com piscina borda infinita no rooftop image for level 60 and above
-    if (level >= 60) {
-      return 'https://static.wixstatic.com/media/50f4bf_f36ccf79521242ab8518cf871e9f6a16~mv2.png';
-    }
-    // Return the Triplex alto padrão image for level 50 and above
-    if (level >= 50) {
-      return 'https://static.wixstatic.com/media/50f4bf_f363ec9d5ca846c4990f7730c5bf479c~mv2.png';
-    }
-    // Return the Sobrado de Luxo image for level 40 and above
-    if (level >= 40) {
-      return 'https://static.wixstatic.com/media/50f4bf_86c3183c0550490fab41c5a8a8f6184b~mv2.png';
-    }
-    // Return the Sobrado com Piscina image for level 30 and above
-    if (level >= 30) {
-      return 'https://static.wixstatic.com/media/50f4bf_b538b42955634d7190d28507d4b05023~mv2.png';
-    }
-    // Return the Sobrado image for level 20 and above
-    if (level >= 20) {
-      return 'https://static.wixstatic.com/media/50f4bf_b23aee963b00465fa534f7705505b5b9~mv2.png';
-    }
-    // Return the Casa de alvenaria image for level 10 and above
-    if (level >= 10) {
-      return 'https://static.wixstatic.com/media/50f4bf_6527240d26e94ca782357743f0ddddd7~mv2.png';
-    }
-    // Return the default barraco image for levels below 10
-    return 'https://static.wixstatic.com/media/50f4bf_99aa35fbb009493a96d4ede6c1af056b~mv2.png';
-  };
-
-  const handleEvolution = async () => {
-    if (!player || !allItemsAtLevel) return;
-
-    const nextLevel = (player.level || 1) + 1;
-    if (nextLevel > 100) {
-      setError('Barraco already at maximum level (100)');
+useEffect(() => {
+    if (initRef.current) return;
+    if (!player?._id) {
+      setLoading(false);
       return;
     }
 
-    const evolutionCost = calculateEvolutionCost(player.level || 1);
+    initRef.current = true;
+    loadPlayerData();
+  }, [player?._id]);
 
-    // Check if player has enough clean money
+  const handleEvolution = async () => {
+    if (!player?._id || !player || !allItemsAtLevel) return;
+
+    const currentBarracoLevel = player.barracoLevel || 1;
+    const nextLevel = currentBarracoLevel + 1;
+
+    if (nextLevel > 100) {
+      setError('Barraco já está no nível máximo (100)');
+      return;
+    }
+
+    const evolutionCost = calculateEvolutionCost(currentBarracoLevel);
+
     if ((player.cleanMoney || 0) < evolutionCost) {
-      setError(`Dinheiro limpo insuficiente. Necessário: R$ ${evolutionCost.toLocaleString('pt-BR')}, Disponível: R$ ${(player.cleanMoney || 0).toLocaleString('pt-BR')}`);
+      setError(
+        `Dinheiro limpo insuficiente. Necessário: R$ ${evolutionCost.toLocaleString(
+          'pt-BR'
+        )}, Disponível: R$ ${(player.cleanMoney || 0).toLocaleString('pt-BR')}`
+      );
       return;
     }
 
@@ -181,26 +157,35 @@ export default function BarracoPage() {
       setEvolving(true);
       setError(null);
 
-      // Use economy service to deduct money and update player
-      const updated = await removeCleanMoney(player._id, evolutionCost, 'BARRACO_EVOLUTION');
-      
-      if (!updated) {
+      // 1. desconta o dinheiro limpo
+      const playerAfterMoney = await removeCleanMoney(
+        player._id,
+        evolutionCost,
+        'BARRACO_EVOLUTION'
+      );
+
+      if (!playerAfterMoney) {
         setError('Falha ao evoluir barraco');
         return;
       }
 
-      // Update level in database
-      const levelUpdated = await BaseCrudService.update<Players>('players', {
-        _id: player._id,
-        level: nextLevel,
-        lastUpdated: new Date().toISOString(),
-      });
+      // 2. sobe o barracoLevel
+      const updatedPlayer: Players = {
+        ...playerAfterMoney,
+        barracoLevel: nextLevel,
+        updatedAt: new Date().toISOString(),
+      };
 
-      // Reload player data to sync everything
+      const savedPlayer = await savePlayer(updatedPlayer);
+
+      // 3. sincroniza store
+      setPlayer(savedPlayer);
+
+      // 4. recarrega para garantir consistência visual
       await loadPlayerData();
     } catch (err) {
-      setError('Failed to evolve barraco');
       console.error(err);
+      setError('Falha ao evoluir barraco');
     } finally {
       setEvolving(false);
     }
@@ -224,10 +209,10 @@ export default function BarracoPage() {
           <div className="text-center">
             <p className="text-foreground text-xl mb-4">{error || 'Jogador não encontrado'}</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => navigate('/login')}
               className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-logo-gradient-end transition-colors"
             >
-              Tentar Novamente
+              Ir para Login
             </button>
           </div>
         </div>
@@ -236,11 +221,11 @@ export default function BarracoPage() {
     );
   }
 
-  const currentLevel = player.level || 1;
+  const currentLevel = player.barracoLevel || 1;
   const nextLevel = currentLevel + 1;
   const evolutionCost = calculateEvolutionCost(currentLevel);
   const canEvolve = allItemsAtLevel && nextLevel <= 100;
-  const barraco_image = getBarracoImage(currentLevel);
+  const barracoImage = getBarracoImage(currentLevel);
   const dynamicBackground = getBackgroundByLevel(currentLevel);
 
   return (
@@ -251,7 +236,7 @@ export default function BarracoPage() {
           onComplete={() => setShowGreeting(false)}
         />
       )}
-      
+
       <main className="max-w-[100rem] mx-auto px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -259,21 +244,21 @@ export default function BarracoPage() {
           transition={{ duration: 0.6 }}
           className="space-y-8"
         >
-          {/* Title */}
           <div className="text-center">
-            <h1 className="font-heading text-6xl font-bold text-primary mb-2">
-              BARRACO
-            </h1>
-            <motion.p 
+            <h1 className="font-heading text-6xl font-bold text-primary mb-2">BARRACO</h1>
+            <motion.p
               className="text-subtitle-neon-blue text-lg"
-              animate={levelUpAnimation ? { scale: [1, 1.3, 1], color: ['#00eaff', '#FFD700', '#00eaff'] } : {}}
+              animate={
+                levelUpAnimation
+                  ? { scale: [1, 1.3, 1], color: ['#00eaff', '#FFD700', '#00eaff'] }
+                  : {}
+              }
               transition={{ duration: 1.5 }}
             >
-              Nível Global: <span className="font-bold">{currentLevel}</span>
+              Nível do Barraco: <span className="font-bold">{currentLevel}</span>
             </motion.p>
           </div>
 
-          {/* Level Up Celebration Effect */}
           {levelUpAnimation && (
             <>
               <motion.div
@@ -286,6 +271,7 @@ export default function BarracoPage() {
                   ⭐ LEVEL UP! ⭐
                 </div>
               </motion.div>
+
               <motion.div
                 initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 0, y: -100 }}
@@ -294,6 +280,7 @@ export default function BarracoPage() {
               >
                 <div className="text-4xl">✨</div>
               </motion.div>
+
               <motion.div
                 initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 0, y: -100 }}
@@ -302,6 +289,7 @@ export default function BarracoPage() {
               >
                 <div className="text-4xl">✨</div>
               </motion.div>
+
               <motion.div
                 initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 0, y: -100 }}
@@ -313,7 +301,6 @@ export default function BarracoPage() {
             </>
           )}
 
-          {/* Error Message */}
           {error && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -324,9 +311,7 @@ export default function BarracoPage() {
             </motion.div>
           )}
 
-          {/* Barraco Image and Info Container */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Image Section */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -339,12 +324,12 @@ export default function BarracoPage() {
                   key={imageKey}
                   initial={{ opacity: 0, rotateY: 90 }}
                   animate={{ opacity: 1, rotateY: 0 }}
-                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
                   className="relative z-10"
-                  style={{ perspective: "1000px" }}
+                  style={{ perspective: '1000px' }}
                 >
                   <Image
-                    src={barraco_image}
+                    src={barracoImage}
                     alt={`Barraco Level ${currentLevel}`}
                     width={484}
                     height={484}
@@ -354,14 +339,12 @@ export default function BarracoPage() {
               </div>
             </motion.div>
 
-            {/* Info Section */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="space-y-6"
             >
-              {/* Level Progress */}
               <div className="bg-slate-800/50 border border-subtitle-neon-blue/30 rounded-lg p-6">
                 <h2 className="font-heading text-2xl text-subtitle-neon-blue mb-4">
                   Progresso
@@ -371,6 +354,7 @@ export default function BarracoPage() {
                     <span>Nível Atual:</span>
                     <span className="font-bold text-primary">{currentLevel}/100</span>
                   </div>
+
                   <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
@@ -379,13 +363,15 @@ export default function BarracoPage() {
                       className="h-full bg-gradient-to-r from-primary to-logo-gradient-end"
                     ></motion.div>
                   </div>
+
                   <p className="text-sm text-slate-400">
-                    {currentLevel === 100 ? 'Nível máximo atingido!' : `${100 - currentLevel} níveis restantes`}
+                    {currentLevel === 100
+                      ? 'Nível máximo atingido!'
+                      : `${100 - currentLevel} níveis restantes`}
                   </p>
                 </div>
               </div>
 
-              {/* Evolution Info */}
               <div className="bg-slate-800/50 border border-subtitle-neon-blue/30 rounded-lg p-6">
                 <h2 className="font-heading text-2xl text-subtitle-neon-blue mb-4">
                   Próxima Evolução
@@ -393,36 +379,47 @@ export default function BarracoPage() {
                 <div className="space-y-3">
                   <div className="flex justify-between text-foreground">
                     <span>Novo Nível:</span>
-                    <span className="font-bold text-primary">{nextLevel}</span>
+                    <span className="font-bold text-primary">
+                      {nextLevel <= 100 ? nextLevel : 100}
+                    </span>
                   </div>
+
                   <div className="flex justify-between text-foreground">
                     <span>Custo:</span>
                     <span className="font-bold text-logo-gradient-end">
                       R$ {evolutionCost.toLocaleString('pt-BR')}
                     </span>
                   </div>
+
                   <div className="flex justify-between text-foreground">
                     <span>Dinheiro Limpo Disponível:</span>
-                    <span className={`font-bold ${(player.cleanMoney || 0) >= evolutionCost ? 'text-green-400' : 'text-red-400'}`}>
+                    <span
+                      className={`font-bold ${
+                        (player.cleanMoney || 0) >= evolutionCost
+                          ? 'text-green-400'
+                          : 'text-red-400'
+                      }`}
+                    >
                       R$ {(player.cleanMoney || 0).toLocaleString('pt-BR')}
                     </span>
                   </div>
+
                   {!allItemsAtLevel && (
                     <p className="text-sm text-yellow-400 mt-2">
-                      ⚠️ Todos os itens do jogo precisam estar no nível {currentLevel} para evoluir
+                      ⚠️ Todos os itens do jogo precisam estar no nível {currentLevel} para
+                      evoluir
                     </p>
                   )}
                 </div>
               </div>
 
-              {/* Evolution Button */}
               <motion.button
                 whileHover={{ scale: canEvolve ? 1.05 : 1 }}
                 whileTap={{ scale: canEvolve ? 0.95 : 1 }}
                 onClick={handleEvolution}
                 disabled={!canEvolve || evolving}
                 className={`w-full py-4 px-6 rounded-lg font-heading text-xl font-bold transition-all ${
-                  canEvolve
+canEvolve
                     ? 'bg-gradient-to-r from-primary to-logo-gradient-end text-white hover:shadow-lg hover:shadow-primary/50 cursor-pointer'
                     : 'bg-slate-700 text-slate-400 cursor-not-allowed opacity-50'
                 }`}
@@ -433,7 +430,7 @@ export default function BarracoPage() {
                     Evoluindo...
                   </span>
                 ) : (
-                  `EVOLUIR NÍVEL (${nextLevel})`
+                  `EVOLUIR NÍVEL (${nextLevel <= 100 ? nextLevel : 100})`
                 )}
               </motion.button>
 
@@ -448,11 +445,12 @@ export default function BarracoPage() {
                 </motion.button>
               )}
 
-              {/* Reset Button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => window.location.href = '/reset-barraco'}
+                onClick={() => {
+                  window.location.href = '/reset-barraco';
+                }}
                 className="w-full py-4 px-6 rounded-lg font-heading text-xl font-bold bg-slate-700 text-slate-200 hover:bg-slate-600 hover:shadow-lg hover:shadow-slate-700/50 cursor-pointer transition-all"
               >
                 🔄 RESETAR NÍVEL
@@ -460,7 +458,6 @@ export default function BarracoPage() {
             </motion.div>
           </div>
 
-          {/* Level Milestones */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -470,6 +467,7 @@ export default function BarracoPage() {
             <h2 className="font-heading text-2xl text-subtitle-neon-blue mb-4">
               Marcos de Evolução
             </h2>
+
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               {BARRACO_LEVELS.map(({ level, milestone }) => (
                 <div
@@ -482,9 +480,7 @@ export default function BarracoPage() {
                 >
                   <div>Nível {level}</div>
                   {milestone && (
-                    <div className="text-xs mt-1 text-subtitle-neon-blue">
-                      {milestone}
-                    </div>
+                    <div className="text-xs mt-1 text-subtitle-neon-blue">{milestone}</div>
                   )}
                 </div>
               ))}
