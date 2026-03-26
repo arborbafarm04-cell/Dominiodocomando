@@ -9,10 +9,7 @@ interface PlayerRegistrationProps {
   onSuccess: () => void;
 }
 
-export default function PlayerRegistration({
-  onClose,
-  onSuccess,
-}: PlayerRegistrationProps) {
+export default function PlayerRegistration({ onClose, onSuccess }: PlayerRegistrationProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,40 +25,13 @@ export default function PlayerRegistration({
   const validateForm = () => {
     setError('');
 
-    if (!email.trim()) {
-      setError('E-mail é obrigatório');
-      return false;
-    }
-
-    if (!email.includes('@')) {
-      setError('E-mail inválido');
-      return false;
-    }
-
-    if (!password.trim()) {
-      setError('Senha é obrigatória');
-      return false;
-    }
-
-    if (password.length < 6) {
-      setError('Senha deve ter no mínimo 6 caracteres');
-      return false;
-    }
-
-    if (password !== confirmPassword) {
-      setError('As senhas não coincidem');
-      return false;
-    }
-
-    if (!gamerName.trim()) {
-      setError('Nome gamer é obrigatório');
-      return false;
-    }
-
-    if (gamerName.trim().length < 3) {
-      setError('Nome gamer deve ter no mínimo 3 caracteres');
-      return false;
-    }
+    if (!email.trim()) return setError('E-mail é obrigatório'), false;
+    if (!email.includes('@')) return setError('E-mail inválido'), false;
+    if (!password.trim()) return setError('Senha é obrigatória'), false;
+    if (password.length < 6) return setError('Senha deve ter no mínimo 6 caracteres'), false;
+    if (password !== confirmPassword) return setError('As senhas não coincidem'), false;
+    if (!gamerName.trim()) return setError('Nome gamer é obrigatório'), false;
+    if (gamerName.length < 3) return setError('Nome gamer deve ter no mínimo 3 caracteres'), false;
 
     return true;
   };
@@ -75,23 +45,19 @@ export default function PlayerRegistration({
     setError('');
 
     try {
-      // Limpa qualquer resquício visual de sessão antiga
+      // 🔥 LIMPA QUALQUER SESSÃO ANTIGA
       reset();
 
-      // Cria o jogador e recebe o player persistido da coleção players
-      const player = await registerLocalPlayer(
-        email.trim(),
-        password,
-        gamerName.trim()
-      );
+      // 🔥 CRIA PLAYER NO BANCO
+      const player = await registerLocalPlayer(email, password, gamerName);
 
-      // Sincroniza a store única da sessão com o player completo
+      // 🔥 SINCRONIZA STORE COM PLAYER REAL
       setPlayer(player);
 
       setLoading(false);
       onSuccess();
     } catch (err: any) {
-      console.error('Player registration error:', err);
+      console.error('Registration error:', err);
       setError(err?.message || 'Erro ao criar perfil. Tente novamente.');
       setLoading(false);
     }
@@ -126,119 +92,54 @@ export default function PlayerRegistration({
 
         <form onSubmit={handleRegister} className="space-y-4 p-6">
           {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="border border-red-500/50 bg-red-900/20 p-3 text-sm text-red-400"
-            >
+            <div className="border border-red-500/50 bg-red-900/20 p-3 text-sm text-red-400">
               {error}
-            </motion.div>
+            </div>
           )}
 
-          <div className="space-y-2">
-            <label className="block text-xs font-bold uppercase tracking-widest text-zinc-400">
-              Nome Gamer
-            </label>
-            <input
-              type="text"
-              value={gamerName}
-              onChange={(e) => setGamerName(e.target.value)}
-              placeholder="Seu nome de agente"
-              className="w-full border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-zinc-600 transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
-              disabled={loading}
-            />
-          </div>
+          <input
+            type="text"
+            value={gamerName}
+            onChange={(e) => setGamerName(e.target.value)}
+            placeholder="Nome Gamer"
+            disabled={loading}
+            className="w-full p-3 bg-white/5 border border-white/10 text-white"
+          />
 
-          <div className="space-y-2">
-            <label className="block text-xs font-bold uppercase tracking-widest text-zinc-400">
-              E-mail
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              className="w-full border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-zinc-600 transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
-              disabled={loading}
-            />
-          </div>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            disabled={loading}
+            className="w-full p-3 bg-white/5 border border-white/10 text-white"
+          />
 
-          <div className="space-y-2">
-            <label className="block text-xs font-bold uppercase tracking-widest text-zinc-400">
-              Senha
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
-                className="w-full border border-white/10 bg-white/5 px-4 py-3 pr-10 text-white placeholder-zinc-600 transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
-                disabled={loading}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors hover:text-white"
-                disabled={loading}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
+          <input
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Senha"
+            disabled={loading}
+            className="w-full p-3 bg-white/5 border border-white/10 text-white"
+          />
 
-          <div className="space-y-2">
-            <label className="block text-xs font-bold uppercase tracking-widest text-zinc-400">
-              Confirmar Senha
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Repita a senha"
-                className="w-full border border-white/10 bg-white/5 px-4 py-3 pr-10 text-white placeholder-zinc-600 transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
-                disabled={loading}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors hover:text-white"
-                disabled={loading}
-              >
-                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
+          <input
+            type={showConfirmPassword ? 'text' : 'password'}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirmar senha"
+            disabled={loading}
+            className="w-full p-3 bg-white/5 border border-white/10 text-white"
+          />
 
-          <div className="grid grid-cols-2 gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={loading}
-              className="border border-white/20 px-4 py-3 font-bold uppercase tracking-tighter transition-all hover:bg-white/10 disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center justify-center gap-2 bg-red-700 px-4 py-3 font-bold uppercase tracking-tighter text-black transition-all hover:bg-red-600 disabled:opacity-50"
-            >
-              {loading ? (
-                <>
-                  <Loader size={18} className="animate-spin" />
-                  Criando...
-                </>
-              ) : (
-                'Criar Perfil'
-              )}
-            </button>
-          </div>
-
-          <p className="pt-2 text-center text-xs text-zinc-500">
-            Seus dados estão protegidos pelo sistema de segurança central.
-          </p>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-red-700 p-3 text-black font-bold"
+          >
+            {loading ? 'Criando...' : 'Criar Perfil'}
+          </button>
         </form>
       </motion.div>
     </motion.div>
