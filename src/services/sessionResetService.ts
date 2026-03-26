@@ -1,9 +1,9 @@
 /**
  * Session Reset Service
  * Handles complete cleanup of player session state before loading a new player
- * 
+ *
  * Order of operations:
- * 1. resetPlayer() - Clear main player store
+ * 1. reset() - Clear main player store
  * 2. Clear all legacy stores
  * 3. Clear local prototype states
  * 4. Clear IndexedDB session data
@@ -46,13 +46,14 @@ export async function resetPlayerSession() {
   try {
     // Step 1: Reset main player store
     console.log('  1️⃣ Resetting player store...');
-    usePlayerStore.getState().resetPlayer();
+    usePlayerStore.getState().reset();
 
     // Step 2: Reset all legacy game stores
     console.log('  2️⃣ Resetting legacy game stores...');
     useGameStore.getState().reset();
+
     // PHASE 4: spinVaultStore is now visual-only, spins are in database
-    // No need to reset it here as it's not the source of truth anymore
+    // No need to preserve data here; just reset visual state
     useSpinVaultStore.setState({
       spins: 0,
       lastGainTime: 0,
@@ -189,8 +190,9 @@ export function resetSpecificStores(storeNames: string[]) {
   console.log(`🔄 Resetting specific stores: ${storeNames.join(', ')}`);
 
   const storeMap: Record<string, () => void> = {
-    player: () => usePlayerStore.getState().resetPlayer(),
+    player: () => usePlayerStore.getState().reset(),
     game: () => useGameStore.getState().reset(),
+
     // PHASE 4: spinVault is now visual-only, spins are in database
     spinVault: () =>
       useSpinVaultStore.setState({
@@ -199,112 +201,134 @@ export function resetSpecificStores(storeNames: string[]) {
         hasInitialized: false,
         barracoLevel: 1,
       }),
+
     luxuryShop: () =>
       useLuxuryShopStore.setState({
         isOpen: false,
         selectedItem: null,
         purchasedItems: [],
       }),
+
     gameScreen: () =>
       useGameScreenStore.setState({
         currentScreen: 'menu',
       }),
+
     bribery: () =>
       useBriberyStore.setState({
         bribedOfficials: {},
         totalBribesPaid: 0,
       }),
+
     comercios: () =>
       useComerciosStore.setState({
         comercios: {},
         selectedComercio: null,
       }),
+
     commercialCenter: () =>
       useCommercialCenterStore.setState({
         upgrades: {},
         selectedUpgrade: null,
       }),
+
     businessInvestment: () =>
       useBusinessInvestmentStore.setState({
         investments: {},
         selectedInvestment: null,
       }),
+
     moneyLaundering: () =>
       useMoneyLaunderingStore.setState({
         businesses: {},
         selectedBusiness: null,
       }),
+
     mapState: () =>
       useMapStateStore.setState({
         currentLocation: 'home',
         mapZoom: 1,
         mapPosition: { x: 0, y: 0 },
       }),
+
     mapButtons: () =>
       useMapButtonsStore.setState({
         visibleButtons: [],
         selectedButton: null,
       }),
+
     hotspot: () =>
       useHotspotStore.setState({
         hotspots: [],
         selectedHotspot: null,
       }),
+
     faction: () =>
       useFactionStore.setState({
         factions: {},
         selectedFaction: null,
       }),
+
     skillTree: () =>
       useSkillTreeStore.setState({
         skills: {},
         selectedSkill: null,
       }),
+
     attackSkillTree: () =>
       useAttackSkillTreeStore.setState({
         skills: {},
         selectedSkill: null,
       }),
+
     agilitySkillTree: () =>
       useAgilitySkillTreeStore.setState({
         skills: {},
         selectedSkill: null,
       }),
+
     defenseSkillTree: () =>
       useDefenseSkillTreeStore.setState({
         skills: {},
         selectedSkill: null,
       }),
+
     intelligenceSkillTree: () =>
       useIntelligenceSkillTreeStore.setState({
         skills: {},
         selectedSkill: null,
       }),
+
     investmentSkillTree: () =>
       useInvestmentSkillTreeStore.setState({
         skills: {},
         selectedSkill: null,
       }),
+
     respeitSkillTree: () =>
       useRespeitSkillTreeStore.setState({
         skills: {},
         selectedSkill: null,
       }),
+
     vigorSkillTree: () =>
       useVigorSkillTreeStore.setState({
         skills: {},
         selectedSkill: null,
       }),
+
     drawing: () =>
       useDrawingStore.setState({
         drawings: [],
         selectedDrawing: null,
       }),
+
     dragCustomization: () =>
       useDragCustomizationStore.setState({
         customizations: {},
         selectedCustomization: null,
       }),
+
     selectedTiles: () =>
       useSelectedTilesStore.setState({
         selectedTiles: [],
@@ -313,6 +337,7 @@ export function resetSpecificStores(storeNames: string[]) {
 
   storeNames.forEach((storeName) => {
     const resetFn = storeMap[storeName];
+
     if (resetFn) {
       resetFn();
       console.log(`  ✓ Reset ${storeName}`);
