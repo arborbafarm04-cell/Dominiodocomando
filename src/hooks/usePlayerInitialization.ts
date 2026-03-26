@@ -3,9 +3,11 @@ import { useMember } from '@/integrations';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
 import { getInitialComercioData } from '@/types/comercios';
+import { usePlayerStore } from '@/store/playerStore';
 
 export const usePlayerInitialization = () => {
   const { member } = useMember();
+  const { setPlayerName, setLevel, setProgress, setProfilePicture, loadPlayerData } = usePlayerStore();
 
   useEffect(() => {
     const initializePlayer = async () => {
@@ -18,9 +20,10 @@ export const usePlayerInitialization = () => {
         if (!player) {
           console.log('📝 Criando novo jogador para:', member._id);
           const comercios = getInitialComercioData();
+          const playerName = member.profile?.nickname || 'Jogador';
           const newPlayer: Players = {
             _id: member._id,
-            playerName: member.profile?.nickname || 'Jogador',
+            playerName,
             cleanMoney: 0,
             dirtyMoney: 1000,
             level: 1,
@@ -31,21 +34,37 @@ export const usePlayerInitialization = () => {
           };
           await BaseCrudService.create('players', newPlayer);
           console.log('✅ Jogador criado com sucesso');
+          
+          // Atualizar store com dados do novo jogador
+          setPlayerName(playerName);
+          setLevel(1);
+          setProgress(0);
+          setProfilePicture(member.profile?.photo?.url || null);
           return;
         }
 
-        // Se o jogador existe mas não tem dados de comércios, inicializar
-        if (player && !player.comercios) {
-          console.log('📝 Inicializando comércios para jogador existente');
-          const comercios = getInitialComercioData();
-          const dirtyMoney = player.dirtyMoney || 1000;
-
-          await BaseCrudService.update<Players>('players', {
-            _id: member._id,
-            comercios: JSON.stringify(comercios),
-            dirtyMoney,
+        // Se o jogador existe, carregar dados no store
+        if (player) {
+          console.log('📝 Carregando dados do jogador existente');
+          loadPlayerData({
+            playerId: player._id,
+            playerName: player.playerName || 'Jogador',
+            level: player.level || 1,
+            progress: player.progress || 0,
+            profilePicture: player.profilePicture || null,
+            isGuest: player.isGuest || false,
           });
-          console.log('✅ Comércios inicializados');
+          
+          // Se não tem dados de comércios, inicializar
+          if (!player.comercios) {
+            console.log('📝 Inicializando comércios para jogador existente');
+            const comercios = getInitialComercioData();
+            await BaseCrudService.update<Players>('players', {
+              _id: member._id,
+              comercios: JSON.stringify(comercios),
+            });
+            console.log('✅ Comércios inicializados');
+          }
         }
       } catch (error) {
         console.error('Erro ao inicializar jogador:', error);
@@ -53,5 +72,5 @@ export const usePlayerInitialization = () => {
     };
 
     initializePlayer();
-  }, [member?._id]);
+  }, [member?._id, setPlayerName, setLevel, setProgress, setProfilePicture, loadPlayerData]);
 };
