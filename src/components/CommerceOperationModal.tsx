@@ -17,8 +17,8 @@ interface CommerceOperationModalProps {
   commerceId: ComercioKey | null;
   commerceData: ComercioData | null;
   playerData?: Players;
-  dirtyMoney: number;
-  cleanMoney: number;
+  dirtyMoneyStore: number;
+  cleanMoneyStore: number;
   onClose: () => void;
   onStartOperation: (commerceId: ComercioKey) => Promise<void>;
   onCompleteOperation: (commerceId: ComercioKey) => Promise<void>;
