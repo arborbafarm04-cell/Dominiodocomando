@@ -1,8 +1,14 @@
+/**
+ * DEPRECATED - Use playerDataService instead
+ * This file is kept for backward compatibility only
+ * All new code should use playerDataService.ts
+ */
+
 // authService.ts
 
 const PLAYER_ID_KEY = 'playerId';
 
-export const login = (playerId) => {
+export const login = (playerId: string) => {
     localStorage.setItem(PLAYER_ID_KEY, playerId);
 };
 
