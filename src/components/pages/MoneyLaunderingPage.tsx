@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 
 export default function MoneyLaunderingPage() {
   const navigate = useNavigate();
-  const { member } = useMember();
+  const { member, isAuthenticated, isLoading: isAuthLoading } = useMember();
   const [player, setPlayer] = useState<Players | null>(null);
   const [businesses, setBusinesses] = useState<MoneyLaunderingBusinesses[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,21 +21,20 @@ export default function MoneyLaunderingPage() {
   const initRef = useRef(false); // Prevent double initialization
 
   useEffect(() => {
-    // Skip if already initialized
-    if (initRef.current) return;
+    if (!isAuthLoading && !isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, isAuthLoading, navigate]);
+
+  useEffect(() => {
+    // Skip if already initialized or not authenticated
+    if (initRef.current || !isAuthenticated || !member?._id) return;
     initRef.current = true;
 
     const loadData = async () => {
       try {
         setIsLoading(true);
         setError(null);
-
-        // Check if user is authenticated
-        if (!member?._id) {
-          setError('Você precisa estar autenticado para acessar operações de lavagem');
-          setIsLoading(false);
-          return;
-        }
 
         // Load player data
         const playerData = await BaseCrudService.getById<Players>('players', member._id);
@@ -60,21 +59,7 @@ export default function MoneyLaunderingPage() {
     };
 
     loadData();
-  }, [member?._id]);
-
-  if (!member?._id) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-heading font-bold text-foreground mb-4">Acesso Restrito</h1>
-          <p className="text-lg text-secondary mb-8">Você precisa estar autenticado para acessar operações de lavagem</p>
-          <Button onClick={() => navigate('/')} className="bg-primary hover:bg-primary/80">
-            Voltar ao Login
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  }, [member?._id, isAuthenticated]);
 
   if (isLoading) {
     return (

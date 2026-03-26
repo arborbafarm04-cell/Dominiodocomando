@@ -1,13 +1,38 @@
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 import { Image } from '@/components/ui/image';
-import { Mail, User, Calendar } from 'lucide-react';
+import { Mail, User, Calendar, LogOut } from 'lucide-react';
+import { useMember } from '@/integrations';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 
 export default function ProfilePage() {
-  const memberName = 'Jogador';
-  const memberEmail = 'jogador@complexo.com';
-  const memberPhoto = 'https://static.wixstatic.com/media/50f4bf_a888df3d639f415b853110e459edba8c~mv2.png?originWidth=128&originHeight=128';
-  const createdDate = new Date().toLocaleDateString('pt-BR');
+  const { member, isAuthenticated, isLoading, actions } = useMember();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-secondary text-lg">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (!member) {
+    return null;
+  }
+
+  const memberName = member?.profile?.nickname || member?.contact?.firstName || 'Jogador';
+  const memberEmail = member?.loginEmail || 'jogador@complexo.com';
+  const memberPhoto = member?.profile?.photo?.url || 'https://static.wixstatic.com/media/50f4bf_a888df3d639f415b853110e459edba8c~mv2.png?originWidth=128&originHeight=128';
+  const createdDate = member?._createdDate ? new Date(member._createdDate).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR');
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -130,7 +155,7 @@ export default function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-background/50 backdrop-blur-sm border border-secondary/30 rounded-lg p-6"
+            className="bg-background/50 backdrop-blur-sm border border-secondary/30 rounded-lg p-6 mb-8"
           >
             <h2 className="font-heading text-xl font-bold text-foreground mb-4">
               Informações da Conta
@@ -146,6 +171,24 @@ export default function ProfilePage() {
                 Status: <span className="text-foreground/50 font-mono">Ativo e Irrestrito</span>
               </p>
             </div>
+          </motion.div>
+
+          {/* Logout Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex justify-center"
+          >
+            <Button
+              onClick={() => {
+                actions.logout();
+              }}
+              className="bg-destructive hover:bg-destructive/90 text-white font-heading font-bold px-8 py-2 rounded-lg flex items-center gap-2"
+            >
+              <LogOut className="w-5 h-5" />
+              Sair da Conta
+            </Button>
           </motion.div>
         </motion.div>
       </main>

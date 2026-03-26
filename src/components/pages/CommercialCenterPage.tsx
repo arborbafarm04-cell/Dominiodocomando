@@ -1,10 +1,10 @@
-
 import { Image } from '@/components/ui/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useMember } from '@/integrations';
+import { useNavigate } from 'react-router-dom';
 import { comerciosService } from '@/services/comerciosService';
 import { Comercios, COMERCIOS_KEYS, ComercioKey, getInitialComercioData } from '@/types/comercios';
 import ComercioCard from '@/components/ComercioCard';
@@ -51,10 +51,12 @@ interface CompletedOperation {
 }
 
 export default function CommercialCenterPage() {
-  const { member } = useMember();
+  const navigate = useNavigate();
+  const { member, isAuthenticated, isLoading: isAuthLoading } = useMember();
   const [comercios, setComercios] = useState<Comercios>(INITIAL_COMERCIOS_DATA);
   const [playerData, setPlayerData] = useState<Players | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const initRef = useRef(false);
   const [operations, setOperations] = useState<CommerceOperation[]>([
     {
       id: 'commerce2',
@@ -71,10 +73,19 @@ export default function CommercialCenterPage() {
   // Modal state
   const [activeCommerceModal, setActiveCommerceModal] = useState<ComercioKey | null>(null);
 
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, isAuthLoading, navigate]);
+
   // Carregar dados do jogador
   useEffect(() => {
+    if (initRef.current || !isAuthenticated || !member?._id) return;
+    initRef.current = true;
+
     const loadPlayerData = async () => {
-      if (!member?._id) return;
       try {
         let player = await BaseCrudService.getById<Players>('players', member._id);
         
@@ -134,7 +145,7 @@ export default function CommercialCenterPage() {
       }
     };
     loadPlayerData();
-  }, [member?._id]);
+  }, [member?._id, isAuthenticated]);
 
   // Atualizar dados periodicamente - FIXED: Removed to prevent excessive polling
   // useEffect(() => {

@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
 import { Image } from '@/components/ui/image';
+import { useMember } from '@/integrations';
+import { useNavigate } from 'react-router-dom';
 
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
@@ -26,6 +28,8 @@ const BASE_EVOLUTION_COST = 500;
 const COST_MULTIPLIER = 1.1;
 
 export default function BarracoPage() {
+  const navigate = useNavigate();
+  const { member, isAuthenticated, isLoading: isAuthLoading } = useMember();
   const [player, setPlayer] = useState<Players | null>(null);
   const [loading, setLoading] = useState(true);
   const [evolving, setEvolving] = useState(false);
@@ -39,8 +43,16 @@ export default function BarracoPage() {
   const { setBarracoLevel: setSpinVaultBarracoLevel } = useSpinVaultStore();
   const initRef = useRef(false); // Prevent double initialization
 
-  // Get player ID from localStorage or URL
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, isAuthLoading, navigate]);
+
+  // Get player ID from member or localStorage
   const getPlayerId = () => {
+    if (member?._id) return member._id;
     const urlParams = new URLSearchParams(window.location.search);
     const idFromUrl = urlParams.get('playerId');
     if (idFromUrl) return idFromUrl;
@@ -48,19 +60,24 @@ export default function BarracoPage() {
   };
 
   useEffect(() => {
-    // Skip if already initialized
-    if (initRef.current) return;
+    // Skip if already initialized or not authenticated
+    if (initRef.current || !isAuthenticated || !member?._id) return;
     initRef.current = true;
 
     loadPlayerData();
-  }, []);
+  }, [isAuthenticated, member?._id]);
 
   const loadPlayerData = async () => {
     try {
       setLoading(true);
       let playerId = getPlayerId();
       
-      // If no player ID, try to get the first player from the collection
+      // If no player ID, try to get from member
+      if (!playerId && member?._id) {
+        playerId = member._id;
+      }
+
+      // If still no player ID, try to get the first player from the collection
       if (!playerId) {
         const result = await BaseCrudService.getAll<Players>('players', [], { limit: 1 });
         if (result.items && result.items.length > 0) {
