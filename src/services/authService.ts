@@ -1,40 +1,29 @@
-class AuthService {
-    constructor() {
-        this.playerIdKey = 'playerId';
-    }
+// authService.ts
 
-    // Manage player authentication
-    login(playerId) {
-        localStorage.setItem(this.playerIdKey, playerId);
-        console.log(`Player ${playerId} logged in.`);
-    }
+const PLAYER_ID_KEY = 'playerId';
 
-    logout() {
-        localStorage.removeItem(this.playerIdKey);
-        console.log(`Player logged out.`);
-    }
+export const login = (playerId) => {
+    localStorage.setItem(PLAYER_ID_KEY, playerId);
+};
 
-    isLoggedIn() {
-        return localStorage.getItem(this.playerIdKey) !== null;
-    }
+export const logout = () => {
+    localStorage.removeItem(PLAYER_ID_KEY);
+};
 
-    // Load player by ID from the database
-    async loadPlayerById(playerId) {
-        try {
-            const response = await fetch(`https://api.example.com/players/${playerId}`);
-            if (!response.ok) {
-                throw new Error('Player not found');
-            }
-            const player = await response.json();
-            return player;
-        } catch (error) {
-            console.error(error);
-            return null;
-        }
+export const loadPlayerData = async () => {
+    const playerId = localStorage.getItem(PLAYER_ID_KEY);
+    if (!playerId) return null;
+    
+    try {
+        const response = await fetch(
+            `https://api.example.com/players/${playerId}`
+        );
+        if (!response.ok) throw new Error('Error fetching player data');
+        const playerData = await response.json();
+        return playerData;
+    } catch (error) {
+        console.error(error);
+        return null;
     }
-}
+};
 
-// Example usage:
-const authService = new AuthService();
-authService.login('12345');
-authService.loadPlayerById('12345');
