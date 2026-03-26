@@ -3,23 +3,29 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import InteractiveTileGrid from '@/components/game/InteractiveTileGrid';
 import { useNavigate } from 'react-router-dom';
-import { usePlayerDataSync } from '@/hooks/usePlayerDataSync';
+import { usePlayerStore } from '@/store/playerStore';
+import { usePlayerAuth } from '@/hooks/usePlayerAuth';
+import { loadPlayerFromDatabase } from '@/services/playerDataService';
 
 export default function StarMapPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  const player = usePlayerStore((state) => state.player);
+  const { isAuthenticated, isLoading: isAuthLoading } = usePlayerAuth();
+
   const [showLuxuryNotification, setShowLuxuryNotification] = useState(false);
   const [showQGNotification, setShowQGNotification] = useState(false);
   const [showGiroNotification, setShowGiroNotification] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
-  // Enable automatic player data sync
-  usePlayerDataSync();
+  const hasLoadedPlayerRef = useRef(false);
 
   const handleLuxuryStoreClick = () => {
     setShowLuxuryNotification(true);
     setTimeout(() => {
       setShowLuxuryNotification(false);
-      window.location.href = '/luxury-showroom';
+      navigate('/luxury-showroom');
     }, 1500);
   };
 
@@ -36,23 +42,46 @@ export default function StarMapPage() {
     }, 1500);
   };
 
+  // Auth gate
   useEffect(() => {
-    // Create animated starfield background
-    const canvas = document.getElementById('starfield-canvas') as HTMLCanvasElement;
+    if (isAuthLoading) return;
+
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    setIsPageLoading(false);
+  }, [isAuthLoading, isAuthenticated, navigate]);
+
+  // Rehydrate current player from DB once
+  useEffect(() => {
+    const hydratePlayer = async () => {
+      if (hasLoadedPlayerRef.current) return;
+      if (!player?._id) return;
+
+      hasLoadedPlayerRef.current = true;
+      await loadPlayerFromDatabase(player._id);
+    };
+
+    hydratePlayer();
+  }, [player?._id]);
+
+  useEffect(() => {
+    const canvas = document.getElementById('starfield-canvas') as HTMLCanvasElement | null;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
+
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Create stars with pulsing effect
     interface Star {
       x: number;
       y: number;
@@ -76,31 +105,15 @@ export default function StarMapPage() {
       });
     }
 
-    // Create nebula clouds - DISABLED (fog removed)
-    interface Nebula {
-      x: number;
-      y: number;
-      size: number;
-      opacity: number;
-      color: string;
-      offsetX: number;
-      offsetY: number;
-      speed: number;
-    }
-
-    const nebulas: Nebula[] = [];
-
-    let animationFrameId: number;
+    let animationFrameId = 0;
     let time = 0;
 
     const animate = () => {
       time += 1;
 
-      // Clear canvas with dark background
       ctx.fillStyle = 'rgba(15, 20, 30, 1)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw pulsing stars
       stars.forEach((star) => {
         const pulse = Math.sin(time * star.pulseSpeed + star.pulsePhase) * 0.5 + 0.5;
         const finalOpacity = star.opacity * (pulse * 0.7 + 0.3);
@@ -110,7 +123,6 @@ export default function StarMapPage() {
         ctx.arc(star.x, star.y, star.radius * (pulse * 0.5 + 0.7), 0, Math.PI * 2);
         ctx.fill();
 
-        // Add subtle glow
         ctx.strokeStyle = `rgba(0, 234, 255, ${finalOpacity * 0.3})`;
         ctx.lineWidth = 0.5;
         ctx.stroke();
@@ -127,45 +139,49 @@ export default function StarMapPage() {
     };
   }, []);
 
+  if (isAuthLoading || isPageLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-white text-lg font-heading">Carregando mapa...</div>
+      </div>
+    );
+  }
+
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-background overflow-hidden">
-      {/* Animated Starfield Background */}
       <canvas
         id="starfield-canvas"
         className="fixed top-0 left-0 w-full h-full z-0"
         style={{ display: 'block' }}
       />
-      {/* Video Background Overlay (for future video integration) */}
+
       <div className="fixed top-0 left-0 w-full h-full z-0 bg-gradient-to-b from-transparent via-transparent to-background/50" />
-      {/* Content */}
+
       <div className="relative z-10 w-full h-screen flex flex-col">
         <Header />
 
-        {/* Interactive Tile Grid Section */}
         <div className="flex-1 w-full h-full overflow-hidden relative">
-          <InteractiveTileGrid 
-            gridWidth={40} 
-            gridHeight={20} 
+          <InteractiveTileGrid
+            gridWidth={40}
+            gridHeight={20}
             tileSize={1}
             onLuxuryStoreClick={handleLuxuryStoreClick}
             onQGClick={handleQGClick}
+            onGiroClick={handleGiroClick}
           />
-          
-          {/* Luxury Store Notification */}
+
           {showLuxuryNotification && (
             <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end px-6 py-3 rounded-lg shadow-lg animate-pulse">
               <p className="text-white font-heading text-lg">🏢 Loja de Luxo 3D Clicada!</p>
             </div>
           )}
 
-          {/* QG Notification */}
           {showQGNotification && (
             <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-subtitle-neon-blue to-player-info-glow-blue px-6 py-3 rounded-lg shadow-lg animate-pulse">
               <p className="text-white font-heading text-lg">🏛️ Quartel General Clicado!</p>
             </div>
           )}
 
-          {/* Giro Notification */}
           {showGiroNotification && (
             <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end px-6 py-3 rounded-lg shadow-lg animate-pulse">
               <p className="text-white font-heading text-lg">🎰 Giro no Asfalto Clicado!</p>
