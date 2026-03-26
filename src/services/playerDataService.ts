@@ -6,18 +6,21 @@
  * 
  * Data Flow:
  * 1. Database (Players collection) = Source of Truth
- * 2. playerStore (Zustand) = In-memory cache
- * 3. Components = Read from playerStore, write through this service
+ * 2. playerStore (Zustand) = Session cache (current player only)
+ * 3. uiStore (Zustand) = Visual/game states (ephemeral)
+ * 4. multiplayerStore (Zustand) = Other players (ephemeral)
+ * 5. Components = Read from stores, write through this service
  * 
  * NEVER:
  * - Access localStorage directly for player data
  * - Use separate stores (dirtyMoneyStore, cleanMoneyStore)
- * - Update playerStore directly without syncing to DB
+ * - Update stores directly without syncing to DB
  */
 
 import { BaseCrudService } from "@/integrations";
 import { Players } from "@/entities";
 import { usePlayerStore } from "@/store/playerStore";
+import { useUIStore } from "@/store/uiStore";
 import { useSkillTreeStore } from "@/store/skillTreeStore";
 import { useLuxuryShopStore } from "@/store/luxuryShopStore";
 import { useComerciosStore } from "@/store/comerciosStore";
@@ -29,7 +32,7 @@ const COLLECTION_ID = "players";
  * Load player from database and sync to ALL stores
  * This is the COMPLETE player load - includes everything:
  * - Basic player data (name, level, money, etc)
- * - Spins and multiplier
+ * - Spins
  * - Skill trees
  * - Luxury items owned
  * - Investments
@@ -44,7 +47,7 @@ export async function loadPlayerFromDatabase(playerId: string): Promise<Players 
     const player = await BaseCrudService.getById<Players>(COLLECTION_ID, playerId);
     
     if (player) {
-      // 1. Load basic player data to playerStore
+      // 1. Load basic player data to playerStore (session cache)
       const playerStore = usePlayerStore.getState();
       playerStore.loadPlayerData({
         playerId: player._id,
@@ -56,7 +59,6 @@ export async function loadPlayerFromDatabase(playerId: string): Promise<Players 
         barracoLevel: player.barracoLevel || 1,
         cleanMoney: player.cleanMoney || 0,
         dirtyMoney: player.dirtyMoney || 0,
-        playerMoney: player.dirtyMoney || 0, // playerMoney = dirtyMoney
         spins: player.spins || 0,
       });
 
@@ -76,10 +78,15 @@ export async function loadPlayerFromDatabase(playerId: string): Promise<Players 
         }
       }
 
-      // 3. Load owned luxury items
+      // 3. Load owned luxury items to uiStore
       if (player.ownedLuxuryItems) {
         try {
           const luxuryItems = JSON.parse(player.ownedLuxuryItems);
+          const uiStore = useUIStore.getState();
+          if (Array.isArray(luxuryItems)) {
+            uiStore.setOwnedLuxuryItems(luxuryItems);
+          }
+          // Also sync to luxury shop store for compatibility
           const luxuryStore = useLuxuryShopStore.getState();
           if (Array.isArray(luxuryItems)) {
             luxuryStore.purchasedItems = luxuryItems;
@@ -107,37 +114,38 @@ export async function loadPlayerFromDatabase(playerId: string): Promise<Players 
         comerciosStore.setComercios(getInitialComercioData());
       }
 
-      // 5. Load inventory
+      // 5. Load inventory to uiStore
       if (player.inventory) {
         try {
           const inventoryData = JSON.parse(player.inventory);
-          // Store inventory data - can be used by components
-          playerStore.inventory = inventoryData;
+          const uiStore = useUIStore.getState();
+          uiStore.setInventory(inventoryData);
         } catch (e) {
           console.warn('Error parsing inventory:', e);
         }
       }
 
-      // 6. Load investments
+      // 6. Load investments to uiStore
       if (player.investments) {
         try {
           const investmentsData = JSON.parse(player.investments);
-          // Store investments data - can be used by components
-          playerStore.investments = investmentsData;
+          const uiStore = useUIStore.getState();
+          uiStore.setInvestments(investmentsData);
         } catch (e) {
           console.warn('Error parsing investments:', e);
         }
       }
 
-      // 7. Load cooldowns and passive bonuses (stored as JSON)
+      // 7. Load cooldowns and passive bonuses to uiStore
       if (player.skillTrees) {
         try {
           const skillTreesData = JSON.parse(player.skillTrees);
+          const uiStore = useUIStore.getState();
           if (skillTreesData.cooldowns) {
-            playerStore.cooldowns = skillTreesData.cooldowns;
+            uiStore.setCooldowns(skillTreesData.cooldowns);
           }
           if (skillTreesData.passiveBonuses) {
-            playerStore.passiveBonuses = skillTreesData.passiveBonuses;
+            uiStore.setPassiveBonuses(skillTreesData.passiveBonuses);
           }
         } catch (e) {
           console.warn('Error parsing cooldowns/bonuses:', e);
@@ -201,7 +209,7 @@ export async function updatePlayerMoney(
   const store = usePlayerStore.getState();
   
   // Update store immediately (optimistic)
-  store.setDirtyMoney(Math.max(0, dirtyMoney));
+  store._setDirtyMoney(Math.max(0, dirtyMoney));
   
   // Sync to database
   try {
@@ -225,7 +233,7 @@ export async function updateCleanMoney(
   const store = usePlayerStore.getState();
   
   // Update store immediately (optimistic)
-  store.setCleanMoney(Math.max(0, cleanMoney));
+  store._setCleanMoney(Math.max(0, cleanMoney));
   
   // Sync to database
   try {
@@ -298,6 +306,7 @@ export async function updateBarracoLevel(
 export async function syncPlayerToDatabase(playerId: string): Promise<void> {
   try {
     const playerStore = usePlayerStore.getState();
+    const uiStore = useUIStore.getState();
     const skillTreeStore = useSkillTreeStore.getState();
     const luxuryStore = useLuxuryShopStore.getState();
     const comerciosStore = useComerciosStore.getState();
@@ -306,18 +315,18 @@ export async function syncPlayerToDatabase(playerId: string): Promise<void> {
     const skillTreesData = {
       skills: skillTreeStore.skills,
       playerMoney: skillTreeStore.playerMoney,
-      cooldowns: playerStore.cooldowns || {},
-      passiveBonuses: playerStore.passiveBonuses || {},
+      cooldowns: uiStore.cooldowns || {},
+      passiveBonuses: uiStore.passiveBonuses || {},
     };
 
     // Prepare luxury items data
     const luxuryItemsData = luxuryStore.purchasedItems;
 
     // Prepare investments data
-    const investmentsData = playerStore.investments || {};
+    const investmentsData = uiStore.investments || {};
 
     // Prepare inventory data
-    const inventoryData = playerStore.inventory || {};
+    const inventoryData = uiStore.inventory || {};
     
     await updatePlayerInDatabase(playerId, {
       playerName: playerStore.playerName,
@@ -342,6 +351,7 @@ export async function syncPlayerToDatabase(playerId: string): Promise<void> {
 
 /**
  * Create new player in database with all data initialized
+ * Production values: level 1, money 0, spins 0
  */
 export async function createNewPlayer(playerData: Partial<Players>): Promise<Players | null> {
   try {
@@ -352,14 +362,14 @@ export async function createNewPlayer(playerData: Partial<Players>): Promise<Pla
     const newPlayer: Players = {
       _id: playerData._id,
       playerName: playerData.playerName || 'COMANDANTE',
-      level: playerData.level || 1,
-      progress: playerData.progress || 0,
-      dirtyMoney: playerData.dirtyMoney || 0,
-      cleanMoney: playerData.cleanMoney || 0,
-      barracoLevel: playerData.barracoLevel || 1,
-      isGuest: playerData.isGuest || false,
+      level: playerData.level ?? 1,
+      progress: playerData.progress ?? 0,
+      dirtyMoney: playerData.dirtyMoney ?? 0,
+      cleanMoney: playerData.cleanMoney ?? 0,
+      barracoLevel: playerData.barracoLevel ?? 1,
+      isGuest: playerData.isGuest ?? false,
       profilePicture: playerData.profilePicture || null,
-      spins: playerData.spins || 0,
+      spins: playerData.spins ?? 0,
       // Initialize all data fields as empty JSON
       skillTrees: JSON.stringify({
         skills: {},
@@ -375,7 +385,7 @@ export async function createNewPlayer(playerData: Partial<Players>): Promise<Pla
 
     await BaseCrudService.create(COLLECTION_ID, newPlayer);
     
-    // Sync to store
+    // Sync to stores
     await loadPlayerFromDatabase(newPlayer._id);
     
     return newPlayer;
@@ -392,9 +402,11 @@ export async function deletePlayerFromDatabase(playerId: string): Promise<void> 
   try {
     await BaseCrudService.delete(COLLECTION_ID, playerId);
     
-    // Reset store
-    const store = usePlayerStore.getState();
-    store.resetPlayer();
+    // Reset stores
+    const playerStore = usePlayerStore.getState();
+    const uiStore = useUIStore.getState();
+    playerStore.resetPlayer();
+    uiStore.reset();
   } catch (error) {
     console.error('Error deleting player:', error);
   }

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Image } from '@/components/ui/image';
 import { usePlayerStore } from '@/store/playerStore';
+import { useUIStore } from '@/store/uiStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { executeSpinOperation } from '@/services/spinEconomyService';
 
@@ -258,7 +259,8 @@ const AnimatedMoney: React.FC<AnimatedMoneyProps> = ({ amount, id, tier }) => {
 };
 
 function SpinButton() {
-  const { isSpinning, setIsSpinning, spins, playerId } = usePlayerStore();
+  const { spins, playerId } = usePlayerStore();
+  const { isSpinning, setIsSpinning } = useUIStore();
   const [selectedMultiplier, setSelectedMultiplier] = useState(1);
 
   const handleSpin = () => {
@@ -320,12 +322,14 @@ function SpinButton() {
 function SlotsDisplay() {
   const {
     dirtyMoney,
-    multiplier,
-    setDirtyMoney,
-    setMultiplier,
-    setIsSpinning,
     playerId,
   } = usePlayerStore();
+  const {
+    multiplier,
+    setMultiplier,
+    isSpinning,
+    setIsSpinning,
+  } = useUIStore();
   const [slots, setSlots] = useState([0, 1, 2]);
   const [spinningIndices, setSpinningIndices] = useState([false, false, false]);
   const [resultMessage, setResultMessage] = useState('');
@@ -467,7 +471,6 @@ function SlotsDisplay() {
   }, [
     multiplier,
     dirtyMoney,
-    setDirtyMoney,
     setMultiplier,
     setIsSpinning,
   ]);
