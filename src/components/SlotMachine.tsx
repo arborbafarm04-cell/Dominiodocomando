@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePlayerStore } from '@/store/playerStore';
 import { executeSpinOperation } from '@/services/spinService';
+import { Players } from '@/entities';
 
 // =======================
 // 🎯 CONFIG
@@ -32,7 +33,7 @@ const generateOutcome = (): SymbolType[] => {
 interface SpinResponse {
   type: 'jackpot' | 'money' | 'attack' | 'prison' | 'none';
   amount: number;
-  updatedPlayer: any;
+  updatedPlayer: Players;
 }
 
 // =======================
@@ -58,6 +59,8 @@ export default function SlotMachine() {
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const particlesTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shakeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const playerId = player?._id;
   const spins = player?.spins ?? 0;
@@ -71,6 +74,8 @@ export default function SlotMachine() {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (particlesTimeoutRef.current) clearTimeout(particlesTimeoutRef.current);
+      if (shakeTimeoutRef.current) clearTimeout(shakeTimeoutRef.current);
     };
   }, []);
 
@@ -116,6 +121,8 @@ export default function SlotMachine() {
           multiplier
         )) as SpinResponse;
 
+        setError('');
+
         let msg = '';
 
         if (res.type === 'jackpot') {
@@ -142,8 +149,11 @@ export default function SlotMachine() {
         setMessage(msg);
         setShowWin(true);
 
-        setTimeout(() => setParticles(false), 1000);
-        setTimeout(() => setShake(false), 500);
+        if (particlesTimeoutRef.current) clearTimeout(particlesTimeoutRef.current);
+        if (shakeTimeoutRef.current) clearTimeout(shakeTimeoutRef.current);
+
+        particlesTimeoutRef.current = setTimeout(() => setParticles(false), 1000);
+        shakeTimeoutRef.current = setTimeout(() => setShake(false), 500);
       } catch (err: any) {
         console.error('Erro no spin:', err);
         setError(err?.message || 'Erro ao girar a máquina.');
@@ -177,12 +187,10 @@ export default function SlotMachine() {
 
   return (
     <div className="w-full max-w-md mx-auto p-4 bg-black rounded-2xl border border-yellow-500 shadow-[0_0_40px_rgba(255,215,0,0.4)] relative overflow-hidden">
-      {/* 🔥 JACKPOT */}
       <div className="text-center text-yellow-300 text-xl font-bold mb-2 animate-pulse">
         💰 JACKPOT: {jackpot.toLocaleString('pt-BR')}
       </div>
 
-      {/* 👤 STATUS JOGADOR */}
       <div className="mb-4 grid grid-cols-2 gap-3">
         <div className="bg-zinc-900 border border-yellow-700 rounded-lg p-3 text-center">
           <div className="text-xs text-zinc-400 uppercase">Giros</div>
@@ -196,7 +204,6 @@ export default function SlotMachine() {
         </div>
       </div>
 
-      {/* 🎰 REELS */}
       <motion.div
         animate={shake ? { x: [-5, 5, -5, 5, 0] } : {}}
         className="flex justify-center gap-3 mb-6"
@@ -213,7 +220,6 @@ export default function SlotMachine() {
         ))}
       </motion.div>
 
-      {/* 🎯 MULTIPLICADORES */}
       <div className="mb-4">
         <div className="text-yellow-300 text-sm mb-2 text-center">Multiplicador</div>
         <div className="flex flex-wrap justify-center gap-2">
@@ -234,7 +240,6 @@ export default function SlotMachine() {
         </div>
       </div>
 
-      {/* 🎯 BOTÕES */}
       <div className="flex flex-col gap-3">
         <button
           onClick={spin}
@@ -259,7 +264,6 @@ export default function SlotMachine() {
         </button>
       </div>
 
-      {/* ❌ ERRO */}
       <AnimatePresence>
         {error && (
           <motion.div
@@ -273,7 +277,6 @@ export default function SlotMachine() {
         )}
       </AnimatePresence>
 
-      {/* 💬 RESULTADO */}
       <AnimatePresence>
         {message && !error && (
           <motion.div
@@ -287,14 +290,12 @@ export default function SlotMachine() {
         )}
       </AnimatePresence>
 
-      {/* ✨ PARTÍCULAS */}
       {particles && (
         <div className="absolute inset-0 pointer-events-none flex justify-center items-center text-yellow-400 text-3xl animate-ping">
           ✨✨✨
         </div>
       )}
 
-      {/* 📜 HISTÓRICO */}
       <div className="mt-6 bg-black/70 p-3 rounded-lg border border-yellow-700">
         <div className="text-yellow-300 text-sm mb-2">Histórico</div>
         {history.length === 0 ? (
