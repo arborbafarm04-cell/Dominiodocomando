@@ -11,6 +11,8 @@ import { Players } from '@/entities';
 import CommercialCenterHotspots from '@/components/CommercialCenterHotspots';
 import CommerceOperationModal from '@/components/CommerceOperationModal';
 import { usePlayerAuth } from '@/hooks/usePlayerAuth';
+import { usePlayerStore } from '@/store/playerStore';
+import { loadPlayerFromDatabase } from '@/services/playerDataService';
 
 const INITIAL_COMERCIOS_DATA = getInitialComercioData();
 
@@ -52,6 +54,7 @@ interface CompletedOperation {
 export default function CommercialCenterPage() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: isAuthLoading, playerData: authPlayerData } = usePlayerAuth();
+  const { playerId, dirtyMoney, cleanMoney, setDirtyMoney, setCleanMoney } = usePlayerStore();
   const [comercios, setComercios] = useState<Comercios>(INITIAL_COMERCIOS_DATA);
   const [playerData, setPlayerData] = useState<Players | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,6 +90,10 @@ export default function CommercialCenterPage() {
     const loadPlayerData = async () => {
       try {
         const playerId = authPlayerData._id; // Usar playerId único e permanente do sistema de autenticação
+        
+        // Load from database and sync to store
+        await loadPlayerFromDatabase(playerId);
+        
         let player = await BaseCrudService.getById<Players>('players', playerId);
         
         // Se o jogador não existe, criar um novo
@@ -110,9 +117,13 @@ export default function CommercialCenterPage() {
           await BaseCrudService.create('players', newPlayer);
           setPlayerData(newPlayer);
           setComercios(initialComerciosData);
+          setDirtyMoney(newPlayer.dirtyMoney || 0);
+          setCleanMoney(newPlayer.cleanMoney || 0);
           console.log('✅ Jogador criado com sucesso');
         } else {
           setPlayerData(player);
+          setDirtyMoney(player.dirtyMoney || 0);
+          setCleanMoney(player.cleanMoney || 0);
           const comerciosData = player.comercios ? safeParseComercios(player.comercios) : null;
           if (!comerciosData) {
             console.warn('⚠️ Comercios não encontrados, inicializando...');
@@ -134,7 +145,7 @@ export default function CommercialCenterPage() {
       }
     };
     loadPlayerData();
-  }, [authPlayerData?._id, isAuthenticated]);
+  }, [authPlayerData?._id, isAuthenticated, setDirtyMoney, setCleanMoney]);
 
   const handleIniciarLavagem = async (comercioKey: ComercioKey) => {
     if (!authPlayerData?._id || !playerData) return;
@@ -142,12 +153,16 @@ export default function CommercialCenterPage() {
       const resultado = await comerciosService.iniciarLavagem(
         authPlayerData._id,
         comercioKey,
-        playerData.dirtyMoney || 0
+        dirtyMoney || 0
       );
       if (resultado.sucesso) {
+        // Reload from database and sync to store
+        await loadPlayerFromDatabase(authPlayerData._id);
         const player = await BaseCrudService.getById<Players>('players', authPlayerData._id);
         if (player) {
           setPlayerData(player);
+          setDirtyMoney(player.dirtyMoney || 0);
+          setCleanMoney(player.cleanMoney || 0);
           const comerciosData = player.comercios ? JSON.parse(player.comercios) : null;
           setComercios(comerciosData);
         }
@@ -165,9 +180,13 @@ export default function CommercialCenterPage() {
     try {
       const resultado = await comerciosService.finalizarLavagem(authPlayerData._id, comercioKey);
       if (resultado.sucesso) {
+        // Reload from database and sync to store
+        await loadPlayerFromDatabase(authPlayerData._id);
         const player = await BaseCrudService.getById<Players>('players', authPlayerData._id);
         if (player) {
           setPlayerData(player);
+          setDirtyMoney(player.dirtyMoney || 0);
+          setCleanMoney(player.cleanMoney || 0);
           const comerciosData = player.comercios ? JSON.parse(player.comercios) : null;
           setComercios(comerciosData);
         }
@@ -548,6 +567,21 @@ export default function CommercialCenterPage() {
         </div>
       </div>
       {/* PLAYER INFO */}
+      <div className="w-full px-4 py-6 relative z-10 border-b border-cyan-500/30 bg-background/50">
+        <div className="max-w-[100rem] mx-auto flex justify-between items-center text-sm md:text-base">
+          <div className="flex gap-6">
+            <div className="text-cyan-300">
+              Nível: <span className="font-bold text-white">{playerData?.level || 1}</span>
+            </div>
+            <div className="text-orange-400">
+              💵 Sujo: <span className="font-bold">${dirtyMoney?.toLocaleString() || 0}</span>
+            </div>
+            <div className="text-green-400">
+              💚 Limpo: <span className="font-bold">${cleanMoney?.toLocaleString() || 0}</span>
+            </div>
+          </div>
+        </div>
+      </div>
       {/* OPERATIONS */}
       <div className="w-full px-4 py-12 relative z-10">
         <div className="max-w-[100rem] mx-auto">

@@ -2,7 +2,9 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMember } from '@/integrations';
 import { BaseCrudService } from '@/integrations';
-import { Players, MoneyLaunderingBusinesses } from '@/entities';
+import { MoneyLaunderingBusinesses, Players } from '@/entities';
+import { usePlayerStore } from '@/store/playerStore';
+import { loadPlayerFromDatabase } from '@/services/playerDataService';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MoneyLaunderingBusiness from '@/components/MoneyLaunderingBusiness';
@@ -14,6 +16,7 @@ import { Button } from '@/components/ui/button';
 export default function MoneyLaunderingPage() {
   const navigate = useNavigate();
   const { member, isAuthenticated, isLoading: isAuthLoading } = useMember();
+  const { playerId, dirtyMoney, cleanMoney } = usePlayerStore();
   const [player, setPlayer] = useState<Players | null>(null);
   const [businesses, setBusinesses] = useState<MoneyLaunderingBusinesses[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,16 +39,8 @@ export default function MoneyLaunderingPage() {
         setIsLoading(true);
         setError(null);
 
-        // Load player data
-        const playerData = await BaseCrudService.getById<Players>('players', member._id);
-        
-        if (!playerData) {
-          setError('Dados do jogador não encontrados. Por favor, faça login novamente.');
-          setIsLoading(false);
-          return;
-        }
-
-        setPlayer(playerData);
+        // Load player data from database and sync to store
+        await loadPlayerFromDatabase(member._id);
 
         // Load money laundering businesses
         const result = await BaseCrudService.getAll<MoneyLaunderingBusinesses>('moneylaunderingbusinesses');
@@ -122,13 +117,13 @@ export default function MoneyLaunderingPage() {
               💧 Operações de Lavagem
             </h1>
             <p className="text-lg text-secondary">
-              Jogador: <span className="font-bold">{player?.playerName || 'Desconhecido'}</span>
+              Jogador: <span className="font-bold">{playerId ? 'Conectado' : 'Desconhecido'}</span>
             </p>
             <p className="text-lg text-secondary">
-              Dinheiro Sujo: <span className="font-bold text-orange-400">${player?.dirtyMoney?.toLocaleString() || 0}</span>
+              Dinheiro Sujo: <span className="font-bold text-orange-400">${dirtyMoney?.toLocaleString() || 0}</span>
             </p>
             <p className="text-lg text-secondary">
-              Dinheiro Limpo: <span className="font-bold text-green-400">${player?.cleanMoney?.toLocaleString() || 0}</span>
+              Dinheiro Limpo: <span className="font-bold text-green-400">${cleanMoney?.toLocaleString() || 0}</span>
             </p>
           </div>
 
@@ -145,14 +140,13 @@ export default function MoneyLaunderingPage() {
                   baseTime={business.baseTime || 1}
                   businessImage={business.businessImage || ''}
                   currentRate={business.initialRate || 10}
-                  currentMaxValue={player?.dirtyMoney || 0}
+                  currentMaxValue={dirtyMoney || 0}
                   currentTimeMultiplier={1}
                   onOperationComplete={() => {
                     // Reload player data after operation completes
                     const loadUpdatedPlayer = async () => {
                       try {
-                        const updated = await BaseCrudService.getById<Players>('players', member._id);
-                        if (updated) setPlayer(updated);
+                        await loadPlayerFromDatabase(member._id);
                       } catch (err) {
                         console.error('Erro ao recarregar dados do jogador:', err);
                       }

@@ -1,18 +1,123 @@
-import { usePlayerStore } from 'path/to/player/store';
+import { usePlayerStore } from '@/store/playerStore';
+import { useMember } from '@/integrations';
+import { useNavigate } from 'react-router-dom';
+import { LogOut, User, Home } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
-const Header = () => {
-    // Get dirtyMoney and cleanMoney from usePlayerStore
-    const { dirtyMoney, cleanMoney } = usePlayerStore();
+export default function Header() {
+  const navigate = useNavigate();
+  const { member, isAuthenticated, actions, isLoading } = useMember();
+  
+  // Get player data from centralized store
+  const { 
+    playerName, 
+    level, 
+    dirtyMoney, 
+    cleanMoney, 
+    barracoLevel 
+  } = usePlayerStore();
 
-    return (
-        <header>
-            <h1>Game Title</h1>
-            <div>
-                <p>Dirty Money: {dirtyMoney}</p>
-                <p>Clean Money: {cleanMoney}</p>
+  const formatMoney = (value: number) => {
+    return value.toLocaleString('pt-BR', { 
+      minimumFractionDigits: 0, 
+      maximumFractionDigits: 0 
+    });
+  };
+
+  return (
+    <header className="w-full bg-background/80 backdrop-blur-sm border-b border-secondary/30 sticky top-0 z-50">
+      <div className="w-full max-w-[120rem] mx-auto px-4 py-4 flex items-center justify-between">
+        {/* Logo/Title */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => navigate('/')}
+        >
+          <div className="text-2xl font-heading font-bold bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end bg-clip-text text-transparent">
+            COMPLEXO
+          </div>
+          <div className="text-xs text-secondary">v1.0</div>
+        </motion.div>
+
+        {/* Player Stats - Center */}
+        {isAuthenticated && playerName && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="hidden md:flex items-center gap-6 text-sm"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-secondary">LVL:</span>
+              <span className="font-bold text-white">{level}</span>
             </div>
-        </header>
-    );
-};
+            <div className="flex items-center gap-2">
+              <span className="text-secondary">🏠:</span>
+              <span className="font-bold text-white">{barracoLevel}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-logo-gradient-start">💵:</span>
+              <span className="font-bold text-logo-gradient-start">{formatMoney(dirtyMoney)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-green-400">💚:</span>
+              <span className="font-bold text-green-400">{formatMoney(cleanMoney)}</span>
+            </div>
+          </motion.div>
+        )}
 
-export default Header;
+        {/* Navigation - Right */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-3"
+        >
+          {isLoading ? (
+            <div className="text-secondary text-sm">Carregando...</div>
+          ) : isAuthenticated ? (
+            <>
+              <Button
+                onClick={() => navigate('/profile')}
+                variant="ghost"
+                size="sm"
+                className="text-secondary hover:text-white hover:bg-secondary/10"
+              >
+                <User className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">{member?.profile?.nickname || 'Perfil'}</span>
+              </Button>
+              <Button
+                onClick={() => actions.logout()}
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Sair</span>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                onClick={() => navigate('/')}
+                variant="ghost"
+                size="sm"
+                className="text-secondary hover:text-white hover:bg-secondary/10"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Início</span>
+              </Button>
+              <Button
+                onClick={() => actions.login()}
+                size="sm"
+                className="bg-primary hover:bg-primary/80 text-white"
+              >
+                Entrar
+              </Button>
+            </>
+          )}
+        </motion.div>
+      </div>
+    </header>
+  );
+}

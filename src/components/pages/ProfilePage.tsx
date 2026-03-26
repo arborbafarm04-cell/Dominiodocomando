@@ -1,15 +1,18 @@
 import Footer from '@/components/Footer';
+import Header from '@/components/Header';
 import { motion } from 'framer-motion';
 import { Image } from '@/components/ui/image';
-import { Mail, User, Calendar, LogOut } from 'lucide-react';
+import { Mail, User, Calendar, LogOut, Gamepad2, TrendingUp } from 'lucide-react';
 import { useMember } from '@/integrations';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { usePlayerStore } from '@/store/playerStore';
 
 export default function ProfilePage() {
   const { member, isAuthenticated, isLoading, actions } = useMember();
   const navigate = useNavigate();
+  const { level, barracoLevel, dirtyMoney, cleanMoney } = usePlayerStore();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -36,6 +39,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <Header />
       <main className="flex-1 w-full max-w-[120rem] mx-auto px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -117,33 +121,40 @@ export default function ProfilePage() {
               </div>
             </motion.div>
 
-            {/* Account Info */}
+            {/* Game Stats */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
               className="bg-background/50 backdrop-blur-sm border border-secondary/30 rounded-lg p-6"
             >
-              <h2 className="font-heading text-xl font-bold text-foreground mb-4">
-                Informações
+              <h2 className="font-heading text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <Gamepad2 className="w-5 h-5 text-secondary" />
+                Estatísticas do Jogo
               </h2>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="font-paragraph text-foreground/70">Nível:</span>
                   <span className="font-heading text-sm font-bold text-secondary">
-                    1
+                    {level}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="font-paragraph text-foreground/70">Experiência:</span>
+                  <span className="font-paragraph text-foreground/70">Casa:</span>
                   <span className="font-heading text-sm font-bold text-secondary">
-                    0 XP
+                    Nível {barracoLevel}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="font-paragraph text-foreground/70">Progresso:</span>
-                  <span className="font-heading text-sm font-bold text-secondary">
-                    0%
+                  <span className="font-paragraph text-foreground/70">Dinheiro Sujo:</span>
+                  <span className="font-heading text-sm font-bold text-orange-400">
+                    ${dirtyMoney?.toLocaleString() || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-paragraph text-foreground/70">Dinheiro Limpo:</span>
+                  <span className="font-heading text-sm font-bold text-green-400">
+                    ${cleanMoney?.toLocaleString() || 0}
                   </span>
                 </div>
               </div>
