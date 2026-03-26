@@ -64,7 +64,12 @@ export default function Header() {
     } else {
       // Local logout
       await logoutLocalPlayer();
-      navigate('/login');
+      // Clear player data
+      localStorage.removeItem('currentPlayerId');
+      localStorage.removeItem('currentPlayerEmail');
+      localStorage.removeItem('playerAuthToken');
+      localStorage.removeItem('lastPlayerData');
+      navigate('/');
     }
   };
 

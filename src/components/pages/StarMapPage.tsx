@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import InteractiveTileGrid from '@/components/game/InteractiveTileGrid';
 import { useNavigate } from 'react-router-dom';
+import { usePlayerDataSync } from '@/hooks/usePlayerDataSync';
 
 export default function StarMapPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -10,6 +11,9 @@ export default function StarMapPage() {
   const [showLuxuryNotification, setShowLuxuryNotification] = useState(false);
   const [showQGNotification, setShowQGNotification] = useState(false);
   const [showGiroNotification, setShowGiroNotification] = useState(false);
+
+  // Enable automatic player data sync
+  usePlayerDataSync();
 
   const handleLuxuryStoreClick = () => {
     setShowLuxuryNotification(true);

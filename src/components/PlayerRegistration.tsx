@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, Eye, EyeOff, Loader } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
+import { registerLocalPlayer } from '@/services/playerService';
 
 interface PlayerRegistrationProps {
   onClose: () => void;
@@ -70,20 +71,19 @@ export default function PlayerRegistration({ onClose, onSuccess }: PlayerRegistr
     setLoading(true);
 
     try {
-      // Simular registro (em produção, isso seria uma chamada à API)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Register player with authentication
+      const player = await registerLocalPlayer(email, password, gamerName);
 
-      // Armazenar dados do jogador
-      const playerId = `player_${Date.now()}`;
-      setPlayerId(playerId);
+      // Update player store
+      setPlayerId(player._id);
       setPlayerName(gamerName);
 
-      // Armazenar credenciais no localStorage (apenas para demo - em produção usar backend seguro)
-      localStorage.setItem('playerAuth', JSON.stringify({
-        playerId,
-        email,
-        gamerName,
-        createdAt: new Date().toISOString(),
+      // Store player data in localStorage for quick access
+      localStorage.setItem('lastPlayerData', JSON.stringify({
+        playerId: player._id,
+        playerName: player.playerName,
+        level: player.level,
+        progress: player.progress,
       }));
 
       setLoading(false);

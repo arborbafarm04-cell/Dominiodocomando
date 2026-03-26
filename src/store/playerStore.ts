@@ -22,7 +22,7 @@ interface PlayerState extends PlayerData {
   setPlayerMoney: (money: number) => void;
   addPlayerMoney: (amount: number) => void;
   
-  loadPlayerData: (data: Partial<PlayerData>) => void;
+  loadPlayerData: (data: Partial<PlayerState>) => void;
   resetPlayer: () => void;
 }
 

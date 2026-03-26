@@ -77,7 +77,18 @@ export async function registerLocalPlayer(email: string, password: string, playe
     isGuest: false,
   };
   
-  return BaseCrudService.create(COLLECTION_ID, newPlayer);
+  const createdPlayer = await BaseCrudService.create(COLLECTION_ID, newPlayer);
+  
+  // Store current session immediately after registration
+  localStorage.setItem('currentPlayerId', playerId);
+  localStorage.setItem('currentPlayerEmail', email);
+  localStorage.setItem('playerAuthToken', JSON.stringify({
+    playerId,
+    email,
+    timestamp: new Date().toISOString(),
+  }));
+  
+  return createdPlayer;
 }
 
 export async function loginLocalPlayer(email: string, password: string) {
@@ -102,6 +113,11 @@ export async function loginLocalPlayer(email: string, password: string) {
   // Store current session
   localStorage.setItem('currentPlayerId', playerId);
   localStorage.setItem('currentPlayerEmail', email);
+  localStorage.setItem('playerAuthToken', JSON.stringify({
+    playerId,
+    email,
+    timestamp: new Date().toISOString(),
+  }));
   
   return player;
 }
@@ -109,10 +125,24 @@ export async function loginLocalPlayer(email: string, password: string) {
 export async function logoutLocalPlayer() {
   localStorage.removeItem('currentPlayerId');
   localStorage.removeItem('currentPlayerEmail');
+  localStorage.removeItem('playerAuthToken');
 }
 
 export async function getCurrentLocalPlayer() {
   const playerId = localStorage.getItem('currentPlayerId');
   if (!playerId) return null;
   return getPlayerById(playerId);
+}
+
+export async function isPlayerAuthenticated(): Promise<boolean> {
+  const token = localStorage.getItem('playerAuthToken');
+  if (!token) return false;
+  
+  try {
+    const auth = JSON.parse(token);
+    const player = await getPlayerById(auth.playerId);
+    return !!player;
+  } catch {
+    return false;
+  }
 }

@@ -4,6 +4,7 @@ import { Chrome, ShieldCheck, Eye, Play, AlertTriangle, UserPlus } from 'lucide-
 import { useNavigate } from 'react-router-dom';
 import { usePlayerStore } from '@/store/playerStore';
 import { usePlayerInitialization } from '@/hooks/usePlayerInitialization';
+import { usePlayerAuth } from '@/hooks/usePlayerAuth';
 import PlayerRegistration from '@/components/PlayerRegistration';
 
 const VIDEO_BG = 'https://video.wixstatic.com/video/50f4bf_570bf5fe87734b1cb3523fd958acce0e/720p/mp4/file.mp4';
@@ -17,7 +18,17 @@ export default function HomePage() {
   // Initialize player data
   usePlayerInitialization();
   
+  // Check for existing authentication
+  const { isAuthenticated, isLoading } = usePlayerAuth();
+  
   const playerName = usePlayerStore((state) => state.playerName);
+  
+  // Redirect to star-map if already authenticated
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate('/star-map');
+    }
+  }, [isAuthenticated, isLoading, navigate]);
 
   const phrases = [
     "COORDENADAS: 22.9068° S, 43.1729° W",
