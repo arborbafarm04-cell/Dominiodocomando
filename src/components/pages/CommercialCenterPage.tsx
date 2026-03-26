@@ -55,16 +55,18 @@ export default function CommercialCenterPage() {
   const [comercios, setComercios] = useState<Comercios>(INITIAL_COMERCIOS_DATA);
   const [playerData, setPlayerData] = useState<Players | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [operations, setOperations] = useState<CommerceOperation[]>([
-    {
-      id: 'commerce2',
-      name: 'Administradora de Bens',
-      value: 5000,
-      tax: 50,
-      duration: 18000, // 5 hours
-      isActive: false,
-    },
-  ]);
+  const [operations, setOperations] = useState<CommerceOperation[]>(
+    [
+      {
+        id: 'commerce2',
+        name: 'Administradora de Bens',
+        value: 5000,
+        tax: 50,
+        duration: 18000, // 5 hours
+        isActive: false,
+      },
+    ]
+  );
 
   const [completedOps, setCompletedOps] = useState<CompletedOperation[]>([]);
 
@@ -533,11 +535,11 @@ export default function CommercialCenterPage() {
       {/* BANNER */}
       <div className="w-full relative z-10">
         <div className="banner-container w-full flex items-center justify-center relative px-4">
-          <div className="relative w-full max-w-[1100px] mx-auto z-0">
+          <div className="relative w-full max-w-[1100px] mx-auto z-0" onClick={(e) => e.stopPropagation()}>
             <Image
               src="https://static.wixstatic.com/media/50f4bf_fd64ac461d5d41c2a6bc7639af7590ac~mv2.png"
               alt="Centro Comercial"
-              className="block h-auto w-full max-h-[600px] object-contain border-none"
+              className="block h-auto w-full max-h-[600px] object-contain border-none pointer-events-none"
             />
             <CommercialCenterHotspots onCommerceClick={openCommerceModal} />
           </div>
