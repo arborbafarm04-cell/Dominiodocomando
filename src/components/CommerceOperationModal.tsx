@@ -10,11 +10,13 @@ import {
   calcularTaxaAplicada,
 } from '@/types/comercios';
 import { ComercioData } from '@/types/comercios';
+import { Players } from '@/entities';
 
 interface CommerceOperationModalProps {
   isOpen: boolean;
   commerceId: ComercioKey | null;
   commerceData: ComercioData | null;
+  playerData?: Players;
   dirtyMoney: number;
   cleanMoney: number;
   onClose: () => void;
@@ -131,14 +133,19 @@ export default function CommerceOperationModal({
   isOpen,
   commerceId,
   commerceData,
+  playerData,
   dirtyMoney: propDirtyMoney,
   cleanMoney: propCleanMoney,
   onClose,
   onStartOperation,
   onCompleteOperation,
 }: CommerceOperationModalProps) {
-  const dirtyMoney = propDirtyMoney;
-  const cleanMoney = propCleanMoney;
+  // Use playerData if available, otherwise use props
+  const dirtyMoney = playerData?.dirtyMoney ?? propDirtyMoney;
+  const cleanMoney = playerData?.cleanMoney ?? propCleanMoney;
+  
+  // Check if player data is available
+  const playerNotFound = !playerData || !playerData._id;
 
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [isStarting, setIsStarting] = useState(false);
@@ -159,6 +166,72 @@ export default function CommerceOperationModal({
   }, [isOpen, commerceData?.emAndamento, commerceData?.horarioFim]);
 
   if (!isOpen || !commerceId || !commerceData) return null;
+
+  // Show error if player data not found
+  if (playerNotFound) {
+    return (
+      <>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-40 bg-black/85 backdrop-blur-md"
+          onClick={onClose}
+        />
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6"
+        >
+          <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-red-400/30 bg-[linear-gradient(180deg,rgba(6,12,24,0.98)_0%,rgba(12,20,36,0.98)_100%)] shadow-[0_0_60px_rgba(255,0,0,0.18)]">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,0,0,0.08),transparent_35%)]" />
+
+            <div className="relative border-b border-red-400/20 bg-black/20 px-5 py-4 md:px-8 md:py-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-red-400/70">
+                    Erro
+                  </p>
+                  <h2 className="mt-2 text-2xl md:text-3xl font-black uppercase tracking-wide text-red-200">
+                    Jogador Não Encontrado
+                  </h2>
+                </div>
+
+                <button
+                  onClick={onClose}
+                  className="rounded-full border border-red-400/20 bg-slate-900/70 p-2 text-red-300 transition hover:bg-slate-800 hover:text-red-100"
+                  aria-label="Fechar modal"
+                >
+                  <X size={22} />
+                </button>
+              </div>
+            </div>
+
+            <div className="relative px-5 py-5 md:px-8 md:py-7">
+              <div className="rounded-2xl border border-red-400/20 bg-slate-950/60 p-6 text-center">
+                <p className="text-sm text-red-300 mb-4">
+                  Não foi possível carregar os dados do jogador. Por favor, recarregue a página e tente novamente.
+                </p>
+              </div>
+            </div>
+
+            <div className="relative flex justify-end gap-3 border-t border-red-400/20 bg-black/20 px-5 py-4 md:px-8">
+              <Button
+                onClick={onClose}
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white font-black uppercase tracking-wide hover:from-red-400 hover:to-red-500"
+              >
+                Fechar
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+      </>
+    );
+  }
 
   const config = COMERCIOS_CONFIG[commerceId];
   const valorLavagem = calcularValorLavagem(commerceId, commerceData.nivelNegocio);
