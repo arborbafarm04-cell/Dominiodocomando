@@ -6,6 +6,7 @@ import { usePlayerStore } from '@/store/playerStore';
 import { usePlayerInitialization } from '@/hooks/usePlayerInitialization';
 import { usePlayerAuth } from '@/hooks/usePlayerAuth';
 import PlayerRegistration from '@/components/PlayerRegistration';
+import QuickLoginForm from '@/components/QuickLoginForm';
 
 const VIDEO_BG = 'https://video.wixstatic.com/video/50f4bf_570bf5fe87734b1cb3523fd958acce0e/720p/mp4/file.mp4';
 
@@ -129,6 +130,7 @@ export default function HomePage() {
                    >
                      <UserPlus /> Criar Perfil
                    </button>
+                   <QuickLoginForm />
                    <button 
                      onClick={() => {
                        console.log('Google login clicked');
