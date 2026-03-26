@@ -5,7 +5,7 @@ import {
   getSession,
   clearSession,
   credentialExists,
-} from "./indexedDBService";
+} from './indexedDBService';
 
 /**
  * Central Authentication Service
@@ -18,11 +18,16 @@ export interface AuthCredentials {
   playerId: string;
 }
 
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 /**
  * Validate email and password, return player ID if valid
  */
 export async function validateCredentials(email: string, password: string): Promise<string> {
-  const credential = await getCredential(email);
+  const normalizedEmail = normalizeEmail(email);
+  const credential = await getCredential(normalizedEmail);
 
   if (!credential) {
     throw new Error('Email não encontrado');
@@ -44,20 +49,23 @@ export async function registerCredentials(
   password: string,
   playerId: string
 ): Promise<void> {
-  const exists = await credentialExists(email);
+  const normalizedEmail = normalizeEmail(email);
+  const exists = await credentialExists(normalizedEmail);
+
   if (exists) {
     throw new Error('Email já registrado');
   }
 
   const hashedPassword = btoa(password);
-  await storeCredential(email, hashedPassword, playerId);
+  await storeCredential(normalizedEmail, hashedPassword, playerId);
 }
 
 /**
  * Create authenticated session
  */
 export async function createSession(playerId: string, email: string): Promise<void> {
-  await storeSession(playerId, email);
+  const normalizedEmail = normalizeEmail(email);
+  await storeSession(playerId, normalizedEmail);
 }
 
 /**
@@ -65,9 +73,13 @@ export async function createSession(playerId: string, email: string): Promise<vo
  */
 export async function getAuthSession(): Promise<AuthCredentials | null> {
   const session = await getSession();
-  if (!session) return null;
+
+  if (!session?.playerId || !session?.email) {
+    return null;
+  }
+
   return {
-    email: session.email,
+    email: normalizeEmail(session.email),
     playerId: session.playerId,
   };
 }
@@ -83,6 +95,6 @@ export async function destroySession(): Promise<void> {
  * Check if user is authenticated
  */
 export async function isAuthenticated(): Promise<boolean> {
-  const session = await getSession();
+  const session = await getAuthSession();
   return !!session;
 }
