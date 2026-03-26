@@ -19,10 +19,6 @@ interface DragCustomizationState {
   // Reset all positions
   resetAllPositions: () => void;
   resetPosition: (id: string) => void;
-
-  // Load from localStorage
-  loadPositions: () => void;
-  savePositions: () => void;
 }
 
 export const useDragCustomizationStore = create<DragCustomizationState>((set, get) => ({
@@ -45,9 +41,6 @@ export const useDragCustomizationStore = create<DragCustomizationState>((set, ge
         [id]: position,
       },
     }));
-    // Auto-save to localStorage
-    const state = get();
-    localStorage.setItem('drag-positions', JSON.stringify(state.positions));
   },
 
   getPosition: (id: string) => {
@@ -56,7 +49,6 @@ export const useDragCustomizationStore = create<DragCustomizationState>((set, ge
 
   resetAllPositions: () => {
     set({ positions: {} });
-    localStorage.removeItem('drag-positions');
   },
 
   resetPosition: (id: string) => {
@@ -65,21 +57,5 @@ export const useDragCustomizationStore = create<DragCustomizationState>((set, ge
       delete newPositions[id];
       return { positions: newPositions };
     });
-  },
-
-  loadPositions: () => {
-    const saved = localStorage.getItem('drag-positions');
-    if (saved) {
-      try {
-        set({ positions: JSON.parse(saved) });
-      } catch (e) {
-        console.error('Failed to load drag positions:', e);
-      }
-    }
-  },
-
-  savePositions: () => {
-    const state = get();
-    localStorage.setItem('drag-positions', JSON.stringify(state.positions));
   },
 }));

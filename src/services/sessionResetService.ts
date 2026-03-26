@@ -173,20 +173,6 @@ export async function resetPlayerSession() {
     console.log('  🔟 Clearing IndexedDB session data...');
     await clearSession();
 
-    // Step 11: Clear localStorage prototype states
-    console.log('  1️⃣1️⃣ Clearing localStorage...');
-    const keysToPreserve = ['theme', 'language', 'settings']; // Keep non-player data
-    const allKeys = Object.keys(localStorage);
-    allKeys.forEach((key) => {
-      if (!keysToPreserve.includes(key)) {
-        localStorage.removeItem(key);
-      }
-    });
-
-    // Step 12: Clear sessionStorage
-    console.log('  1️⃣2️⃣ Clearing sessionStorage...');
-    sessionStorage.clear();
-
     console.log('✅ Session reset complete!');
     return true;
   } catch (error) {

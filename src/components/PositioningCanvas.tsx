@@ -21,29 +21,9 @@ export default function PositioningCanvas({ children, isInspectorMode }: Positio
   const canvasRef = useRef<HTMLDivElement>(null);
   const elementRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Load positions from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('positioning-canvas-elements');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setElements(parsed);
-      } catch (e) {
-        console.error('Failed to load positions:', e);
-      }
-    }
-  }, []);
+  // ... keep existing code (state declarations) ...
 
-  // Save positions to localStorage
-  useEffect(() => {
-    const toSave = Object.entries(elements).reduce((acc, [id, el]) => {
-      acc[id] = { id: el.id, x: el.x, y: el.y, isDragging: false };
-      return acc;
-    }, {} as Record<string, any>);
-    localStorage.setItem('positioning-canvas-elements', JSON.stringify(toSave));
-  }, [elements]);
-
-  // Register child elements
+  // Initialize elements (no localStorage persistence)
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -148,7 +128,6 @@ export default function PositioningCanvas({ children, isInspectorMode }: Positio
   };
 
   const handleResetAll = () => {
-    localStorage.removeItem('positioning-canvas-elements');
     setElements({});
     window.location.reload();
   };

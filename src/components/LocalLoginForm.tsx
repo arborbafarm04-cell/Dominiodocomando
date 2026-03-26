@@ -97,7 +97,7 @@ export default function LocalLoginForm() {
       setIsLoading(true);
       
       // loginLocalPlayer now handles complete session reset internally:
-      // 1. Resets all stores and clears localStorage/sessionStorage
+      // 1. Resets all stores
       // 2. Validates credentials
       // 3. Loads player from database
       // 4. Creates authenticated session

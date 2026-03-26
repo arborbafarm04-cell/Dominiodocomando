@@ -26,18 +26,13 @@ export default function DraggableContainer({
   const containerRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<HTMLDivElement>(null);
 
-  // Load position from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem(`container-pos-${id}`);
-    if (saved) {
-      setPosition(JSON.parse(saved));
-    }
-  }, [id]);
+  // ... keep existing code (state declarations) ...
 
-  // Save position to localStorage
+  // Load position from state (no localStorage)
   useEffect(() => {
-    localStorage.setItem(`container-pos-${id}`, JSON.stringify(position));
-  }, [position, id]);
+    // Positions are managed in-memory by Zustand store
+    // No persistence between sessions
+  }, [id]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!dragRef.current) return;

@@ -13,16 +13,8 @@ export default function CharacterDialog() {
 
   useEffect(() => {
     setIsMounted(true);
-    const savedCustomName = localStorage.getItem('customPlayerName');
-    if (savedCustomName) {
-      setCustomPlayerName(savedCustomName);
-    }
-    // Auto-open dialog on first visit
-    const hasVisited = localStorage.getItem('characterDialogVisited');
-    if (!hasVisited) {
-      setIsOpen(true);
-      localStorage.setItem('characterDialogVisited', 'true');
-    }
+    // Dialog opens on first mount (no localStorage persistence)
+    setIsOpen(true);
   }, []);
 
   const handleViewLuxury = () => {
