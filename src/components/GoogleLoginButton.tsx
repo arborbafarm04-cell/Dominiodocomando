@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { useMember } from '@/integrations';
 import { useNavigate } from 'react-router-dom';
 import { registerPlayer } from '@/services/playerService';
+import { resetPlayerSession } from '@/services/sessionResetService';
+import { usePlayerStore } from '@/store/playerStore';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export default function GoogleLoginButton() {
   const { member, actions } = useMember();
   const navigate = useNavigate();
+  const { loadPlayerData } = usePlayerStore();
   const [isLoading, setIsLoading] = useState(false);
   const [hasRegistered, setHasRegistered] = useState(false);
 
@@ -28,10 +31,30 @@ export default function GoogleLoginButton() {
       if (member && member.loginEmail && !hasRegistered) {
         try {
           setHasRegistered(true);
+          
+          // Reset old session before registering new player
+          console.log('🔄 Resetting session before Google login registration...');
+          await resetPlayerSession();
+          
           const playerName = member.contact?.firstName || member.profile?.nickname || 'Player';
           const nickname = member.profile?.nickname || member.contact?.firstName || 'Anonymous';
 
-          await registerPlayer(member.loginEmail, playerName, nickname);
+          const player = await registerPlayer(member.loginEmail, playerName, nickname);
+          
+          // Load player data into store for UI synchronization
+          loadPlayerData({
+            playerId: player._id,
+            playerName: player.playerName || 'Player',
+            level: player.level || 1,
+            progress: player.progress || 0,
+            isGuest: player.isGuest || false,
+            profilePicture: player.profilePicture || null,
+            barracoLevel: player.barracoLevel || 1,
+            cleanMoney: player.cleanMoney || 0,
+            dirtyMoney: player.dirtyMoney || 0,
+            hasInitialized: true,
+          });
+          
           // Redirect to game page after successful registration
           navigate('/star-map');
         } catch (error) {
@@ -42,7 +65,7 @@ export default function GoogleLoginButton() {
     };
 
     handlePlayerRegistration();
-  }, [member, hasRegistered, navigate]);
+  }, [member, hasRegistered, navigate, loadPlayerData]);
 
   return (
     <Button

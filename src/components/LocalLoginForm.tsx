@@ -95,13 +95,15 @@ export default function LocalLoginForm() {
 
     try {
       setIsLoading(true);
-      // Step 1: Validate credentials and load player from database
+      
+      // loginLocalPlayer now handles complete session reset internally:
+      // 1. Resets all stores and clears localStorage/sessionStorage
+      // 2. Validates credentials
+      // 3. Loads player from database
+      // 4. Creates authenticated session
       const player = await loginLocalPlayer(email, password);
       
-      // Step 2: Clear any previous session data
-      resetPlayer();
-      
-      // Step 3: Load player data into playerStore
+      // Load player data into playerStore for UI synchronization
       loadPlayerData({
         playerId: player._id,
         playerName: player.playerName || 'Player',
@@ -121,6 +123,7 @@ export default function LocalLoginForm() {
         navigate('/star-map');
       }, 1500);
     } catch (err: any) {
+      console.error('Login error:', err);
       setError(err.message || 'Erro ao fazer login');
     } finally {
       setIsLoading(false);

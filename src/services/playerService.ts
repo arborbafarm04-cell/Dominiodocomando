@@ -13,6 +13,7 @@ import {
   destroySession,
   getAuthSession,
 } from "./authService";
+import { resetPlayerSession } from "./sessionResetService";
 
 const COLLECTION_ID = "players";
 
@@ -95,27 +96,38 @@ export async function registerLocalPlayer(email: string, password: string, playe
 
 /**
  * REFACTORED: Login player with email/password
- * Step 1: Validate email and password (returns player _id)
- * Step 2: Load player data from database
- * Step 3: Create authenticated session
- * Step 4: Clear any previous session data
+ * 
+ * CRITICAL SESSION RESET ORDER:
+ * Step 1: Reset old session (clear all stores, localStorage, IndexedDB)
+ * Step 2: Validate email and password (returns player _id)
+ * Step 3: Load player data from database
+ * Step 4: Create authenticated session
+ * Step 5: Sync screen state
  */
 export async function loginLocalPlayer(email: string, password: string) {
-  // Step 1: Validate email and password (returns player _id)
+  // Step 1: RESET OLD SESSION - Clear all player-related state
+  // This prevents leftover state from previous player from contaminating new session
+  console.log('🔄 Resetting old session before login...');
+  await resetPlayerSession();
+  
+  // Step 2: Validate email and password (returns player _id)
+  console.log('🔐 Validating credentials...');
   const playerId = await validateCredentials(email, password);
   
-  // Step 2: Load player data from database
+  // Step 3: Load player data from database
+  console.log('📥 Loading player data from database...');
   const player = await getPlayerById(playerId);
   
   if (!player) {
     throw new Error('Jogador não encontrado no banco de dados');
   }
   
-  // Step 3: Create authenticated session
+  // Step 4: Create authenticated session
+  console.log('🔑 Creating authenticated session...');
   await createSession(playerId, email);
   
-  // Step 4: Clear any previous session data (handled by createSession)
-  
+  // Step 5: Return player data (caller will sync screen state)
+  console.log('✅ Login successful - player session ready');
   return player;
 }
 
