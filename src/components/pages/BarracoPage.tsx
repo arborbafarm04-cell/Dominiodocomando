@@ -492,4 +492,4 @@ export default function BarracoPage() {
       <Footer />
     </div>
   );
-}
+} 
