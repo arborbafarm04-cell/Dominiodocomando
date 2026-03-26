@@ -45,7 +45,7 @@ export default function MoneyLaunderingBusiness({
     }
   }, [activeOp?.businessId, activeOp?.status]);
 
-  // Update timer every 100ms
+  // Update timer every 100ms - FIXED: Optimized dependencies
   useEffect(() => {
     if (!isProcessing || !activeOp) return;
 
@@ -63,7 +63,7 @@ export default function MoneyLaunderingBusiness({
     }, 100); // Update every 100ms for smooth animation
 
     return () => clearInterval(interval);
-  }, [isProcessing, activeOp]);
+  }, [isProcessing, activeOp?.businessId, activeOp?.status]);
 
   const handleLaunder = () => {
     if (!canOperate || isProcessing || launderAmount <= 0 || launderAmount > currentMaxValue) {

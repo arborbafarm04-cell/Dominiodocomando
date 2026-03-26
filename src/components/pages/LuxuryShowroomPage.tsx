@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Image } from '@/components/ui/image';
 
@@ -164,8 +164,13 @@ export default function LuxuryShowroomPage() {
   const barracoLevel = usePlayerStore((s) => s.barracoLevel);
   const playerLevel = usePlayerStore((s) => s.level);
   const setBarracoLevel = usePlayerStore((s) => s.setBarracoLevel);
+  const initRef = useRef(false); // Prevent double initialization
 
   useEffect(() => {
+    // Skip if already initialized
+    if (initRef.current) return;
+    initRef.current = true;
+
     const loadPlayerData = async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);

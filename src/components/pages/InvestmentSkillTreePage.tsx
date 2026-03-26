@@ -128,12 +128,15 @@ export default function InvestmentSkillTreePage() {
     }
   };
 
-  // Update timers for upgrading skills
+  // Update timers for upgrading skills - FIXED: Reduced frequency and optimized deps
   useEffect(() => {
     const interval = setInterval(() => {
       const newTimers: Record<string, number> = {};
+      let hasActiveUpgrades = false;
+      
       Object.values(skills).forEach((skill) => {
         if (skill.upgrading && skill.endTime) {
+          hasActiveUpgrades = true;
           const remaining = Math.max(0, skill.endTime - Date.now());
           newTimers[skill.id] = remaining;
 
@@ -147,8 +150,12 @@ export default function InvestmentSkillTreePage() {
           }
         }
       });
-      setUpgradeTimers(newTimers);
-    }, 100);
+      
+      // Only update if there are active upgrades
+      if (hasActiveUpgrades) {
+        setUpgradeTimers(newTimers);
+      }
+    }, 500); // Changed from 100ms to 500ms
 
     return () => clearInterval(interval);
   }, [skills, finalizeUpgrade]);

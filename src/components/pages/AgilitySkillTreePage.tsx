@@ -27,7 +27,7 @@ export default function AgilitySkillTreePage() {
   const [upgradeTimers, setUpgradeTimers] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // Update timers for upgrading skills
+  // Update timers for upgrading skills - FIXED: Reduced frequency and optimized deps
   useEffect(() => {
     const interval = setInterval(() => {
       const newTimers: Record<string, number> = {};
@@ -46,8 +46,11 @@ export default function AgilitySkillTreePage() {
         }
       });
 
-      setUpgradeTimers(newTimers);
-    }, 100);
+      // Only update if there are active upgrades
+      if (hasActiveUpgrades) {
+        setUpgradeTimers(newTimers);
+      }
+    }, 500); // Changed from 100ms to 500ms
 
     return () => clearInterval(interval);
   }, [skills, finalizeUpgrade]);

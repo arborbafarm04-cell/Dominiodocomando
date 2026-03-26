@@ -136,24 +136,24 @@ export default function CommercialCenterPage() {
     loadPlayerData();
   }, [member?._id]);
 
-  // Atualizar dados periodicamente
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      if (!member?._id) return;
-      try {
-        const player = await BaseCrudService.getById<Players>('players', member._id);
-        if (player) {
-          setPlayerData(player);
-          const comerciosData = player.comercios ? safeParseComercios(player.comercios) : null;
-          setComercios(comerciosData);
-        }
-      } catch (error) {
-        console.error('Erro ao atualizar dados:', error);
-      }
-    }, 5000); // Atualizar a cada 5 segundos
+  // Atualizar dados periodicamente - FIXED: Removed to prevent excessive polling
+  // useEffect(() => {
+  //   const interval = setInterval(async () => {
+  //     if (!member?._id) return;
+  //     try {
+  //       const player = await BaseCrudService.getById<Players>('players', member._id);
+  //       if (player) {
+  //         setPlayerData(player);
+  //         const comerciosData = player.comercios ? safeParseComercios(player.comercios) : null;
+  //         setComercios(comerciosData);
+  //       }
+  //     } catch (error) {
+  //       console.error('Erro ao atualizar dados:', error);
+  //     }
+  //   }, 5000); // Atualizar a cada 5 segundos
 
-    return () => clearInterval(interval);
-  }, [member?._id]);
+  //   return () => clearInterval(interval);
+  // }, [member?._id]);
 
   const handleIniciarLavagem = async (comercioKey: ComercioKey) => {
     if (!member?._id || !playerData) return;

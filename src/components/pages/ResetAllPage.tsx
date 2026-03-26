@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
 
@@ -16,8 +16,13 @@ export default function ResetAllPage() {
   const { reset: resetGameStore } = useGameStore();
   const { setLevel: setPlayerLevel } = usePlayerStore();
   const { reset: resetBriberyStore } = useBriberyStore();
+  const initRef = useRef(false); // Prevent double initialization
 
   useEffect(() => {
+    // Skip if already initialized
+    if (initRef.current) return;
+    initRef.current = true;
+
     resetAll();
   }, []);
 

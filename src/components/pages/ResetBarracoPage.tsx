@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
 
@@ -13,8 +13,13 @@ export default function ResetBarracoPage() {
   const [resetting, setResetting] = useState(false);
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
+  const initRef = useRef(false); // Prevent double initialization
 
   useEffect(() => {
+    // Skip if already initialized
+    if (initRef.current) return;
+    initRef.current = true;
+
     resetBarraco();
   }, []);
 

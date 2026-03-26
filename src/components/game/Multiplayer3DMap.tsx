@@ -667,7 +667,7 @@ export default function Multiplayer3DMap() {
     loadPlayersAndBarracos();
   }, []);
 
-  // Real-time player updates (polling for now, can be replaced with WebSocket)
+  // Real-time player updates (polling for now, can be replaced with WebSocket) - FIXED: Increased interval to reduce load
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
@@ -730,7 +730,7 @@ export default function Multiplayer3DMap() {
       } catch (error) {
         console.error('Error updating players:', error);
       }
-    }, 5000); // Update every 5 seconds
+    }, 15000); // Update every 15 seconds (increased from 5 seconds)
 
     return () => clearInterval(interval);
   }, []);

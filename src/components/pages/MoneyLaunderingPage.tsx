@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMember } from '@/integrations';
 import { BaseCrudService } from '@/integrations';
@@ -18,8 +18,13 @@ export default function MoneyLaunderingPage() {
   const [businesses, setBusinesses] = useState<MoneyLaunderingBusinesses[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const initRef = useRef(false); // Prevent double initialization
 
   useEffect(() => {
+    // Skip if already initialized
+    if (initRef.current) return;
+    initRef.current = true;
+
     const loadData = async () => {
       try {
         setIsLoading(true);

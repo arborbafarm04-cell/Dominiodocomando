@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
 import { Image } from '@/components/ui/image';
@@ -37,6 +37,7 @@ export default function BarracoPage() {
   const [previousLevel, setPreviousLevel] = useState<number | null>(null);
   const { setLevel, setBarracoLevel } = usePlayerStore();
   const { setBarracoLevel: setSpinVaultBarracoLevel } = useSpinVaultStore();
+  const initRef = useRef(false); // Prevent double initialization
 
   // Get player ID from localStorage or URL
   const getPlayerId = () => {
@@ -47,6 +48,10 @@ export default function BarracoPage() {
   };
 
   useEffect(() => {
+    // Skip if already initialized
+    if (initRef.current) return;
+    initRef.current = true;
+
     loadPlayerData();
   }, []);
 

@@ -30,22 +30,24 @@ export const useSpinVault = () => {
       setShowNotification(true);
 
       // Hide notification after 2 seconds
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         setShowNotification(false);
       }, 2000);
+      
+      return () => clearTimeout(timeoutId);
     }, 60000);
 
     return () => clearInterval(interval);
   }, [vaultBarracoLevel, addSpins]);
 
-  // Update countdown timer
+  // Update countdown timer - FIXED: Removed getTimeUntilNextGain from deps to prevent infinite loops
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeUntilNextGain(getTimeUntilNextGain());
-    }, 100);
+    }, 1000); // Changed from 100ms to 1000ms to reduce CPU usage
 
     return () => clearInterval(interval);
-  }, [getTimeUntilNextGain]);
+  }, []);
 
   const formatTime = (ms: number) => {
     const seconds = Math.ceil(ms / 1000);

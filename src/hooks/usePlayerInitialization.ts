@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useMember } from '@/integrations';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
@@ -8,11 +8,14 @@ import { usePlayerStore } from '@/store/playerStore';
 export const usePlayerInitialization = () => {
   const { member } = useMember();
   const { setPlayerName, setLevel, setProgress, setProfilePicture, loadPlayerData } = usePlayerStore();
+  const initRef = useRef(false); // Prevent double initialization
 
   useEffect(() => {
-    const initializePlayer = async () => {
-      if (!member?._id) return;
+    // Skip if already initialized or no member
+    if (initRef.current || !member?._id) return;
+    initRef.current = true;
 
+    const initializePlayer = async () => {
       try {
         let player = await BaseCrudService.getById<Players>('players', member._id);
 
