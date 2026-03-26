@@ -13,6 +13,7 @@ import CommerceOperationModal from '@/components/CommerceOperationModal';
 import { usePlayerAuth } from '@/hooks/usePlayerAuth';
 import { usePlayerStore } from '@/store/playerStore';
 import { loadPlayerFromDatabase } from '@/services/playerDataService';
+import { syncPlayerFinances } from '@/services/playerEconomyService';
 
 const INITIAL_COMERCIOS_DATA = getInitialComercioData();
 
@@ -54,7 +55,7 @@ interface CompletedOperation {
 export default function CommercialCenterPage() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: isAuthLoading, playerData: authPlayerData } = usePlayerAuth();
-  const { playerId, dirtyMoney, cleanMoney, setDirtyMoney, setCleanMoney } = usePlayerStore();
+  const { playerId } = usePlayerStore();
   const [comercios, setComercios] = useState<Comercios>(INITIAL_COMERCIOS_DATA);
   const [playerData, setPlayerData] = useState<Players | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,6 +94,8 @@ export default function CommercialCenterPage() {
         
         // Load from database and sync to store
         await loadPlayerFromDatabase(playerId);
+        // Sync finances from database to store
+        await syncPlayerFinances(playerId);
         
         let player = await BaseCrudService.getById<Players>('players', playerId);
         
@@ -117,13 +120,13 @@ export default function CommercialCenterPage() {
           await BaseCrudService.create('players', newPlayer);
           setPlayerData(newPlayer);
           setComercios(initialComerciosData);
-          setDirtyMoney(newPlayer.dirtyMoney || 0);
-          setCleanMoney(newPlayer.cleanMoney || 0);
+          // Sync to store
+          await syncPlayerFinances(playerId);
           console.log('✅ Jogador criado com sucesso');
         } else {
           setPlayerData(player);
-          setDirtyMoney(player.dirtyMoney || 0);
-          setCleanMoney(player.cleanMoney || 0);
+          // Sync to store
+          await syncPlayerFinances(playerId);
           const comerciosData = player.comercios ? safeParseComercios(player.comercios) : null;
           if (!comerciosData) {
             console.warn('⚠️ Comercios não encontrados, inicializando...');
@@ -145,11 +148,12 @@ export default function CommercialCenterPage() {
       }
     };
     loadPlayerData();
-  }, [authPlayerData?._id, isAuthenticated, setDirtyMoney, setCleanMoney]);
+  }, [authPlayerData?._id, isAuthenticated]);
 
   const handleIniciarLavagem = async (comercioKey: ComercioKey) => {
     if (!authPlayerData?._id || !playerData) return;
     try {
+      const { dirtyMoney } = usePlayerStore.getState();
       const resultado = await comerciosService.iniciarLavagem(
         authPlayerData._id,
         comercioKey,
@@ -158,11 +162,10 @@ export default function CommercialCenterPage() {
       if (resultado.sucesso) {
         // Reload from database and sync to store
         await loadPlayerFromDatabase(authPlayerData._id);
+        await syncPlayerFinances(authPlayerData._id);
         const player = await BaseCrudService.getById<Players>('players', authPlayerData._id);
         if (player) {
           setPlayerData(player);
-          setDirtyMoney(player.dirtyMoney || 0);
-          setCleanMoney(player.cleanMoney || 0);
           const comerciosData = player.comercios ? JSON.parse(player.comercios) : null;
           setComercios(comerciosData);
         }
@@ -182,11 +185,10 @@ export default function CommercialCenterPage() {
       if (resultado.sucesso) {
         // Reload from database and sync to store
         await loadPlayerFromDatabase(authPlayerData._id);
+        await syncPlayerFinances(authPlayerData._id);
         const player = await BaseCrudService.getById<Players>('players', authPlayerData._id);
         if (player) {
           setPlayerData(player);
-          setDirtyMoney(player.dirtyMoney || 0);
-          setCleanMoney(player.cleanMoney || 0);
           const comerciosData = player.comercios ? JSON.parse(player.comercios) : null;
           setComercios(comerciosData);
         }

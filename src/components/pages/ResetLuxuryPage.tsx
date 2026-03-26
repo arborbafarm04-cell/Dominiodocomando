@@ -5,12 +5,13 @@ import { AlertTriangle, RotateCcw, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useLuxuryShopStore } from '@/store/luxuryShopStore';
 import { usePlayerStore } from '@/store/playerStore';
+import { resetPlayerFinances } from '@/services/playerEconomyService';
 
 export default function ResetLuxuryPage() {
   const [isResetting, setIsResetting] = useState(false);
   const [resetComplete, setResetComplete] = useState(false);
   const { purchasedItems } = useLuxuryShopStore();
-  const { dirtyMoney, setDirtyMoney } = usePlayerStore();
+  const { playerId } = usePlayerStore();
 
   const handleResetLuxury = async () => {
     setIsResetting(true);
@@ -19,8 +20,10 @@ export default function ResetLuxuryPage() {
       const store = useLuxuryShopStore.getState();
       store.purchasedItems = [];
       
-      // Reset dirty money to 0
-      setDirtyMoney(0);
+      // Reset dirty money to 0 using playerEconomyService
+      if (playerId) {
+        await resetPlayerFinances(playerId, 0, 0);
+      }
 
       setResetComplete(true);
       

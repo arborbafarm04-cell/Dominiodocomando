@@ -40,14 +40,10 @@ interface PlayerState extends PlayerData {
   setProfilePicture: (url: string | null) => void;
   setBarracoLevel: (level: number) => void;
   
-  // Unified money system methods
-  setCleanMoney: (money: number) => void;
-  addCleanMoney: (amount: number) => void;
-  removeCleanMoney: (amount: number) => void;
-  
-  setDirtyMoney: (money: number) => void;
-  addDirtyMoney: (amount: number) => void;
-  removeDirtyMoney: (amount: number) => void;
+  // ⚠️ INTERNAL ONLY: Money sync methods (use playerEconomyService for all operations)
+  // These are called by playerEconomyService to sync state after DB updates
+  _setCleanMoney: (money: number) => void;
+  _setDirtyMoney: (money: number) => void;
   
   // Game state methods (migrated from useGameStore)
   setSpins: (spins: number) => void;
@@ -111,64 +107,58 @@ export const usePlayerStore = create<PlayerState>()(
       setIsGuest: (isGuest: boolean) => set({ isGuest }),
       setProfilePicture: (url: string | null) => set({ profilePicture: url }),
       setBarracoLevel: (level: number) => set({ barracoLevel: Math.max(1, level) }),
-      
-      // Unified clean money methods
-      setCleanMoney: (money: number) => set({ cleanMoney: Math.max(0, money) }),
-      addCleanMoney: (amount: number) => set((state) => ({ cleanMoney: Math.max(0, state.cleanMoney + amount) })),
-      removeCleanMoney: (amount: number) => set((state) => ({ cleanMoney: Math.max(0, state.cleanMoney - amount) })),
-      
-      // Unified dirty money methods
-      setDirtyMoney: (money: number) => set({ dirtyMoney: Math.max(0, money) }),
-      addDirtyMoney: (amount: number) => set((state) => ({ dirtyMoney: Math.max(0, state.dirtyMoney + amount) })),
-      removeDirtyMoney: (amount: number) => set((state) => ({ dirtyMoney: Math.max(0, state.dirtyMoney - amount) })),
-      
-      // Game state methods
-      setSpins: (spins) => set({ spins }),
-      addSpins: (amount: number) => set((state) => ({ spins: state.spins + amount })),
-      subtractSpins: (amount: number) => set((state) => ({ spins: Math.max(0, state.spins - amount) })),
-      setMultiplier: (multiplier) => set({ multiplier }),
-      setHasInitialized: (initialized) => set({ hasInitialized: initialized }),
-      setIsSpinning: (spinning) => set({ isSpinning: spinning }),
-      setLastResult: (result) => set({ lastResult: result }),
-      setPlayers: (players) => set({ players }),
-      addPlayer: (player) => set((state) => ({
-        players: { ...state.players, [player.playerId || player._id]: player }
-      })),
-      updatePlayer: (playerId, updates) => set((state) => ({
-        players: {
-          ...state.players,
-          [playerId]: { ...state.players[playerId], ...updates }
-        }
-      })),
-      
-      // Spin Vault methods (consolidated from spinVaultStore)
-      setLastGainTime: (time: number) => set({ lastGainTime: time }),
-      updateLastGainTime: () => set({ lastGainTime: Date.now() }),
-      getTimeUntilNextGain: () => {
-        const state = usePlayerStore.getState();
-        const timeSinceLastGain = Date.now() - state.lastGainTime;
-        const timeUntilNextGain = 60000 - (timeSinceLastGain % 60000);
-        return Math.max(0, timeUntilNextGain);
-      },
-      
-      // Luxury items methods (consolidated from localStorage)
-      setOwnedLuxuryItems: (itemIds: string[]) => set({ ownedLuxuryItemIds: itemIds }),
-      addOwnedLuxuryItem: (itemId: string) => set((state) => {
-        if (!state.ownedLuxuryItemIds.includes(itemId)) {
-          return { ownedLuxuryItemIds: [...state.ownedLuxuryItemIds, itemId] };
-        }
-        return state;
-      }),
-      isLuxuryItemOwned: (itemId: string) => {
-        const state = usePlayerStore.getState();
-        return state.ownedLuxuryItemIds.includes(itemId);
-      },
-      
-      loadPlayerData: (data: Partial<PlayerState>) => set(data),
-      resetPlayer: () => set({
-        ...initialState,
-        level: 1,
-      }),
+       
+       // ⚠️ INTERNAL ONLY: Money sync methods (called by playerEconomyService)
+       _setCleanMoney: (money: number) => set({ cleanMoney: Math.max(0, money) }),
+       _setDirtyMoney: (money: number) => set({ dirtyMoney: Math.max(0, money) }),
+       
+       // Game state methods
+       setSpins: (spins) => set({ spins }),
+       addSpins: (amount: number) => set((state) => ({ spins: state.spins + amount })),
+       subtractSpins: (amount: number) => set((state) => ({ spins: Math.max(0, state.spins - amount) })),
+       setMultiplier: (multiplier) => set({ multiplier }),
+       setHasInitialized: (initialized) => set({ hasInitialized: initialized }),
+       setIsSpinning: (spinning) => set({ isSpinning: spinning }),
+       setLastResult: (result) => set({ lastResult: result }),
+       setPlayers: (players) => set({ players }),
+       addPlayer: (player) => set((state) => ({
+         players: { ...state.players, [player.playerId || player._id]: player }
+       })),
+       updatePlayer: (playerId, updates) => set((state) => ({
+         players: {
+           ...state.players,
+           [playerId]: { ...state.players[playerId], ...updates }
+         }
+       })),
+       
+       // Spin Vault methods (consolidated from spinVaultStore)
+       setLastGainTime: (time: number) => set({ lastGainTime: time }),
+       updateLastGainTime: () => set({ lastGainTime: Date.now() }),
+       getTimeUntilNextGain: () => {
+         const state = usePlayerStore.getState();
+         const timeSinceLastGain = Date.now() - state.lastGainTime;
+         const timeUntilNextGain = 60000 - (timeSinceLastGain % 60000);
+         return Math.max(0, timeUntilNextGain);
+       },
+       
+       // Luxury items methods (consolidated from localStorage)
+       setOwnedLuxuryItems: (itemIds: string[]) => set({ ownedLuxuryItemIds: itemIds }),
+       addOwnedLuxuryItem: (itemId: string) => set((state) => {
+         if (!state.ownedLuxuryItemIds.includes(itemId)) {
+           return { ownedLuxuryItemIds: [...state.ownedLuxuryItemIds, itemId] };
+         }
+         return state;
+       }),
+       isLuxuryItemOwned: (itemId: string) => {
+         const state = usePlayerStore.getState();
+         return state.ownedLuxuryItemIds.includes(itemId);
+       },
+       
+       loadPlayerData: (data: Partial<PlayerState>) => set(data),
+       resetPlayer: () => set({
+         ...initialState,
+         level: 1,
+       }),
     }),
     {
       name: 'player-store',
