@@ -8,9 +8,8 @@ interface PlayerData {
   isGuest: boolean;
   profilePicture: string | null;
   barracoLevel: number;
-  playerMoney: number;
-  cleanMoney: number;
-  dirtyMoney: number;
+  cleanMoney: number; // Unified money system - clean money from legitimate sources
+  dirtyMoney: number; // Unified money system - dirty money from illegal sources
 }
 
 interface PlayerState extends PlayerData {
@@ -21,12 +20,15 @@ interface PlayerState extends PlayerData {
   setIsGuest: (isGuest: boolean) => void;
   setProfilePicture: (url: string | null) => void;
   setBarracoLevel: (level: number) => void;
-  setPlayerMoney: (money: number) => void;
-  addPlayerMoney: (amount: number) => void;
+  
+  // Unified money system methods
   setCleanMoney: (money: number) => void;
   addCleanMoney: (amount: number) => void;
+  removeCleanMoney: (amount: number) => void;
+  
   setDirtyMoney: (money: number) => void;
   addDirtyMoney: (amount: number) => void;
+  removeDirtyMoney: (amount: number) => void;
   
   loadPlayerData: (data: Partial<PlayerState>) => void;
   resetPlayer: () => void;
@@ -40,9 +42,8 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   isGuest: false,
   profilePicture: null,
   barracoLevel: 1,
-  playerMoney: 50000,
-  cleanMoney: 0,
-  dirtyMoney: 10000000000,
+  cleanMoney: 1000000000, // Unified: clean money
+  dirtyMoney: 0, // Unified: dirty money
   
   setPlayerId: (id: string) => set({ playerId: id }),
   setPlayerName: (name: string) => set({ playerName: name }),
@@ -51,12 +52,16 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   setIsGuest: (isGuest: boolean) => set({ isGuest }),
   setProfilePicture: (url: string | null) => set({ profilePicture: url }),
   setBarracoLevel: (level: number) => set({ barracoLevel: Math.max(1, level) }),
-  setPlayerMoney: (money: number) => set({ playerMoney: Math.max(0, money) }),
-  addPlayerMoney: (amount: number) => set((state) => ({ playerMoney: Math.max(0, state.playerMoney + amount) })),
+  
+  // Unified clean money methods
   setCleanMoney: (money: number) => set({ cleanMoney: Math.max(0, money) }),
   addCleanMoney: (amount: number) => set((state) => ({ cleanMoney: Math.max(0, state.cleanMoney + amount) })),
+  removeCleanMoney: (amount: number) => set((state) => ({ cleanMoney: Math.max(0, state.cleanMoney - amount) })),
+  
+  // Unified dirty money methods
   setDirtyMoney: (money: number) => set({ dirtyMoney: Math.max(0, money) }),
   addDirtyMoney: (amount: number) => set((state) => ({ dirtyMoney: Math.max(0, state.dirtyMoney + amount) })),
+  removeDirtyMoney: (amount: number) => set((state) => ({ dirtyMoney: Math.max(0, state.dirtyMoney - amount) })),
   
   loadPlayerData: (data: Partial<PlayerState>) => set(data),
   resetPlayer: () => set({
@@ -67,8 +72,7 @@ export const usePlayerStore = create<PlayerState>((set) => ({
     isGuest: false,
     profilePicture: null,
     barracoLevel: 1,
-    playerMoney: 50000,
-    cleanMoney: 0,
-    dirtyMoney: 10000000000,
+    cleanMoney: 1000000000,
+    dirtyMoney: 0,
   }),
 }));

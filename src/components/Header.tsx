@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Image } from '@/components/ui/image';
-import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
-import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
 import { usePlayerStore } from '@/store/playerStore';
 import { useSpinVault } from '@/hooks/useSpinVault';
 import { useNavigate } from 'react-router-dom';
@@ -38,9 +36,7 @@ function Stat({ label, value }: StatProps) {
 }
 
 export default function Header() {
-  const { dirtyMoney } = useDirtyMoneyStore();
-  const { cleanMoney } = useCleanMoneyStore();
-  const { playerName, level, playerId } = usePlayerStore();
+  const { dirtyMoney, cleanMoney, playerName, level, playerId } = usePlayerStore();
   const { spins, timeUntilNextGain, formatTime } = useSpinVault();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);

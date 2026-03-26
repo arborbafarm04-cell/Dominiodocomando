@@ -1,8 +1,7 @@
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
 import { Comercios, ComercioKey, getInitialComercioData, COMERCIOS_CONFIG, calcularValorLavagem, calcularTempoLavagem, calcularTaxaAplicada } from '@/types/comercios';
-import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
-import { useCleanMoneyStore } from '@/store/cleanMoneyStore';
+import { usePlayerStore } from '@/store/playerStore';
 
 export const comerciosService = {
   async getPlayerComercios(playerId: string): Promise<Comercios> {
@@ -92,8 +91,8 @@ export const comerciosService = {
       });
 
       // Atualizar store de dinheiro sujo
-      const dirtyMoneyStore = useDirtyMoneyStore.getState();
-      dirtyMoneyStore.setDirtyMoney(novosDirtyMoney);
+      const playerStore = usePlayerStore.getState();
+      playerStore.setDirtyMoney(novosDirtyMoney);
 
       console.log('✅ [iniciarLavagem] Lavagem iniciada com sucesso');
       return { sucesso: true, mensagem: 'Lavagem iniciada com sucesso' };
@@ -153,8 +152,8 @@ export const comerciosService = {
       });
 
       // Atualizar store de dinheiro limpo
-      const cleanMoneyStore = useCleanMoneyStore.getState();
-      cleanMoneyStore.setCleanMoney(novoCleanMoney);
+      const playerStore = usePlayerStore.getState();
+      playerStore.setCleanMoney(novoCleanMoney);
 
       console.log('✅ [finalizarLavagem] Lavagem finalizada com sucesso');
       return { sucesso: true, cleanMoneyGanho, mensagem: 'Lavagem finalizada com sucesso' };
@@ -203,8 +202,8 @@ export const comerciosService = {
       });
 
       // Atualizar store de dinheiro limpo
-      const cleanMoneyStore = useCleanMoneyStore.getState();
-      cleanMoneyStore.setCleanMoney(novoCleanMoney);
+      const playerStore = usePlayerStore.getState();
+      playerStore.setCleanMoney(novoCleanMoney);
 
       return { sucesso: true, mensagem: 'Capacidade atualizada com sucesso' };
     } catch (error) {
@@ -252,8 +251,8 @@ export const comerciosService = {
       });
 
       // Atualizar store de dinheiro limpo
-      const cleanMoneyStore = useCleanMoneyStore.getState();
-      cleanMoneyStore.setCleanMoney(novoCleanMoney);
+      const playerStore = usePlayerStore.getState();
+      playerStore.setCleanMoney(novoCleanMoney);
 
       return { sucesso: true, mensagem: 'Eficiência atualizada com sucesso' };
     } catch (error) {

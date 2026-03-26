@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Image } from '@/components/ui/image';
 import { useGameStore } from '@/store/gameStore';
-import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
 import { useSpinVaultStore } from '@/store/spinVaultStore';
 import { usePlayerStore } from '@/store/playerStore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -330,7 +329,7 @@ function SlotsDisplay() {
     setIsSpinning,
   } = useGameStore();
 
-  const { dirtyMoney, setDirtyMoney } = useDirtyMoneyStore();
+  const { dirtyMoney, setDirtyMoney } = usePlayerStore();
   const [slots, setSlots] = useState([0, 1, 2]);
   const [spinningIndices, setSpinningIndices] = useState([false, false, false]);
   const [resultMessage, setResultMessage] = useState('');

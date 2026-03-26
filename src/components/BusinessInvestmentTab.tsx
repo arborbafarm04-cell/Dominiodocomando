@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BaseCrudService } from '@/integrations';
 import { useBusinessInvestmentStore } from '@/store/businessInvestmentStore';
-import { useDirtyMoneyStore } from '@/store/dirtyMoneyStore';
+import { usePlayerStore } from '@/store/playerStore';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
@@ -31,7 +31,7 @@ export default function BusinessInvestmentTab() {
   const [upgradeTimers, setUpgradeTimers] = useState<Record<string, number>>({});
   const [completedUpgrades, setCompletedUpgrades] = useState<Set<string>>(new Set());
 
-  const { dirtyMoney } = useDirtyMoneyStore();
+  const { dirtyMoney } = usePlayerStore();
   const {
     upgrades: upgradeStates,
     upgradeBusinessSkill,
