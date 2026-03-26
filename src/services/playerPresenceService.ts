@@ -1,4 +1,11 @@
-import { BaseCrudService } from '@/integrations';
+import {
+  updatePlayerPresence as updateMultiplayerPresence,
+  getPlayerPresence as getMultiplayerPlayerPresence,
+  getOnlinePlayers,
+  getPlayersInLocation,
+  setPlayerOffline as setMultiplayerPlayerOffline,
+  getTotalOnlinePlayersCount,
+} from '@/services/multiplayerPresenceService';
 
 export interface MapPosition {
   x: number;
@@ -14,6 +21,39 @@ export interface PlayerPresenceData {
   complexStatus?: string;
 }
 
+type PresenceStatus = 'online' | 'offline' | 'away';
+
+function toPresenceStatus(
+  status: PlayerPresenceData['status'] | 'online' | 'offline' | 'away'
+): PresenceStatus {
+  if (status === 'offline') return 'offline';
+  if (status === 'idle') return 'away';
+  return 'online';
+}
+
+function serializeMapPosition(position: MapPosition): string {
+  return `${position.complexo}:${position.area || 'default'}:${position.x},${position.y}`;
+}
+
+function parseMapPositionString(mapPosition: string): MapPosition {
+  const [complexo = 'unknown', area = 'default', coords = '0,0'] = mapPosition.split(':');
+  const [xRaw = '0', yRaw = '0'] = coords.split(',');
+
+  return {
+    x: Number(xRaw) || 0,
+    y: Number(yRaw) || 0,
+    complexo,
+    area,
+  };
+}
+
+function fromMultiplayerPresence(presence: any) {
+  return {
+    ...presence,
+    mapPosition: parseMapPositionString(presence.mapPosition || 'unknown:default:0,0'),
+  };
+}
+
 /**
  * Atualizar presença de um jogador no mapa
  */
@@ -21,76 +61,53 @@ export async function updatePlayerPresence(
   playerId: string,
   position: MapPosition,
   status: 'active' | 'idle' | 'in_combat' = 'active',
-  complexStatus?: string
+  complexStatus?: string,
+  playerName?: string
 ) {
-  try {
-    // Encontrar presença existente
-    const { items } = await BaseCrudService.getAll('playerpresence');
-    const existingPresence = items.find((p: any) => p.playerId === playerId);
+  const mapPosition = serializeMapPosition(position);
 
-    const presenceData = {
-      playerId,
-      mapPosition: JSON.stringify(position),
-      status,
-      complexStatus: complexStatus || '',
-      lastSeenAt: new Date(),
-      isOnline: true,
-    };
+  const result = await updateMultiplayerPresence(
+    playerId,
+    mapPosition,
+    toPresenceStatus(status),
+    playerName
+  );
 
-    if (existingPresence) {
-      // Atualizar presença existente
-      return await BaseCrudService.update('playerpresence', {
-        _id: existingPresence._id,
-        ...presenceData,
-      });
-    } else {
-      // Criar nova presença
-      return await BaseCrudService.create('playerpresence', {
-        _id: crypto.randomUUID(),
-        ...presenceData,
-      });
-    }
-  } catch (error) {
-    console.error('Erro ao atualizar presença do jogador:', error);
-    throw error;
+  if (!result.success) {
+    throw new Error(result.error || 'Erro ao atualizar presença do jogador');
   }
+
+  return {
+    success: true,
+    playerId,
+    mapPosition: position,
+    status,
+    complexStatus: complexStatus || '',
+    isOnline: status !== 'offline',
+    lastSeenAt: new Date(),
+  };
 }
 
 /**
  * Obter jogadores online próximos a uma posição
  */
-export async function getOnlinePlayersNearby(
-  position: MapPosition,
-  radius: number = 500
-) {
+export async function getOnlinePlayersNearby(position: MapPosition, radius: number = 500) {
   try {
-    const { items } = await BaseCrudService.getAll('playerpresence');
+    const players = await getOnlinePlayers();
 
-    return items
+    return players
+      .map(fromMultiplayerPresence)
       .filter((player: any) => {
         if (!player.isOnline || player.status === 'offline') return false;
+        if (player.mapPosition.complexo !== position.complexo) return false;
 
-        try {
-          const playerPos = JSON.parse(player.mapPosition || '{}');
+        const distance = Math.sqrt(
+          Math.pow(player.mapPosition.x - position.x, 2) +
+            Math.pow(player.mapPosition.y - position.y, 2)
+        );
 
-          // Se em complexos diferentes, não mostrar
-          if (playerPos.complexo !== position.complexo) return false;
-
-          // Calcular distância
-          const distance = Math.sqrt(
-            Math.pow(playerPos.x - position.x, 2) +
-              Math.pow(playerPos.y - position.y, 2)
-          );
-
-          return distance <= radius;
-        } catch {
-          return false;
-        }
-      })
-      .map((player: any) => ({
-        ...player,
-        mapPosition: JSON.parse(player.mapPosition || '{}'),
-      }));
+        return distance <= radius;
+      });
   } catch (error) {
     console.error('Erro ao obter jogadores próximos:', error);
     return [];
@@ -102,23 +119,14 @@ export async function getOnlinePlayersNearby(
  */
 export async function getOnlinePlayersInComplex(complexo: string) {
   try {
-    const { items } = await BaseCrudService.getAll('playerpresence');
+    const players = await getOnlinePlayers();
 
-    return items
+    return players
+      .map(fromMultiplayerPresence)
       .filter((player: any) => {
         if (!player.isOnline || player.status === 'offline') return false;
-
-        try {
-          const playerPos = JSON.parse(player.mapPosition || '{}');
-          return playerPos.complexo === complexo;
-        } catch {
-          return false;
-        }
-      })
-      .map((player: any) => ({
-        ...player,
-        mapPosition: JSON.parse(player.mapPosition || '{}'),
-      }));
+        return player.mapPosition.complexo === complexo;
+      });
   } catch (error) {
     console.error('Erro ao obter jogadores no complexo:', error);
     return [];
@@ -129,21 +137,10 @@ export async function getOnlinePlayersInComplex(complexo: string) {
  * Definir jogador como offline
  */
 export async function setPlayerOffline(playerId: string) {
-  try {
-    const { items } = await BaseCrudService.getAll('playerpresence');
-    const presence = items.find((p: any) => p.playerId === playerId);
+  const result = await setMultiplayerPlayerOffline(playerId);
 
-    if (presence) {
-      await BaseCrudService.update('playerpresence', {
-        _id: presence._id,
-        isOnline: false,
-        status: 'offline',
-        lastSeenAt: new Date(),
-      });
-    }
-  } catch (error) {
-    console.error('Erro ao definir jogador como offline:', error);
-    throw error;
+  if (!result.success) {
+    throw new Error(result.error || 'Erro ao definir jogador como offline');
   }
 }
 
@@ -152,17 +149,13 @@ export async function setPlayerOffline(playerId: string) {
  */
 export async function getPlayerPresence(playerId: string) {
   try {
-    const { items } = await BaseCrudService.getAll('playerpresence');
-    const presence = items.find((p: any) => p.playerId === playerId);
+    const presence = await getMultiplayerPlayerPresence(playerId);
 
-    if (presence) {
-      return {
-        ...presence,
-        mapPosition: JSON.parse(presence.mapPosition || '{}'),
-      };
+    if (!presence) {
+      return null;
     }
 
-    return null;
+    return fromMultiplayerPresence(presence);
   } catch (error) {
     console.error('Erro ao obter presença do jogador:', error);
     return null;
@@ -170,30 +163,12 @@ export async function getPlayerPresence(playerId: string) {
 }
 
 /**
- * Limpar jogadores offline (manutenção)
- * Remove registros de jogadores que estão offline há mais de X minutos
+ * Limpar jogadores offline
+ * No modelo atual, não removemos registros automaticamente.
+ * Mantemos histórico de presença e apenas reportamos zero removidos.
  */
-export async function cleanupOfflinePlayers(minutesThreshold: number = 5) {
-  try {
-    const { items } = await BaseCrudService.getAll('playerpresence');
-    const now = new Date();
-    const threshold = new Date(now.getTime() - minutesThreshold * 60000);
-
-    const offlineItems = items.filter((p: any) => {
-      if (p.isOnline) return false;
-      const lastSeen = new Date(p.lastSeenAt);
-      return lastSeen < threshold;
-    });
-
-    for (const item of offlineItems) {
-      await BaseCrudService.delete('playerpresence', item._id);
-    }
-
-    return offlineItems.length;
-  } catch (error) {
-    console.error('Erro ao limpar jogadores offline:', error);
-    return 0;
-  }
+export async function cleanupOfflinePlayers(_minutesThreshold: number = 5) {
+  return 0;
 }
 
 /**
@@ -201,23 +176,19 @@ export async function cleanupOfflinePlayers(minutesThreshold: number = 5) {
  */
 export async function getOnlinePlayersStats() {
   try {
-    const { items } = await BaseCrudService.getAll('playerpresence');
-
-    const onlinePlayers = items.filter((p: any) => p.isOnline);
+    const players = await getOnlinePlayers();
     const complexStats: Record<string, number> = {};
 
-    onlinePlayers.forEach((player: any) => {
-      try {
-        const pos = JSON.parse(player.mapPosition || '{}');
-        complexStats[pos.complexo] = (complexStats[pos.complexo] || 0) + 1;
-      } catch {
-        // Ignorar erros de parsing
-      }
-    });
+    players
+      .map(fromMultiplayerPresence)
+      .forEach((player: any) => {
+        const complexo = player.mapPosition.complexo || 'unknown';
+        complexStats[complexo] = (complexStats[complexo] || 0) + 1;
+      });
 
     return {
-      totalOnline: onlinePlayers.length,
-      totalPlayers: items.length,
+      totalOnline: await getTotalOnlinePlayersCount(),
+      totalPlayers: players.length,
       complexStats,
       timestamp: new Date(),
     };
@@ -229,5 +200,18 @@ export async function getOnlinePlayersStats() {
       complexStats: {},
       timestamp: new Date(),
     };
+  }
+}
+
+/**
+ * Compat helper: obter jogadores numa localização textual já serializada
+ */
+export async function getPlayersBySerializedLocation(mapPosition: string) {
+  try {
+    const players = await getPlayersInLocation(mapPosition);
+    return players.map(fromMultiplayerPresence);
+  } catch (error) {
+    console.error('Erro ao obter jogadores por localização serializada:', error);
+    return [];
   }
 }
