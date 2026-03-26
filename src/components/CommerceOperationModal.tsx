@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Clock3, DollarSign, TrendingUp, Zap, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { useMember } from '@/integrations';
 import {
   ComercioKey,
   COMERCIOS_CONFIG,
@@ -17,8 +18,8 @@ interface CommerceOperationModalProps {
   commerceId: ComercioKey | null;
   commerceData: ComercioData | null;
   playerData?: Players;
-  dirtyMoneyStore: number;
-  cleanMoneyStore: number;
+  dirtyMoney?: number;
+  cleanMoney?: number;
   onClose: () => void;
   onStartOperation: (commerceId: ComercioKey) => Promise<void>;
   onCompleteOperation: (commerceId: ComercioKey) => Promise<void>;
@@ -134,17 +135,20 @@ export default function CommerceOperationModal({
   commerceId,
   commerceData,
   playerData,
-  dirtyMoney: propDirtyMoney,
-  cleanMoney: propCleanMoney,
+  dirtyMoney: propDirtyMoney = 0,
+  cleanMoney: propCleanMoney = 0,
   onClose,
   onStartOperation,
   onCompleteOperation,
 }: CommerceOperationModalProps) {
+  const { member } = useMember();
+
   // Use playerData if available, otherwise use props
   const dirtyMoney = playerData?.dirtyMoney ?? propDirtyMoney;
   const cleanMoney = playerData?.cleanMoney ?? propCleanMoney;
-  
-  // Check if player data is available - only show error if playerData prop was explicitly passed but is null/invalid
+
+  // Check if player is authenticated and has valid data
+  const playerNotAuthenticated = !member?._id;
   const playerNotFound = playerData !== undefined && (!playerData || !playerData._id);
 
   const [timeLeft, setTimeLeft] = useState<number>(0);
@@ -167,8 +171,8 @@ export default function CommerceOperationModal({
 
   if (!isOpen || !commerceId || !commerceData) return null;
 
-  // Show error if player data not found
-  if (playerNotFound) {
+  // Show error if player not authenticated or player data not found
+  if (playerNotAuthenticated || playerNotFound) {
     return (
       <>
         <motion.div
@@ -197,7 +201,7 @@ export default function CommerceOperationModal({
                     Erro
                   </p>
                   <h2 className="mt-2 text-2xl md:text-3xl font-black uppercase tracking-wide text-red-200">
-                    Jogador Não Encontrado
+                    {playerNotAuthenticated ? 'Autenticação Necessária' : 'Jogador Não Encontrado'}
                   </h2>
                 </div>
 
@@ -214,7 +218,9 @@ export default function CommerceOperationModal({
             <div className="relative px-5 py-5 md:px-8 md:py-7">
               <div className="rounded-2xl border border-red-400/20 bg-slate-950/60 p-6 text-center">
                 <p className="text-sm text-red-300 mb-4">
-                  Não foi possível carregar os dados do jogador. Por favor, recarregue a página e tente novamente.
+                  {playerNotAuthenticated
+                    ? 'Você precisa estar autenticado para realizar operações. Por favor, faça login e tente novamente.'
+                    : 'Não foi possível carregar os dados do jogador. Por favor, recarregue a página e tente novamente.'}
                 </p>
               </div>
             </div>
