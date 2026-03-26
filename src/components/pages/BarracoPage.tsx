@@ -46,7 +46,7 @@ export default function BarracoPage() {
   };
 
   const checkAllItemsAtLevel = (_level: number) => {
-    // Placeholder para futura validação real dos itens
+    // Placeholder para futura validação real usando coleções do jogo
     setAllItemsAtLevel(true);
   };
 
@@ -120,8 +120,10 @@ export default function BarracoPage() {
       setLoading(false);
     }
   };
-useEffect(() => {
+
+  useEffect(() => {
     if (initRef.current) return;
+
     if (!player?._id) {
       setLoading(false);
       return;
@@ -157,7 +159,7 @@ useEffect(() => {
       setEvolving(true);
       setError(null);
 
-      // 1. desconta o dinheiro limpo
+      // 1. desconta o dinheiro limpo na coleção players
       const playerAfterMoney = await removeCleanMoney(
         player._id,
         evolutionCost,
@@ -169,7 +171,7 @@ useEffect(() => {
         return;
       }
 
-      // 2. sobe o barracoLevel
+      // 2. sobe o barracoLevel na coleção players
       const updatedPlayer: Players = {
         ...playerAfterMoney,
         barracoLevel: nextLevel,
@@ -178,7 +180,7 @@ useEffect(() => {
 
       const savedPlayer = await savePlayer(updatedPlayer);
 
-      // 3. sincroniza store
+      // 3. sincroniza a store
       setPlayer(savedPlayer);
 
       // 4. recarrega para garantir consistência visual
@@ -419,7 +421,7 @@ useEffect(() => {
                 onClick={handleEvolution}
                 disabled={!canEvolve || evolving}
                 className={`w-full py-4 px-6 rounded-lg font-heading text-xl font-bold transition-all ${
-canEvolve
+                  canEvolve
                     ? 'bg-gradient-to-r from-primary to-logo-gradient-end text-white hover:shadow-lg hover:shadow-primary/50 cursor-pointer'
                     : 'bg-slate-700 text-slate-400 cursor-not-allowed opacity-50'
                 }`}
@@ -448,9 +450,7 @@ canEvolve
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  window.location.href = '/reset-barraco';
-                }}
+                onClick={() => navigate('/reset-barraco')}
                 className="w-full py-4 px-6 rounded-lg font-heading text-xl font-bold bg-slate-700 text-slate-200 hover:bg-slate-600 hover:shadow-lg hover:shadow-slate-700/50 cursor-pointer transition-all"
               >
                 🔄 RESETAR NÍVEL
