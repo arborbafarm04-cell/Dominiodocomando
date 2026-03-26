@@ -1,80 +1,88 @@
-/**
- * AUTHENTICATION SERVICE (PHASE 1 REFACTORED)
- * 
- * SINGLE SOURCE OF TRUTH: IndexedDB for session/credentials only
- * Player data: Use playerDataService instead
- * 
- * This service handles:
- * - Session management (IndexedDB)
- * - Credential storage (IndexedDB)
- * 
- * NEVER use localStorage for player progress
- */
-
-import { storeSession, getSession, clearSession } from './indexedDBService';
-import { usePlayerStore } from '@/store/playerStore';
-import { loadPlayerFromDatabase } from './playerDataService';
+import {
+  storeCredential,
+  getCredential,
+  storeSession,
+  getSession,
+  clearSession,
+  credentialExists,
+} from "./indexedDBService";
 
 /**
- * Login: Store session in IndexedDB, load player from database
+ * Central Authentication Service
+ * Handles email/password validation and session management
+ * Separated from player data loading
  */
-export async function login(playerId: string, email: string): Promise<boolean> {
-  try {
-    // Store session in IndexedDB (not localStorage)
-    await storeSession(playerId, email);
-    
-    // Load player data from database
-    const player = await loadPlayerFromDatabase(playerId);
-    
-    return player !== null;
-  } catch (error) {
-    console.error('Login error:', error);
-    return false;
-  }
+
+export interface AuthCredentials {
+  email: string;
+  playerId: string;
 }
 
 /**
- * Logout: Clear session from IndexedDB and reset store
+ * Validate email and password, return player ID if valid
  */
-export async function logout(): Promise<void> {
-  try {
-    // Clear session from IndexedDB
-    await clearSession();
-    
-    // Reset player store
-    const store = usePlayerStore.getState();
-    store.resetPlayer();
-  } catch (error) {
-    console.error('Logout error:', error);
+export async function validateCredentials(email: string, password: string): Promise<string> {
+  const credential = await getCredential(email);
+
+  if (!credential) {
+    throw new Error('Email não encontrado');
   }
+
+  const hashedPassword = btoa(password);
+  if (credential.password !== hashedPassword) {
+    throw new Error('Senha incorreta');
+  }
+
+  return credential.playerId;
 }
 
 /**
- * Get current session from IndexedDB
+ * Register new credentials in the authentication system
  */
-export async function getCurrentSession(): Promise<{ playerId: string; email: string } | null> {
-  try {
-    const session = await getSession();
-    return session ? { playerId: session.playerId, email: session.email } : null;
-  } catch (error) {
-    console.error('Error getting session:', error);
-    return null;
+export async function registerCredentials(
+  email: string,
+  password: string,
+  playerId: string
+): Promise<void> {
+  const exists = await credentialExists(email);
+  if (exists) {
+    throw new Error('Email já registrado');
   }
+
+  const hashedPassword = btoa(password);
+  await storeCredential(email, hashedPassword, playerId);
 }
 
 /**
- * Load player data from database (called after login)
+ * Create authenticated session
  */
-export async function loadPlayerData(): Promise<boolean> {
-  try {
-    const session = await getCurrentSession();
-    if (!session) return false;
-    
-    const player = await loadPlayerFromDatabase(session.playerId);
-    return player !== null;
-  } catch (error) {
-    console.error('Error loading player data:', error);
-    return false;
-  }
+export async function createSession(playerId: string, email: string): Promise<void> {
+  await storeSession(playerId, email);
 }
 
+/**
+ * Get current authenticated session
+ */
+export async function getAuthSession(): Promise<AuthCredentials | null> {
+  const session = await getSession();
+  if (!session) return null;
+  return {
+    email: session.email,
+    playerId: session.playerId,
+  };
+}
+
+/**
+ * Destroy authenticated session
+ */
+export async function destroySession(): Promise<void> {
+  await clearSession();
+}
+
+/**
+ * Check if user is authenticated
+ */
+export async function isAuthenticated(): Promise<boolean> {
+  const session = await getSession();
+  return !!session;
+}

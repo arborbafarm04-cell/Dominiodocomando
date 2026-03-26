@@ -2,13 +2,17 @@ import { BaseCrudService } from "@/integrations";
 import { Players } from "@/entities";
 import { getInitialComercioData } from "@/types/comercios";
 import {
-  storeCredential,
-  getCredential,
   storeSession,
   getSession,
   clearSession,
-  credentialExists,
 } from "./indexedDBService";
+import {
+  registerCredentials,
+  validateCredentials,
+  createSession,
+  destroySession,
+  getAuthSession,
+} from "./authService";
 
 const COLLECTION_ID = "players";
 
@@ -55,24 +59,17 @@ export async function registerPlayer(email: string, playerName: string, nickname
   return BaseCrudService.create(COLLECTION_ID, newPlayer);
 }
 
-// Local authentication - store hashed passwords in IndexedDB
+/**
+ * REFACTORED: Register new player with email/password
+ * Step 1: Create player in database with fixed _id
+ * Step 2: Register credentials in auth system
+ * Step 3: Create authenticated session
+ */
 export async function registerLocalPlayer(email: string, password: string, playerName: string) {
+  // Step 1: Create player in database with fixed _id
   const playerId = crypto.randomUUID();
   const comercios = getInitialComercioData();
   
-  // Check if email already exists
-  const exists = await credentialExists(email);
-  if (exists) {
-    throw new Error('Email já registrado');
-  }
-  
-  // Hash password (simple hash for demo - use proper hashing in production)
-  const hashedPassword = btoa(password);
-  
-  // Store credentials in IndexedDB (persistent)
-  await storeCredential(email, hashedPassword, playerId);
-  
-  // Create player in database
   const newPlayer: Players = {
     _id: playerId,
     playerName: playerName || 'Player',
@@ -87,49 +84,53 @@ export async function registerLocalPlayer(email: string, password: string, playe
   
   const createdPlayer = await BaseCrudService.create(COLLECTION_ID, newPlayer);
   
-  // Store current session in IndexedDB (persistent)
-  await storeSession(playerId, email);
+  // Step 2: Register credentials in auth system
+  await registerCredentials(email, password, playerId);
+  
+  // Step 3: Create authenticated session
+  await createSession(playerId, email);
   
   return createdPlayer;
 }
 
+/**
+ * REFACTORED: Login player with email/password
+ * Step 1: Validate email and password (returns player _id)
+ * Step 2: Load player data from database
+ * Step 3: Create authenticated session
+ * Step 4: Clear any previous session data
+ */
 export async function loginLocalPlayer(email: string, password: string) {
-  const credential = await getCredential(email);
+  // Step 1: Validate email and password (returns player _id)
+  const playerId = await validateCredentials(email, password);
   
-  if (!credential) {
-    throw new Error('Email não encontrado');
-  }
-  
-  const hashedPassword = btoa(password);
-  if (credential.password !== hashedPassword) {
-    throw new Error('Senha incorreta');
-  }
-  
-  const playerId = credential.playerId;
+  // Step 2: Load player data from database
   const player = await getPlayerById(playerId);
   
   if (!player) {
-    throw new Error('Jogador não encontrado');
+    throw new Error('Jogador não encontrado no banco de dados');
   }
   
-  // Store current session in IndexedDB (persistent)
-  await storeSession(playerId, email);
+  // Step 3: Create authenticated session
+  await createSession(playerId, email);
+  
+  // Step 4: Clear any previous session data (handled by createSession)
   
   return player;
 }
 
 export async function logoutLocalPlayer() {
-  await clearSession();
+  await destroySession();
 }
 
 export async function getCurrentLocalPlayer() {
-  const session = await getSession();
+  const session = await getAuthSession();
   if (!session) return null;
   return getPlayerById(session.playerId);
 }
 
 export async function isPlayerAuthenticated(): Promise<boolean> {
-  const session = await getSession();
+  const session = await getAuthSession();
   if (!session) return false;
   
   try {
