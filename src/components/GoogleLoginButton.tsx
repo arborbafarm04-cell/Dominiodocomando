@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useMember } from '@/integrations';
 import { useNavigate } from 'react-router-dom';
-import { registerPlayer } from '@/services/playerService';
+import { registerPlayer, getPlayerById } from '@/services/playerService';
 import { resetPlayerSession } from '@/services/sessionResetService';
 import { usePlayerStore } from '@/store/playerStore';
 import { Button } from '@/components/ui/button';
@@ -12,10 +12,9 @@ export default function GoogleLoginButton() {
   const navigate = useNavigate();
 
   const setPlayer = usePlayerStore((state) => state.setPlayer);
-  const reset = usePlayerStore((state) => state.reset);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [hasRegistered, setHasRegistered] = useState(false);
+  const [hasHandled, setHasHandled] = useState(false);
 
   const handleGoogleLogin = async () => {
     try {
@@ -28,46 +27,46 @@ export default function GoogleLoginButton() {
   };
 
   useEffect(() => {
-    const handlePlayerRegistration = async () => {
-      if (!member || !member.loginEmail || hasRegistered) return;
+    const handleGoogleAuth = async () => {
+      if (!member || !member.loginEmail || hasHandled) return;
 
       try {
-        setHasRegistered(true);
+        setHasHandled(true);
 
-        console.log('🔄 Resetting session before Google login registration...');
-
-        // Limpa stores legadas e sessão persistida
+        // 🔥 RESET TOTAL (obrigatório pra multiplayer)
         await resetPlayerSession();
 
-        // Garante que a store principal também comece limpa
-        reset();
+        const email = member.loginEmail.trim().toLowerCase();
 
-        const playerName =
-          member.contact?.firstName || member.profile?.nickname || 'Player';
-        const nickname =
-          member.profile?.nickname || member.contact?.firstName || 'Anonymous';
+        // 🔥 TENTA BUSCAR PLAYER EXISTENTE
+        let player = await getPlayerById(email);
 
-        const player = await registerPlayer(
-          member.loginEmail,
-          playerName,
-          nickname
-        );
+        // 🔥 SE NÃO EXISTIR → CRIA
+        if (!player) {
+          const playerName =
+            member.contact?.firstName || member.profile?.nickname || 'Player';
 
-        // Sincroniza a UI com o player completo retornado do banco
+          player = await registerPlayer(email, playerName, playerName);
+        }
+
+        if (!player) {
+          throw new Error('Falha ao carregar jogador');
+        }
+
+        // 🔥 SETA PLAYER GLOBAL
         setPlayer(player);
 
         navigate('/star-map');
       } catch (error) {
-        console.error('Error registering player:', error);
-        reset();
-        setHasRegistered(false);
+        console.error('Error in Google auth:', error);
+        setHasHandled(false);
       } finally {
         setIsLoading(false);
       }
     };
 
-    handlePlayerRegistration();
-  }, [member, hasRegistered, navigate, setPlayer, reset]);
+    handleGoogleAuth();
+  }, [member, hasHandled, navigate, setPlayer]);
 
   return (
     <Button
