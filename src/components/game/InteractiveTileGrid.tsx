@@ -113,7 +113,7 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x06080d);
     // BLOCO 9 — FOG (PROFUNDO)
-    scene.fog = new THREE.Fog(0x09111a, 25, 110);
+    scene.fog = new THREE.Fog(0x0a0f18, 30, 120);
 
     const width = containerRef.current.clientWidth;
     const height = containerRef.current.clientHeight;
@@ -177,6 +177,120 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     const warmCenterAccent = new THREE.PointLight(0xff9a3d, 1.6, 18, 2);
     warmCenterAccent.position.set(0, 3, 0);
     scene.add(warmCenterAccent);
+
+    // TAREFA 1 — CRIAR BASE DE TERRENO (SUBSTITUIR GRID VISUAL)
+    const terrain = new THREE.Mesh(
+      new THREE.BoxGeometry(80, 8, 80),
+      new THREE.MeshStandardMaterial({
+        color: 0x5a4c3b,
+        roughness: 1,
+        metalness: 0.05,
+      })
+    );
+    terrain.position.y = -4;
+    terrain.castShadow = true;
+    terrain.receiveShadow = true;
+    scene.add(terrain);
+
+    // TAREFA 2 — CRIAR TOPO DO TERRENO (ONDE FICA O GRID)
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(80, 80, 32, 32),
+      new THREE.MeshStandardMaterial({
+        color: 0x6b5e4a,
+        roughness: 0.95,
+      })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    
+    // ADICIONAR relevo leve
+    const pos = ground.geometry.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const y = Math.random() * 0.8;
+      pos.setY(i, y);
+    }
+    ground.geometry.computeVertexNormals();
+    ground.castShadow = true;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // TAREFA 4 — CRIAR BORDA DE MORRO (EFEITO PENHASCO)
+    const cliffMaterial = new THREE.MeshStandardMaterial({
+      color: 0x4a3d2e,
+      roughness: 1,
+    });
+
+    // Parede frontal
+    const cliffFront = new THREE.Mesh(
+      new THREE.BoxGeometry(80, 10, 2),
+      cliffMaterial
+    );
+    cliffFront.position.set(0, 3, 40);
+    cliffFront.castShadow = true;
+    cliffFront.receiveShadow = true;
+    scene.add(cliffFront);
+
+    // Parede traseira
+    const cliffBack = new THREE.Mesh(
+      new THREE.BoxGeometry(80, 10, 2),
+      cliffMaterial
+    );
+    cliffBack.position.set(0, 3, -40);
+    cliffBack.castShadow = true;
+    cliffBack.receiveShadow = true;
+    scene.add(cliffBack);
+
+    // Parede esquerda
+    const cliffLeft = new THREE.Mesh(
+      new THREE.BoxGeometry(2, 10, 80),
+      cliffMaterial
+    );
+    cliffLeft.position.set(-40, 3, 0);
+    cliffLeft.castShadow = true;
+    cliffLeft.receiveShadow = true;
+    scene.add(cliffLeft);
+
+    // Parede direita
+    const cliffRight = new THREE.Mesh(
+      new THREE.BoxGeometry(2, 10, 80),
+      cliffMaterial
+    );
+    cliffRight.position.set(40, 3, 0);
+    cliffRight.castShadow = true;
+    cliffRight.receiveShadow = true;
+    scene.add(cliffRight);
+
+    // TAREFA 5 — ADICIONAR CIDADE AO FUNDO (REALISTA)
+    const cityGroup = new THREE.Group();
+
+    for (let i = 0; i < 40; i++) {
+      const h = 8 + Math.random() * 30;
+
+      const building = new THREE.Mesh(
+        new THREE.BoxGeometry(2, h, 2),
+        new THREE.MeshStandardMaterial({
+          color: 0x1a2230,
+          emissive: 0x111827,
+          emissiveIntensity: 0.4,
+        })
+      );
+
+      building.position.set(
+        -40 + Math.random() * 80,
+        h / 2,
+        -50
+      );
+
+      building.castShadow = true;
+      building.receiveShadow = true;
+      cityGroup.add(building);
+    }
+
+    scene.add(cityGroup);
+
+    // TAREFA 6 — ADICIONAR LUZ DE CIDADE AO FUNDO
+    const cityGlow = new THREE.PointLight(0xffaa55, 4, 200);
+    cityGlow.position.set(0, 20, -60);
+    scene.add(cityGlow);
 
     const aaa3dSystem = new AAA3DVisualSystem(scene, camera, renderer);
     aaa3dSystemRef.current = aaa3dSystem;
@@ -523,11 +637,11 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
 
     scene.add(cityMesh);
     scene.add(favelaMesh);
-const gridLinesGeometry = new THREE.BufferGeometry();
+    const gridLinesGeometry = new THREE.BufferGeometry();
     const gridLinesMaterial = new THREE.LineBasicMaterial({
       color: 0x8ec6ff,
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.08,
     });
     const gridLinesPoints: number[] = [];
 
