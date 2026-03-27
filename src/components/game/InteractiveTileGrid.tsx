@@ -209,68 +209,8 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
         }
       }
     };
-const containerRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const tilesRef = useRef<Map<number, TileData>>(new Map());
-  const instancedMeshRef = useRef<THREE.InstancedMesh | null>(null);
-  const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
-  const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
-  const selectedTileRef = useRef<number | null>(null);
-  const controlsRef = useRef<OrbitControls | null>(null);
 
-  const luxuryStoreGroupRef = useRef<THREE.Group | null>(null);
-  const qgGroupRef = useRef<THREE.Group | null>(null);
-  const delegaciaGroupRef = useRef<THREE.Group | null>(null);
-  const giroAsfaltoGroupRef = useRef<THREE.Group | null>(null);
-  const centroComercialGroupRef = useRef<THREE.Group | null>(null);
-  const centroComunitarioGroupRef = useRef<THREE.Group | null>(null);
-  const customObjectsRef = useRef<Map<number, THREE.Group>>(new Map());
-  const blockedTilesRef = useRef<Set<string>>(new Set());
-  const aaa3dSystemRef = useRef<AAA3DVisualSystem | null>(null);
-
-  const navigate = useNavigate();
-  const player = usePlayerStore((state) => state.player);
-  const level = player?.level ?? 1;
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0xaecbff, 300, 1200);
-    sceneRef.current = scene;
-
-    const width = containerRef.current.clientWidth;
-    const height = containerRef.current.clientHeight;
-
-    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 10000);
-
-    const gridTotalWidth = gridWidth * tileSize;
-    const gridTotalHeight = gridHeight * tileSize;
-    const maxDim = Math.max(gridTotalWidth, gridTotalHeight);
-
-    camera.position.set(gridTotalWidth / 2, maxDim * 0.6, gridTotalHeight * 0.8);
-    camera.lookAt(gridTotalWidth / 2, 0, gridTotalHeight / 2);
-    cameraRef.current = camera;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(width, height);
-    renderer.shadowMap.enabled = true;
-    rendererRef.current = renderer;
-
-    containerRef.current.appendChild(renderer.domElement);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-
-    const light = new THREE.DirectionalLight(0xffffff, 1.8);
-    light.position.set(30, 60, 30);
-    light.castShadow = true;
-    scene.add(light);
-
-    const aaa3dSystem = new AAA3DVisualSystem(scene, camera, renderer);
-    aaa3dSystemRef.current = aaa3dSystem;
-const totalTiles = gridWidth * gridHeight;
+    const totalTiles = gridWidth * gridHeight;
 
     const geometry = new THREE.BoxGeometry(tileSize * 0.9, tileSize * 0.05, tileSize * 0.9);
 
@@ -313,7 +253,8 @@ const totalTiles = gridWidth * gridHeight;
     }
 
     scene.add(instancedMesh);
-const loader = new GLTFLoader();
+
+    const loader = new GLTFLoader();
 
     // 🔥 EXEMPLO: BARRACO DO JOGADOR (4 tiles)
     const playerLot = {
@@ -343,8 +284,10 @@ const loader = new GLTFLoader();
         customObjectsRef.current.set(999, group);
       }
     );
-const controls = new OrbitControls(camera, renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
+    controlsRef.current = controls;
 
     const onMouseClick = () => {
       raycasterRef.current.setFromCamera(mouseRef.current, camera);
@@ -373,7 +316,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
       renderer.domElement.removeEventListener('click', onMouseClick);
       renderer.dispose();
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <div

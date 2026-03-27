@@ -1,6 +1,6 @@
 /**
  * Auto-generated entity types
- * Contains all CMS collection interfaces in a single file
+ * Contains all CMS collection interfaces in a single file 
  */
 
 /**
@@ -18,6 +18,7 @@ export interface Background {
   /** @wixFieldType image - Contains image URL, render with <Image> component, NOT as text */
   image?: string;
 }
+
 
 /**
  * Collection ID: businessupgrades
@@ -40,6 +41,7 @@ export interface BusinessUpgrades {
   /** @wixFieldType text */
   description?: string;
 }
+
 
 /**
  * Collection ID: financialhistory
@@ -65,6 +67,7 @@ export interface FinancialHistory {
   timestamp?: Date | string;
 }
 
+
 /**
  * Collection ID: itensdeluxo
  * Interface for ItensdeLuxo
@@ -87,6 +90,7 @@ export interface ItensdeLuxo {
   category?: string;
 }
 
+
 /**
  * Collection ID: moneylaunderingbusinesses
  * Interface for MoneyLaunderingBusinesses
@@ -107,6 +111,7 @@ export interface MoneyLaunderingBusinesses {
   businessImage?: string;
 }
 
+
 /**
  * Collection ID: personagens
  * Interface for Characters
@@ -126,12 +131,50 @@ export interface Characters {
   /** @wixFieldType text */
   acceptOptionText?: string;
   /** @wixFieldType text */
- denounceOptionText?: string;
+  denounceOptionText?: string;
   /** @wixFieldType number */
   baseBribeValue?: number;
   /** @wixFieldType image - Contains image URL, render with <Image> component, NOT as text */
   characterImage?: string;
 }
+
+
+/**
+ * Collection ID: playerlots
+ * Interface for Playerlots
+ */
+export interface Playerlots {
+  _id: string;
+  _createdDate?: Date;
+  _updatedDate?: Date;
+  /** @wixFieldType text */
+  title?: string;
+  /** @wixFieldType text */
+  playerId?: string;
+  /** @wixFieldType text */
+  playerName?: string;
+  /** @wixFieldType number */
+  gridX?: number;
+  /** @wixFieldType number */
+  gridZ?: number;
+  /** @wixFieldType number */
+  sizeX?: number;
+  /** @wixFieldType number */
+  sizeZ?: number;
+  /** @wixFieldType number */
+  rotation?: number;
+  /** @wixFieldType text */
+  complexo?: string;
+  /** @wixFieldType text */
+  area?: string;
+  /** @wixFieldType text */
+  status?: string;
+  /** @wixFieldType date */
+  dateAndTime?: Date | string;
+  /** @wixFieldType date */
+  updatedAt?: Date | string;
+}
+
 
 /**
  * Collection ID: playerpresence
@@ -141,37 +184,20 @@ export interface PlayerPresence {
   _id: string;
   _createdDate?: Date;
   _updatedDate?: Date;
-
   /** @wixFieldType text */
   playerId?: string;
-
-  /** @wixFieldType text */
-  playerName?: string;
-
   /** @wixFieldType text */
   mapPosition?: string;
-
-  /** @wixFieldType text */
-  currentComplex?: string;
-
-  /** @wixFieldType text */
-  currentArea?: string;
-
-  /** @wixFieldType text */
-  status?: string;
-
-  /** @wixFieldType text */
-  complexStatus?: string;
-
-  /** @wixFieldType boolean */
-  isOnline?: boolean;
-
   /** @wixFieldType datetime */
   lastSeenAt?: Date | string;
-
-  /** @wixFieldType datetime */
-  updatedAt?: Date | string;
+  /** @wixFieldType text */
+  status?: string;
+  /** @wixFieldType text */
+  complexStatus?: string;
+  /** @wixFieldType boolean */
+  isOnline?: boolean;
 }
+
 
 /**
  * Collection ID: players
@@ -181,76 +207,50 @@ export interface Players {
   _id: string;
   _createdDate?: Date;
   _updatedDate?: Date;
-
   /** @wixFieldType number */
   cleanMoney?: number;
-
-  /** @wixFieldType number */
-  dirtyMoney?: number;
-
-  /** @wixFieldType number */
-  spins?: number;
-
-  /** @wixFieldType number */
-  barracoLevel?: number;
-
-  /** @wixFieldType number */
-  level?: number;
-
-  /** @wixFieldType number */
-  progress?: number;
-
-  /** @wixFieldType number */
-  xp?: number;
-
-  /** @wixFieldType number */
-  power?: number;
-
-  /** @wixFieldType text */
-  email?: string;
-
-  /** @wixFieldType text */
-  playerId?: string;
-
-  /** @wixFieldType text */
-  externalPlayerId?: string;
-
-  /** @wixFieldType text */
-  playerName?: string;
-
-  /** @wixFieldType image */
-  profilePicture?: string;
-
-  /** @wixFieldType boolean */
-  isGuest?: boolean;
-
-  /** @wixFieldType text */
-  inventory?: string;
-
-  /** @wixFieldType text */
-  skillTrees?: string;
-
-  /** @wixFieldType text */
-  ownedLuxuryItems?: string;
-
-  /** @wixFieldType text */
-  investments?: string;
-
-  /** @wixFieldType text */
-  comercios?: string;
-
   /** @wixFieldType datetime */
   createdAt?: Date | string;
-
   /** @wixFieldType datetime */
   lastLoginAt?: Date | string;
-
+  /** @wixFieldType text */
+  inventory?: string;
+  /** @wixFieldType text */
+  skillTrees?: string;
+  /** @wixFieldType text */
+  ownedLuxuryItems?: string;
+  /** @wixFieldType text */
+  investments?: string;
+  /** @wixFieldType number */
+  barracoLevel?: number;
+  /** @wixFieldType number */
+  spins?: number;
+  /** @wixFieldType text */
+  email?: string;
+  /** @wixFieldType text */
+  comercios?: string;
+  /** @wixFieldType date */
+  updatedAt?: Date | string;
+  /** @wixFieldType number */
+  dirtyMoney?: number;
+  /** @wixFieldType text */
+  playerId?: string;
+  /** @wixFieldType text */
+  playerName?: string;
+  /** @wixFieldType number */
+  level?: number;
+  /** @wixFieldType number */
+  progress?: number;
+  /** @wixFieldType text */
+  externalPlayerId?: string;
   /** @wixFieldType datetime */
   lastUpdated?: Date | string;
-
-  /** @wixFieldType datetime */
-  updatedAt?: Date | string;
+  /** @wixFieldType image - Contains image URL, render with <Image> component, NOT as text */
+  profilePicture?: string;
+  /** @wixFieldType boolean */
+  isGuest?: boolean;
 }
+
 
 /**
  * Collection ID: playerslogados
