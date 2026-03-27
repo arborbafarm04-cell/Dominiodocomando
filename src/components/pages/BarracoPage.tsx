@@ -198,10 +198,10 @@ export default function BarracoPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
         <Header />
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-foreground">Carregando Barraco...</p>
+            <div className="animate-spin rounded-full h-10 sm:h-12 w-10 sm:w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-foreground text-sm sm:text-base">Carregando Barraco...</p>
           </div>
         </div>
         <Footer />
@@ -213,12 +213,12 @@ export default function BarracoPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col">
         <Header />
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center">
-            <p className="text-foreground text-xl mb-4">{error || 'Jogador não encontrado'}</p>
+            <p className="text-foreground text-base sm:text-xl mb-4">{error || 'Jogador não encontrado'}</p>
             <button
               onClick={() => navigate('/login')}
-              className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-logo-gradient-end transition-colors"
+              className="px-4 sm:px-6 py-2 bg-primary text-white rounded-lg hover:bg-logo-gradient-end transition-colors text-sm sm:text-base"
             >
               Ir para Login
             </button>
@@ -246,17 +246,17 @@ export default function BarracoPage() {
         />
       )}
 
-      <main className="flex-1 max-w-[100rem] mx-auto px-4 py-12">
+      <main className="flex-1 w-full max-w-full mx-auto px-3 sm:px-4 py-8 sm:py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="space-y-8"
+          className="space-y-6 sm:space-y-8"
         >
           <div className="text-center">
-            <h1 className="font-heading text-6xl font-bold text-primary mb-2">BARRACO</h1>
+            <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-bold text-primary mb-2">BARRACO</h1>
             <motion.p
-              className="text-subtitle-neon-blue text-lg"
+              className="text-subtitle-neon-blue text-base sm:text-lg"
               animate={
                 levelUpAnimation
                   ? { scale: [1, 1.3, 1], color: ['#00eaff', '#FFD700', '#00eaff'] }
@@ -276,7 +276,7 @@ export default function BarracoPage() {
                 transition={{ duration: 1.5 }}
                 className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50"
               >
-                <div className="text-6xl font-bold text-yellow-400 drop-shadow-lg">
+                <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-yellow-400 drop-shadow-lg">
                   ⭐ LEVEL UP! ⭐
                 </div>
               </motion.div>
@@ -287,7 +287,7 @@ export default function BarracoPage() {
                 transition={{ duration: 1.5 }}
                 className="fixed top-1/3 left-1/2 transform -translate-x-1/2 pointer-events-none z-50"
               >
-                <div className="text-4xl">✨</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl">✨</div>
               </motion.div>
 
               <motion.div
@@ -296,7 +296,7 @@ export default function BarracoPage() {
                 transition={{ duration: 1.5, delay: 0.1 }}
                 className="fixed top-1/3 right-1/4 pointer-events-none z-50"
               >
-                <div className="text-4xl">✨</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl">✨</div>
               </motion.div>
 
               <motion.div
@@ -305,7 +305,7 @@ export default function BarracoPage() {
                 transition={{ duration: 1.5, delay: 0.2 }}
                 className="fixed top-1/3 left-1/4 pointer-events-none z-50"
               >
-                <div className="text-4xl">✨</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl">✨</div>
               </motion.div>
             </>
           )}
@@ -314,20 +314,20 @@ export default function BarracoPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="bg-red-500/20 border border-red-500 rounded-lg p-4 text-red-200 text-center"
+              className="bg-red-500/20 border border-red-500 rounded-lg p-3 sm:p-4 text-red-200 text-center text-xs sm:text-sm"
             >
               {error}
             </motion.div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               className="flex justify-center"
             >
-              <div className="relative">
+              <div className="relative w-full max-w-sm">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-logo-gradient-end opacity-20 blur-2xl rounded-full"></div>
                 <motion.div
                   key={imageKey}
@@ -342,7 +342,7 @@ export default function BarracoPage() {
                     alt={`Barraco Level ${currentLevel}`}
                     width={484}
                     height={484}
-                    className="drop-shadow-2xl"
+                    className="drop-shadow-2xl w-full h-auto"
                   />
                 </motion.div>
               </div>
@@ -352,19 +352,19 @@ export default function BarracoPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="space-y-6"
+              className="space-y-4 sm:space-y-6"
             >
-              <div className="bg-slate-800/50 border border-subtitle-neon-blue/30 rounded-lg p-6">
-                <h2 className="font-heading text-2xl text-subtitle-neon-blue mb-4">
+              <div className="bg-slate-800/50 border border-subtitle-neon-blue/30 rounded-lg p-4 sm:p-6">
+                <h2 className="font-heading text-lg sm:text-2xl text-subtitle-neon-blue mb-3 sm:mb-4">
                   Progresso
                 </h2>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-foreground">
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex justify-between text-foreground text-sm sm:text-base">
                     <span>Nível Atual:</span>
                     <span className="font-bold text-primary">{currentLevel}/100</span>
                   </div>
 
-                  <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                  <div className="w-full bg-slate-700 rounded-full h-2 sm:h-3 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(currentLevel / 100) * 100}%` }}
@@ -373,7 +373,7 @@ export default function BarracoPage() {
                     ></motion.div>
                   </div>
 
-                  <p className="text-sm text-slate-400">
+                  <p className="text-xs sm:text-sm text-slate-400">
                     {currentLevel === 100
                       ? 'Nível máximo atingido!'
                       : `${100 - currentLevel} níveis restantes`}
@@ -381,19 +381,19 @@ export default function BarracoPage() {
                 </div>
               </div>
 
-              <div className="bg-slate-800/50 border border-subtitle-neon-blue/30 rounded-lg p-6">
-                <h2 className="font-heading text-2xl text-subtitle-neon-blue mb-4">
+              <div className="bg-slate-800/50 border border-subtitle-neon-blue/30 rounded-lg p-4 sm:p-6">
+                <h2 className="font-heading text-lg sm:text-2xl text-subtitle-neon-blue mb-3 sm:mb-4">
                   Próxima Evolução
                 </h2>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-foreground">
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex justify-between text-foreground text-sm sm:text-base">
                     <span>Novo Nível:</span>
                     <span className="font-bold text-primary">
                       {nextLevel <= 100 ? nextLevel : 100}
                     </span>
                   </div>
 
-                  <div className="flex justify-between text-foreground">
+                  <div className="flex justify-between text-foreground text-sm sm:text-base">
                     <span>Custo:</span>
                     <span className="font-bold text-logo-gradient-end">
                       R$ {evolutionCost.toLocaleString('pt-BR')}

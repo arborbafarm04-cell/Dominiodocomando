@@ -82,8 +82,8 @@ export default function FinancialHistoryPage() {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="flex items-center justify-center h-96">
-          <p className="text-foreground">Please log in to view financial history</p>
+        <div className="flex items-center justify-center h-96 px-4">
+          <p className="text-foreground text-sm sm:text-base">Please log in to view financial history</p>
         </div>
         <Footer />
       </div>
@@ -94,8 +94,8 @@ export default function FinancialHistoryPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-foreground mb-8">Financial History</h1>
+      <main className="w-full max-w-full mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <h1 className="text-2xl sm:text-4xl font-bold text-foreground mb-6 sm:mb-8">Financial History</h1>
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 flex-wrap">

@@ -367,14 +367,14 @@ export default function LuxuryShowroomPage() {
       <div className="flex min-h-screen flex-col bg-black">
         <Header />
         <div
-          className="relative flex flex-1 items-center justify-center overflow-hidden"
+          className="relative flex flex-1 items-center justify-center overflow-hidden px-4"
           style={{ background: getBackgroundByLevel(1) }}
         >
           <Image src={SHOWROOM_BG} alt="showroom" className="absolute h-full w-full object-cover opacity-80" width={1920} height={1080} />
           <div className="absolute inset-0 bg-black/45" />
-          <div className="relative z-10 rounded-[28px] border border-white/10 bg-black/55 px-8 py-6 text-center backdrop-blur-xl">
+          <div className="relative z-10 rounded-[28px] border border-white/10 bg-black/55 px-6 sm:px-8 py-4 sm:py-6 text-center backdrop-blur-xl max-w-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.45em] text-white/45">Luxury Showroom</p>
-            <h2 className="mt-3 text-3xl font-black text-white">Carregando vitrine privada</h2>
+            <h2 className="mt-3 text-xl sm:text-3xl font-black text-white">Carregando vitrine privada</h2>
           </div>
         </div>
         <Footer />
@@ -383,7 +383,7 @@ export default function LuxuryShowroomPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-black pt-[140px]">
+    <div className="flex min-h-screen flex-col bg-black pt-16 sm:pt-20 md:pt-[140px]">
       <Header />
       <div className="relative flex-1 overflow-hidden" style={{ background: getBackgroundByLevel(level) }}>
         <div className="absolute inset-0">
@@ -404,11 +404,11 @@ export default function LuxuryShowroomPage() {
           )}
         </AnimatePresence>
 
-        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-140px)] w-full max-w-[1800px] flex-col gap-6 px-4 pb-8 pt-5 lg:px-8">
+        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-140px)] w-full max-w-full flex-col gap-4 sm:gap-6 px-3 sm:px-4 pb-6 sm:pb-8 pt-4 sm:pt-5 lg:px-8">
           {/* Placeholder for full JSX - keeping structure minimal for now */}
           <div className="text-white text-center">
-            <h2>Coleção {system.collectionName}</h2>
-            <p>Itens: {ownedCount} comprados</p>
+            <h2 className="text-lg sm:text-2xl font-bold">Coleção {system.collectionName}</h2>
+            <p className="text-sm sm:text-base">Itens: {ownedCount} comprados</p>
           </div>
         </div>
       </div>

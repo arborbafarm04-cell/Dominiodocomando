@@ -30,24 +30,24 @@ export default function GiroNoAsfaltoPage() {
       <SpinVaultNotification show={showNotification} amount={lastGainAmount} />
 
       {/* Navigation Buttons */}
-      <div className="absolute top-24 left-6 z-20 flex gap-3">
+      <div className="fixed top-20 left-3 sm:left-6 z-20 flex gap-2 sm:gap-3">
         <Button
           onClick={() => navigate('/')}
           variant="outline"
           size="sm"
-          className="bg-[#FF4500]/20 border-[#FF4500] text-white hover:bg-[#FF4500]/40"
+          className="bg-[#FF4500]/20 border-[#FF4500] text-white hover:bg-[#FF4500]/40 text-xs sm:text-sm"
         >
-          <Home className="w-4 h-4 mr-2" />
-          Home
+          <Home className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Home</span>
         </Button>
         <Button
           onClick={() => navigate(-1)}
           variant="outline"
           size="sm"
-          className="bg-[#00eaff]/20 border-[#00eaff] text-white hover:bg-[#00eaff]/40"
+          className="bg-[#00eaff]/20 border-[#00eaff] text-white hover:bg-[#00eaff]/40 text-xs sm:text-sm"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar
+          <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Voltar</span>
         </Button>
       </div>
 
@@ -61,7 +61,7 @@ export default function GiroNoAsfaltoPage() {
           className="w-full h-full object-cover fixed top-0 left-0 brightness-125 contrast-110"
         />
         {/* Slot Machine Component positioned inside the slot machine screen - TV display area */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-18 relative z-10">
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-16 sm:pb-18 relative z-10">
           <div className="bg-transparent flex items-center justify-center">
             <SlotMachine />
           </div>
@@ -69,11 +69,11 @@ export default function GiroNoAsfaltoPage() {
       </div>
 
       {/* Gallery Section */}
-      <div className="w-full bg-gradient-to-b from-[#0f1419] to-[#0a0d14] py-16 px-6">
+      <div className="w-full bg-gradient-to-b from-[#0f1419] to-[#0a0d14] py-12 sm:py-16 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-heading text-center mb-12 text-white">Galeria do Giro</h2>
+          <h2 className="text-2xl sm:text-4xl font-heading text-center mb-8 sm:mb-12 text-white">Galeria do Giro</h2>
           {/* Gallery Container */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">
             {/* Image 1 */}
             <div className="flex justify-center">
               <div className="rounded-lg overflow-hidden border border-[#00eaff]/30 hover:border-[#00eaff] transition-all">

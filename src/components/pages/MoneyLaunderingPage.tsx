@@ -77,20 +77,20 @@ export default function MoneyLaunderingPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
         <LoadingSpinner />
-        <p className="text-foreground mt-4">Carregando operações...</p>
+        <p className="text-foreground mt-4 text-sm sm:text-base">Carregando operações...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
         <div className="text-center">
-          <h1 className="text-4xl font-heading font-bold text-destructive mb-4">Erro</h1>
-          <p className="text-lg text-foreground mb-8">{error}</p>
-          <Button onClick={() => navigate('/')} className="bg-primary hover:bg-primary/80">
+          <h1 className="text-2xl sm:text-4xl font-heading font-bold text-destructive mb-4">Erro</h1>
+          <p className="text-base sm:text-lg text-foreground mb-8">{error}</p>
+          <Button onClick={() => navigate('/')} className="bg-primary hover:bg-primary/80 text-sm sm:text-base">
             Voltar ao Login
           </Button>
         </div>
@@ -102,50 +102,50 @@ export default function MoneyLaunderingPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <div className="fixed top-24 left-6 z-20 flex gap-3">
+      <div className="fixed top-20 left-3 sm:left-6 z-20 flex gap-2 sm:gap-3">
         <Button
           onClick={() => navigate('/')}
           variant="outline"
           size="sm"
-          className="bg-[#FF4500]/20 border-[#FF4500] text-white hover:bg-[#FF4500]/40"
+          className="bg-[#FF4500]/20 border-[#FF4500] text-white hover:bg-[#FF4500]/40 text-xs sm:text-sm"
         >
-          <Home className="w-4 h-4 mr-2" />
-          Home
+          <Home className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Home</span>
         </Button>
         <Button
           onClick={() => navigate(-1)}
           variant="outline"
           size="sm"
-          className="bg-[#00eaff]/20 border-[#00eaff] text-white hover:bg-[#00eaff]/40"
+          className="bg-[#00eaff]/20 border-[#00eaff] text-white hover:bg-[#00eaff]/40 text-xs sm:text-sm"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar
+          <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Voltar</span>
         </Button>
       </div>
 
-      <main className="flex-1 w-full max-w-[120rem] mx-auto px-4 py-20">
+      <main className="flex-1 w-full max-w-full mx-auto px-3 sm:px-4 py-16 sm:py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="mb-12">
-            <h1 className="text-5xl font-heading font-bold text-foreground mb-2">
+          <div className="mb-8 sm:mb-12">
+            <h1 className="text-3xl sm:text-5xl font-heading font-bold text-foreground mb-2">
               💧 Operações de Lavagem
             </h1>
-            <p className="text-lg text-secondary">
+            <p className="text-base sm:text-lg text-secondary">
               Jogador:{' '}
               <span className="font-bold">
                 {player?.playerName || member?.profile?.nickname || 'Desconhecido'}
               </span>
             </p>
-            <p className="text-lg text-secondary">
+            <p className="text-base sm:text-lg text-secondary">
               Dinheiro Sujo:{' '}
               <span className="font-bold text-orange-400">
                 ${(player?.dirtyMoney ?? 0).toLocaleString()}
               </span>
             </p>
-            <p className="text-lg text-secondary">
+            <p className="text-base sm:text-lg text-secondary">
               Dinheiro Limpo:{' '}
               <span className="font-bold text-green-400">
                 ${(player?.cleanMoney ?? 0).toLocaleString()}
@@ -154,7 +154,7 @@ export default function MoneyLaunderingPage() {
           </div>
 
           {businesses.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {businesses.map((business) => (
                 <MoneyLaunderingBusiness
                   key={business._id}
@@ -172,8 +172,8 @@ export default function MoneyLaunderingPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-lg text-foreground/70">
+            <div className="text-center py-12 px-4">
+              <p className="text-base sm:text-lg text-foreground/70">
                 Nenhuma operação de lavagem disponível no momento.
               </p>
             </div>

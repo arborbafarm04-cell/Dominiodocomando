@@ -28,15 +28,15 @@ export default function Header() {
 
   return (
     <header className="w-full bg-background/80 backdrop-blur-sm border-b border-secondary/30 sticky top-0 z-50">
-      <div className="w-full max-w-[120rem] mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="w-full max-w-full mx-auto px-3 sm:px-4 py-3 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
         {/* Logo/Title */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-3 cursor-pointer"
+          className="flex items-center gap-2 sm:gap-3 cursor-pointer"
           onClick={() => navigate('/')}
         >
-          <div className="text-2xl font-heading font-bold bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end bg-clip-text text-transparent">
+          <div className="text-xl sm:text-2xl font-heading font-bold bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end bg-clip-text text-transparent">
             COMPLEXO
           </div>
           <div className="text-xs text-secondary">v1.0</div>
@@ -47,23 +47,23 @@ export default function Header() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="hidden md:flex items-center gap-6 text-sm"
+            className="hidden lg:flex items-center gap-3 lg:gap-6 text-xs sm:text-sm"
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <span className="text-secondary">LVL:</span>
               <span className="font-bold text-white">{level}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <span className="text-secondary">🏠:</span>
               <span className="font-bold text-white">{barracoLevel}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <span className="text-logo-gradient-start">💵:</span>
-              <span className="font-bold text-logo-gradient-start">{formatMoney(dirtyMoney)}</span>
+              <span className="font-bold text-logo-gradient-start text-xs">{formatMoney(dirtyMoney)}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <span className="text-green-400">💚:</span>
-              <span className="font-bold text-green-400">{formatMoney(cleanMoney)}</span>
+              <span className="font-bold text-green-400 text-xs">{formatMoney(cleanMoney)}</span>
             </div>
           </motion.div>
         )}
@@ -72,7 +72,7 @@ export default function Header() {
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-3"
+          className="flex items-center gap-2 sm:gap-3"
         >
           {player ? (
             <>
@@ -80,9 +80,10 @@ export default function Header() {
                 onClick={() => navigate('/profile')}
                 variant="ghost"
                 size="sm"
-                className="text-secondary hover:text-white hover:bg-secondary/10"
+                className="text-secondary hover:text-white hover:bg-secondary/10 text-xs sm:text-sm"
               >
                 <span className="hidden sm:inline">{playerName || 'Perfil'}</span>
+                <span className="sm:hidden">👤</span>
               </Button>
               <Button
                 onClick={async () => {
@@ -92,9 +93,9 @@ export default function Header() {
                 }}
                 variant="ghost"
                 size="sm"
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs sm:text-sm"
               >
-                <LogOut className="w-4 h-4 mr-2" />
+                <LogOut className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Sair</span>
               </Button>
             </>
@@ -103,9 +104,9 @@ export default function Header() {
               onClick={() => navigate('/')}
               variant="ghost"
               size="sm"
-              className="text-secondary hover:text-white hover:bg-secondary/10"
+              className="text-secondary hover:text-white hover:bg-secondary/10 text-xs sm:text-sm"
             >
-              <Home className="w-4 h-4 mr-2" />
+              <Home className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Início</span>
             </Button>
           )}

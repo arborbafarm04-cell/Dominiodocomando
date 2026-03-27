@@ -61,7 +61,7 @@ if (isPageLoading) {
   }
 
   return (
-    <div className="w-full h-screen bg-black relative overflow-hidden">
+    <div className="w-full min-h-screen bg-black relative overflow-hidden flex flex-col">
 
       {/* 🌃 GRADIENTE AMBIENTE */}
       <div className="absolute inset-0 bg-gradient-to-b from-black via-[#0a0a0a] to-black z-0" />
@@ -72,28 +72,28 @@ if (isPageLoading) {
       <Header />
 
       {/* 🧠 MAPA */}
-      <div className="absolute inset-0 z-10">
+      <div className="flex-1 relative z-10 w-full">
         <InteractiveTileGrid
           onLuxuryStoreClick={handleLuxuryStoreClick}
           onQGClick={handleQGClick}
           onGiroClick={handleGiroClick}
         />
       </div>
-{/* 💬 NOTIFICAÇÕES */}
+      {/* 💬 NOTIFICAÇÕES */}
       {showLuxuryNotification && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-yellow-500 text-black px-6 py-2 rounded-lg font-bold shadow-lg z-20">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-yellow-500 text-black px-4 sm:px-6 py-2 rounded-lg font-bold shadow-lg z-20 text-sm sm:text-base">
           Entrando na Loja de Luxo...
         </div>
       )}
 
       {showQGNotification && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg z-20">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg font-bold shadow-lg z-20 text-sm sm:text-base">
           QG do Comando
         </div>
       )}
 
       {showGiroNotification && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-green-500 text-black px-6 py-2 rounded-lg font-bold shadow-lg z-20">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-green-500 text-black px-4 sm:px-6 py-2 rounded-lg font-bold shadow-lg z-20 text-sm sm:text-base">
           Giro no Asfalto...
         </div>
       )}
