@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { SkillUpgradeAnimations, AnimatedConnection, CompletionBackgroundGlow } from '@/components/SkillUpgradeAnimations';
-import { useMember } from '@/integrations';
 import { BaseCrudService } from '@/integrations';
 import { Players } from '@/entities';
 import { Comercios, COMERCIOS_KEYS, ComercioKey } from '@/types/comercios';
@@ -44,8 +43,8 @@ export default function InvestmentSkillTreePage() {
     getSkill,
   } = useInvestmentSkillTreeStore();
   
+  const player = usePlayerStore((state) => state.player);
   const { dirtyMoney } = usePlayerStore();
-  const { member } = useMember();
 
   const [selectedSkill, setSelectedSkill] = useState<SkillModalData | null>(null);
   const [scale, setScale] = useState(1);
@@ -62,13 +61,13 @@ export default function InvestmentSkillTreePage() {
   // Carregar dados de comércios
   useEffect(() => {
     const loadComercios = async () => {
-      if (!member?._id || activeTab !== 'negocios') return;
+      if (!player?._id || activeTab !== 'negocios') return;
       setIsLoadingComercios(true);
       try {
-        const player = await BaseCrudService.getById<Players>('players', member._id);
-        if (player) {
-          setPlayerData(player);
-          const comerciosData = player.comercios ? JSON.parse(player.comercios) : null;
+        const playerInfo = await BaseCrudService.getById<Players>('players', player._id);
+        if (playerInfo) {
+          setPlayerData(playerInfo);
+          const comerciosData = playerInfo.comercios ? JSON.parse(playerInfo.comercios) : null;
           setComercios(comerciosData);
         }
       } catch (error) {
@@ -78,21 +77,21 @@ export default function InvestmentSkillTreePage() {
       }
     };
     loadComercios();
-  }, [member?._id, activeTab]);
+  }, [player?._id, activeTab]);
 
   const handleUpgradeCapacidade = async (comercioKey: ComercioKey) => {
-    if (!member?._id || !playerData) return;
+    if (!player?._id || !playerData) return;
     try {
       const resultado = await comerciosService.upgradeCapacidade(
-        member._id,
+        player._id,
         comercioKey,
         playerData.cleanMoney || 0
       );
       if (resultado.sucesso) {
-        const player = await BaseCrudService.getById<Players>('players', member._id);
-        if (player) {
-          setPlayerData(player);
-          const comerciosData = player.comercios ? JSON.parse(player.comercios) : null;
+        const playerInfo = await BaseCrudService.getById<Players>('players', player._id);
+        if (playerInfo) {
+          setPlayerData(playerInfo);
+          const comerciosData = playerInfo.comercios ? JSON.parse(playerInfo.comercios) : null;
           setComercios(comerciosData);
         }
       } else {
@@ -105,18 +104,18 @@ export default function InvestmentSkillTreePage() {
   };
 
   const handleUpgradeEficiencia = async (comercioKey: ComercioKey) => {
-    if (!member?._id || !playerData) return;
+    if (!player?._id || !playerData) return;
     try {
       const resultado = await comerciosService.upgradeEficiencia(
-        member._id,
+        player._id,
         comercioKey,
         playerData.cleanMoney || 0
       );
       if (resultado.sucesso) {
-        const player = await BaseCrudService.getById<Players>('players', member._id);
-        if (player) {
-          setPlayerData(player);
-          const comerciosData = player.comercios ? JSON.parse(player.comercios) : null;
+        const playerInfo = await BaseCrudService.getById<Players>('players', player._id);
+        if (playerInfo) {
+          setPlayerData(playerInfo);
+          const comerciosData = playerInfo.comercios ? JSON.parse(playerInfo.comercios) : null;
           setComercios(comerciosData);
         }
       } else {

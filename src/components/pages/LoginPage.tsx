@@ -1,26 +1,8 @@
-import { useEffect, useState } from 'react';
-import { useMember } from '@/integrations';
-import { useNavigate } from 'react-router-dom';
-import { useGameScreenStore } from '@/store/gameScreenStore';
-
 import Footer from '@/components/Footer';
-import GoogleLoginButton from '@/components/GoogleLoginButton';
 import LocalLoginForm from '@/components/LocalLoginForm';
 import { motion } from 'framer-motion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function LoginPage() {
-  const { member, isAuthenticated } = useMember();
-  const navigate = useNavigate();
-  const { setCurrentScreen } = useGameScreenStore();
-  const [activeTab, setActiveTab] = useState('google');
-
-  useEffect(() => {
-    if (isAuthenticated && member) {
-      // Redirect to star map after successful login
-      navigate('/star-map');
-    }
-  }, [isAuthenticated, member, navigate]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -32,64 +14,39 @@ export default function LoginPage() {
           className="w-full max-w-2xl"
         >
           {/* Login Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-background/50 border border-secondary/30 rounded-lg p-1 mb-6">
-              <TabsTrigger 
-                value="google"
-                className="font-heading text-sm font-bold data-[state=active]:bg-primary data-[state=active]:text-white"
-              >
-                🔐 Google
-              </TabsTrigger>
-              <TabsTrigger 
-                value="local"
-                className="font-heading text-sm font-bold data-[state=active]:bg-primary data-[state=active]:text-white"
-              >
-                📧 Email & Senha
-              </TabsTrigger>
-            </TabsList>
+          <div className="bg-background/50 backdrop-blur-sm border-2 border-secondary/30 rounded-lg p-8 shadow-2xl">
+            {/* Title */}
+            <div className="mb-8 text-center">
+              <h1 className="font-heading text-5xl font-bold text-foreground mb-2">
+                Bem-vindo
+              </h1>
+              <p className="font-paragraph text-lg text-secondary">
+                ao Jogo Multiplayer
+              </p>
+            </div>
 
-            {/* Google Login Tab */}
-            <TabsContent value="google" className="space-y-4">
-              <div className="bg-background/50 backdrop-blur-sm border-2 border-secondary/30 rounded-lg p-8 shadow-2xl">
-                {/* Title */}
-                <div className="mb-8 text-center">
-                  <h1 className="font-heading text-5xl font-bold text-foreground mb-2">
-                    Bem-vindo
-                  </h1>
-                  <p className="font-paragraph text-lg text-secondary">
-                    ao Jogo Multiplayer
-                  </p>
-                </div>
-
-                {/* Description */}
-                <div className="mb-8">
-                  <p className="font-paragraph text-foreground text-center mb-4">
-                    Faça login com sua conta Google para começar a jogar e competir com outros jogadores.
-                  </p>
-                  <div className="bg-primary/10 border-l-4 border-primary rounded px-4 py-3">
-                    <p className="font-paragraph text-sm text-foreground">
-                      ✓ Acesso seguro via Google<br />
-                      ✓ Sincronize seu progresso<br />
-                      ✓ Jogue com amigos
-                    </p>
-                  </div>
-                </div>
-
-                {/* Login Button */}
-                <GoogleLoginButton />
-
-                {/* Footer Text */}
-                <p className="font-paragraph text-xs text-foreground/50 text-center mt-6">
-                  Ao fazer login, você concorda com nossos Termos de Serviço
+            {/* Description */}
+            <div className="mb-8">
+              <p className="font-paragraph text-foreground text-center mb-4">
+                Faça login com sua conta de email para começar a jogar.
+              </p>
+              <div className="bg-primary/10 border-l-4 border-primary rounded px-4 py-3">
+                <p className="font-paragraph text-sm text-foreground">
+                  ✓ Acesso seguro com email e senha<br />
+                  ✓ Sincronize seu progresso<br />
+                  ✓ Jogue com amigos
                 </p>
               </div>
-            </TabsContent>
+            </div>
 
-            {/* Local Login Tab */}
-            <TabsContent value="local">
-              <LocalLoginForm />
-            </TabsContent>
-          </Tabs>
+            {/* Local Login Form */}
+            <LocalLoginForm />
+
+            {/* Footer Text */}
+            <p className="font-paragraph text-xs text-foreground/50 text-center mt-6">
+              Ao fazer login, você concorda com nossos Termos de Serviço
+            </p>
+          </div>
 
           {/* Features Section */}
           <motion.div

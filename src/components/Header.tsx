@@ -1,13 +1,12 @@
 import { usePlayerStore } from '@/store/playerStore';
-import { useMember } from '@/integrations';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User, Home } from 'lucide-react';
+import { LogOut, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { destroySession } from '@/services/authService';
 
 export default function Header() {
   const navigate = useNavigate();
-  const { member, isAuthenticated, actions, isLoading } = useMember();
   
   // Get player data from centralized store
   const { 
@@ -15,7 +14,9 @@ export default function Header() {
     level, 
     dirtyMoney, 
     cleanMoney, 
-    barracoLevel 
+    barracoLevel,
+    player,
+    reset
   } = usePlayerStore();
 
   const formatMoney = (value: number) => {
@@ -42,7 +43,7 @@ export default function Header() {
         </motion.div>
 
         {/* Player Stats - Center */}
-        {isAuthenticated && playerName && (
+        {player && playerName && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -73,9 +74,7 @@ export default function Header() {
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-3"
         >
-          {isLoading ? (
-            <div className="text-secondary text-sm">Carregando...</div>
-          ) : isAuthenticated ? (
+          {player ? (
             <>
               <Button
                 onClick={() => navigate('/profile')}
@@ -83,11 +82,14 @@ export default function Header() {
                 size="sm"
                 className="text-secondary hover:text-white hover:bg-secondary/10"
               >
-                <User className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">{member?.profile?.nickname || 'Perfil'}</span>
+                <span className="hidden sm:inline">{playerName || 'Perfil'}</span>
               </Button>
               <Button
-                onClick={() => actions.logout()}
+                onClick={async () => {
+                  await destroySession();
+                  reset();
+                  navigate('/');
+                }}
                 variant="ghost"
                 size="sm"
                 className="text-destructive hover:text-destructive hover:bg-destructive/10"
@@ -108,7 +110,7 @@ export default function Header() {
                 <span className="hidden sm:inline">Início</span>
               </Button>
               <Button
-                onClick={() => actions.login()}
+                onClick={() => navigate('/login')}
                 size="sm"
                 className="bg-primary hover:bg-primary/80 text-white"
               >

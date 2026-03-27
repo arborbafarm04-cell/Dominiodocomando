@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useCommercialCenterStore } from '@/store/commercialCenterStore';
-import { useMember } from '@/integrations';
+import { usePlayerStore } from '@/store/playerStore';
 import { motion } from 'framer-motion';
 import { Percent, TrendingUp, Users, DollarSign } from 'lucide-react';
 import { BaseCrudService } from '@/integrations';
@@ -20,28 +20,28 @@ interface UpgradeOption {
 
 export default function CommercialCenterUpgrades() {
   const commercialStore = useCommercialCenterStore();
-  const { member } = useMember();
+  const player = usePlayerStore((state) => state.player);
   const [dirtyMoney, setDirtyMoney] = useState(0);
   const [playerData, setPlayerData] = useState<Players | null>(null);
 
-  // Carregar dados do jogador usando playerId único (member._id)
+  // Carregar dados do jogador usando playerId único
   useEffect(() => {
-    if (!member?._id) return;
+    if (!player?._id) return;
 
     const loadPlayerData = async () => {
       try {
-        const playerId = member._id;
-        const player = await BaseCrudService.getById<Players>('players', playerId);
-        if (player) {
-          setPlayerData(player);
-          setDirtyMoney(player.dirtyMoney || 0);
+        const playerId = player._id;
+        const playerInfo = await BaseCrudService.getById<Players>('players', playerId);
+        if (playerInfo) {
+          setPlayerData(playerInfo);
+          setDirtyMoney(playerInfo.dirtyMoney || 0);
         }
       } catch (error) {
         console.error('Erro ao carregar dados do jogador:', error);
       }
     };
     loadPlayerData();
-  }, [member?._id]);
+  }, [player?._id]);
 
   const upgrades: UpgradeOption[] = [
     {

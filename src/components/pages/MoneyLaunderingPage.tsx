@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMember } from '@/integrations';
 import { BaseCrudService } from '@/integrations';
 import { MoneyLaunderingBusinesses } from '@/entities';
 import { usePlayerStore } from '@/store/playerStore';
@@ -15,7 +14,6 @@ import { Button } from '@/components/ui/button';
 
 export default function MoneyLaunderingPage() {
   const navigate = useNavigate();
-  const { member, isAuthenticated, isLoading: isAuthLoading } = useMember();
 
   const player = usePlayerStore((state) => state.player);
   const setPlayer = usePlayerStore((state) => state.setPlayer);
@@ -27,18 +25,13 @@ export default function MoneyLaunderingPage() {
   const initRef = useRef(false);
 
   useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
+    if (!player?._id) {
       navigate('/login');
     }
-  }, [isAuthenticated, isAuthLoading, navigate]);
+  }, [player?._id, navigate]);
 
   useEffect(() => {
-    if (initRef.current || !isAuthenticated) return;
-    if (!player?._id) {
-      setIsLoading(false);
-      setError('Jogador não encontrado');
-      return;
-    }
+    if (initRef.current || !player?._id) return;
 
     initRef.current = true;
 
@@ -67,7 +60,7 @@ export default function MoneyLaunderingPage() {
     };
 
     loadData();
-  }, [isAuthenticated, player?._id, setPlayer]);
+  }, [player?._id, setPlayer]);
 
   const reloadPlayer = async () => {
     if (!player?._id) return;
