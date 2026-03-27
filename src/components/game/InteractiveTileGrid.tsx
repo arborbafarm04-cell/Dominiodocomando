@@ -112,8 +112,8 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x06080d);
-    // TAREFA 9 — ATMOSFERA CINEMATOGRÁFICA
-    scene.fog = new THREE.Fog(0x0a1a2e, 32, 110);
+    // BLOCO 9 — FOG (PROFUNDO)
+    scene.fog = new THREE.Fog(0x09111a, 25, 110);
 
     const width = containerRef.current.clientWidth;
     const height = containerRef.current.clientHeight;
@@ -143,11 +143,12 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     renderer.toneMappingExposure = 1.55;
     containerRef.current.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.85);
+    // BLOCO 7 — LUZ GLOBAL (ESSENCIAL)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2);
     scene.add(ambientLight);
 
-    const moonLight = new THREE.DirectionalLight(0xcfe8ff, 3.8);
-    moonLight.position.set(25, 50, 20);
+    const moonLight = new THREE.DirectionalLight(0xcfe8ff, 3.5);
+    moonLight.position.set(20, 40, 20);
     moonLight.castShadow = true;
     moonLight.shadow.mapSize.width = 2048;
     moonLight.shadow.mapSize.height = 2048;
@@ -159,17 +160,15 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     moonLight.shadow.bias = -0.00012;
     scene.add(moonLight);
 
-    const blueFillLight = new THREE.DirectionalLight(0x00d9ff, 1.5);
-    blueFillLight.position.set(-28, 18, -18);
-    scene.add(blueFillLight);
+    const blueLight = new THREE.DirectionalLight(0x00eaff, 1.5);
+    blueLight.position.set(-20, 10, -10);
+    scene.add(blueLight);
 
-    const warmFillLight = new THREE.DirectionalLight(0xffb347, 2.2);
-    warmFillLight.position.set(16, 14, 12);
-    scene.add(warmFillLight);
+    const warmLight = new THREE.DirectionalLight(0xffa64d, 2);
+    warmLight.position.set(10, 10, 10);
+    scene.add(warmLight);
 
-    const rimLight = new THREE.DirectionalLight(0x7ae7ff, 1.25);
-    rimLight.position.set(0, 20, -35);
-    scene.add(rimLight);
+    // ... keep existing code (rimLight and other lights)
 
     const centerGlow = new THREE.PointLight(0x00eaff, 3.0, 28, 2);
     centerGlow.position.set(0, 5, 0);
@@ -357,13 +356,14 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       emissiveIntensity: 0.25,
     });
 
+    // BLOCO 6 — FAVELA MAIS ORGÂNICA
     const favelaMaterial = new THREE.MeshStandardMaterial({
       map: dirtTexture,
-      color: 0x6b5e4a,
+      color: 0x5a4c3b,
       roughness: 0.95,
-      metalness: 0.02,
-      emissive: new THREE.Color(0x120d08),
-      emissiveIntensity: 0.08,
+      metalness: 0.05,
+      emissive: 0x120d08,
+      emissiveIntensity: 0.12,
     });
 
     const cityTileCount = CITY_COLUMNS * gridHeight;
@@ -785,6 +785,15 @@ const gridLinesGeometry = new THREE.BufferGeometry();
             aaa3dSystemRef.current.applyBuildingVisuals(group, 'building');
             aaa3dSystemRef.current.addGroundShadow(group, Math.max(sizeX, sizeZ));
           }
+
+          // BLOCO 8 — PRÉDIOS COM VIDA
+          const light = new THREE.PointLight(0xffffff, 1.2, 6);
+          light.position.set(0, 2, 0);
+          group.add(light);
+
+          const neon = new THREE.PointLight(0x00eaff, 0.8, 5);
+          neon.position.set(0, 1.5, 0);
+          group.add(neon);
 
           onLoaded?.(group);
         },
