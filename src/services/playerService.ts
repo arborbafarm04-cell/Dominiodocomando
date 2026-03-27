@@ -116,13 +116,17 @@ export async function registerPlayer(email: string, playerName: string, _nicknam
  */
 export async function registerLocalPlayer(email: string, password: string, playerName: string) {
   const normalizedEmail = email.trim().toLowerCase();
-  const playerId = crypto.randomUUID();
-  const newPlayer = buildNewPlayerData(playerId, normalizedEmail, playerName.trim());
+  const tempPlayerId = crypto.randomUUID();
+  const newPlayer = buildNewPlayerData(tempPlayerId, normalizedEmail, playerName.trim());
 
   const createdPlayer = await createPlayerInDatabase(newPlayer);
 
-  await registerCredentials(normalizedEmail, password, playerId);
-  await createSession(playerId, normalizedEmail);
+  if (!createdPlayer?._id) {
+    throw new Error('Falha ao criar jogador no banco de dados');
+  }
+
+  await registerCredentials(normalizedEmail, password, createdPlayer._id);
+  await createSession(createdPlayer._id, normalizedEmail);
 
   return createdPlayer;
 }
