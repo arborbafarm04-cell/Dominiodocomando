@@ -23,7 +23,8 @@ function buildNewPlayerData(playerId: string, email: string, playerName: string)
   return {
     _id: playerId,
     email,
-    playerId: email,
+    playerId, // 🔥 corrigido
+
     playerName: playerName || 'Player',
 
     cleanMoney: 0,
@@ -32,8 +33,6 @@ function buildNewPlayerData(playerId: string, email: string, playerName: string)
 
     level: 1,
     progress: 0,
-    xp: 0,
-    power: 0,
     barracoLevel: 1,
 
     comercios: JSON.stringify(comercios),
@@ -108,97 +107,60 @@ export async function registerPlayer(email: string, playerName: string, _nicknam
   return createPlayerInDatabase(newPlayer);
 }
 
-/**
- * Register new player with email/password
- * Step 1: Create player in database with fixed _id
- * Step 2: Register credentials in auth system
- * Step 3: Create authenticated session
- */
 export async function registerLocalPlayer(email: string, password: string, playerName: string) {
   const normalizedEmail = email.trim().toLowerCase();
   const tempPlayerId = crypto.randomUUID();
   const newPlayer = buildNewPlayerData(tempPlayerId, normalizedEmail, playerName.trim());
 
-  console.log('📝 Criando novo player:', { email: normalizedEmail, playerName, playerId: tempPlayerId });
-
   const createdPlayer = await createPlayerInDatabase(newPlayer);
 
   if (!createdPlayer?._id) {
-    console.error('❌ Falha ao criar jogador no banco de dados');
     throw new Error('Falha ao criar jogador no banco de dados');
   }
 
-  console.log('✅ Player criado com sucesso:', createdPlayer._id);
-
-  console.log('🔐 Registrando credenciais...');
   await registerCredentials(normalizedEmail, password, createdPlayer._id);
-
-  console.log('🎮 Criando sessão...');
   await createSession(createdPlayer._id, normalizedEmail);
 
-  console.log('✅ Registro concluído com sucesso');
   return createdPlayer;
 }
 
-/**
- * Login player with email/password
- *
- * Step 1: Reset old session
- * Step 2: Validate email and password
- * Step 3: Load player data from database (with fallback)
- * Step 4: Create authenticated session
- * Step 5: Update last login timestamp
- * Step 6: Return player data
- */
 export async function loginLocalPlayer(email: string, password: string) {
   const normalizedEmail = email.trim().toLowerCase();
-
-  console.log('🔐 Iniciando login para:', normalizedEmail);
 
   await resetPlayerSession();
 
   const playerId = await validateCredentials(normalizedEmail, password);
-  console.log('✅ Credenciais validadas. PlayerId:', playerId);
 
   let player = await getPlayerFromDatabase(playerId);
-  console.log('🔍 Player encontrado por ID?', !!player);
 
-  // Fallback: se não encontrar por playerId, buscar por email normalizado
   if (!player) {
-    console.log('⚠️ Player não encontrado por ID, buscando por email...');
     const result = await getAllPlayers();
     const allPlayers = result.items || [];
-    console.log('📊 Total de players no banco:', allPlayers.length);
 
     const playerByEmail = allPlayers.find(
       (p) => p.email?.toLowerCase() === normalizedEmail
     );
 
     if (playerByEmail) {
-      console.log('✅ Player encontrado por email:', playerByEmail._id);
       player = playerByEmail;
     } else {
-      console.error('❌ Player não encontrado por email nem por ID');
       throw new Error('Jogador não encontrado no banco de dados');
     }
   }
 
-  // Validar que temos um player válido
   if (!player || !player._id) {
     throw new Error('Dados do jogador inválidos');
   }
 
-  console.log('🎮 Criando sessão para player:', player._id);
-  // Usar o _id real do player encontrado
   await createSession(player._id, normalizedEmail);
 
   const now = new Date().toISOString();
+
   const updatedPlayer = await savePlayerInDatabase({
     ...player,
     lastLoginAt: now,
   });
 
-  console.log('✅ Login concluído com sucesso para:', updatedPlayer.playerName);
   return updatedPlayer;
 }
 
@@ -210,17 +172,38 @@ export async function getCurrentLocalPlayer() {
   const session = await getAuthSession();
   if (!session) return null;
 
-  return getPlayerFromDatabase(session.playerId);
+  let player = await getPlayerFromDatabase(session.playerId);
+
+  if (!player) {
+    const result = await getAllPlayers();
+    const allPlayers = result.items || [];
+
+    const fallback = allPlayers.find(
+      (p) => p.email?.toLowerCase() === session.email?.toLowerCase()
+    );
+
+    if (fallback) {
+      player = fallback;
+    }
+  }
+
+  return player || null;
 }
 
 export async function isPlayerAuthenticated(): Promise<boolean> {
   const session = await getAuthSession();
   if (!session) return false;
 
-  try {
-    const player = await getPlayerFromDatabase(session.playerId);
-    return !!player;
-  } catch {
-    return false;
+  let player = await getPlayerFromDatabase(session.playerId);
+
+  if (!player) {
+    const result = await getAllPlayers();
+    const allPlayers = result.items || [];
+
+    player = allPlayers.find(
+      (p) => p.email?.toLowerCase() === session.email?.toLowerCase()
+    );
   }
+
+  return !!player;
 }
