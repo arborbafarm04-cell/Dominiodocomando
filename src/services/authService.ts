@@ -1,100 +1,61 @@
-import {
-  storeCredential,
-  getCredential,
-  storeSession,
-  getSession,
-  clearSession,
-  credentialExists,
-} from './indexedDBService';
+// authService.ts
 
-/**
- * Central Authentication Service
- * Handles email/password validation and session management
- * Separated from player data loading
- */
+import crypto from 'crypto';
+import { getSessionToken, saveSessionToken } from './sessionService';
+import { User } from '../models/user';
 
-export interface AuthCredentials {
-  email: string;
-  playerId: string;
-}
+// Validate email format using regex
+const isValidEmail = (email) => {
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return re.test(String(email).toLowerCase());
+};
 
-function normalizeEmail(email: string): string {
-  return email.trim().toLowerCase();
-}
+// Strong password validation function
+const isValidPassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /[0-9]/.test(password);
+    const hasNonalphas = /[!@#$%^&*]/.test(password);
+    return (
+        password.length >= minLength &&
+        hasUpperCase &&
+        hasLowerCase &&
+        hasNumbers &&
+        hasNonalphas
+    );
+};
 
-/**
- * Validate email and password, return player ID if valid
- */
-export async function validateCredentials(email: string, password: string): Promise<string> {
-  const normalizedEmail = normalizeEmail(email);
-  const credential = await getCredential(normalizedEmail);
+// Hash password using crypto
+const hashPassword = (password) => {
+    return crypto.createHash('sha256').update(password).digest('hex');
+};
 
-  if (!credential) {
-    throw new Error('Email não encontrado');
-  }
+// Authenticate user function
+export const authenticateUser = async (email, password) => {
+    try {
+        if (!isValidEmail(email)) {
+            throw new Error('Invalid email format.');
+        }
+        if (!isValidPassword(password)) {
+            throw new Error('Password does not meet the complexity requirements.');
+        }
 
-  const hashedPassword = btoa(password);
-  if (credential.password !== hashedPassword) {
-    throw new Error('Senha incorreta');
-  }
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new Error('User not found.');
+        }
 
-  return credential.playerId;
-}
+        const hashedPassword = hashPassword(password);
+        if (hashedPassword !== user.password) {
+            throw new Error('Incorrect password.');
+        }
 
-/**
- * Register new credentials in the authentication system
- */
-export async function registerCredentials(
-  email: string,
-  password: string,
-  playerId: string
-): Promise<void> {
-  const normalizedEmail = normalizeEmail(email);
-  const exists = await credentialExists(normalizedEmail);
-
-  if (exists) {
-    throw new Error('Email já registrado');
-  }
-
-  const hashedPassword = btoa(password);
-  await storeCredential(normalizedEmail, hashedPassword, playerId);
-}
-
-/**
- * Create authenticated session
- */
-export async function createSession(playerId: string, email: string): Promise<void> {
-  const normalizedEmail = normalizeEmail(email);
-  await storeSession(playerId, normalizedEmail);
-}
-
-/**
- * Get current authenticated session
- */
-export async function getAuthSession(): Promise<AuthCredentials | null> {
-  const session = await getSession();
-
-  if (!session?.playerId || !session?.email) {
-    return null;
-  }
-
-  return {
-    email: normalizeEmail(session.email),
-    playerId: session.playerId,
-  };
-}
-
-/**
- * Destroy authenticated session
- */
-export async function destroySession(): Promise<void> {
-  await clearSession();
-}
-
-/**
- * Check if user is authenticated
- */
-export async function isAuthenticated(): Promise<boolean> {
-  const session = await getAuthSession();
-  return !!session;
-}
+        const token = getSessionToken();
+        saveSessionToken(user.id, token);
+        return { user, token };
+    } catch (error) {
+        console.error('Authentication error:', error);
+        throw error;
+    }
+};
