@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import InteractiveTileGrid from '@/components/game/InteractiveTileGrid';
 import { useEnsurePlayerLot } from '@/hooks/useEnsurePlayerLot';
 import { usePlayerLot } from '@/hooks/usePlayerLot';
@@ -61,7 +60,7 @@ if (isPageLoading) {
   }
 
   return (
-    <div className="w-full min-h-screen bg-black relative overflow-hidden flex flex-col">
+    <div className="w-full h-screen bg-black relative overflow-hidden flex flex-col">
 
       {/* 🌃 GRADIENTE AMBIENTE */}
       <div className="absolute inset-0 bg-gradient-to-b from-black via-[#0a0a0a] to-black z-0" />
@@ -72,7 +71,7 @@ if (isPageLoading) {
       <Header />
 
       {/* 🧠 MAPA */}
-      <div className="flex-1 relative z-10 w-full">
+      <div className="flex-1 relative z-10 w-full h-full">
         <InteractiveTileGrid
           onLuxuryStoreClick={handleLuxuryStoreClick}
           onQGClick={handleQGClick}
@@ -97,8 +96,6 @@ if (isPageLoading) {
           Giro no Asfalto...
         </div>
       )}
-
-      <Footer />
     </div>
   );
 }
