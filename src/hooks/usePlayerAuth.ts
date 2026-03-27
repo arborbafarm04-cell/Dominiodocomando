@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getAuthSession } from '@/services/authService';
-import { getPlayerFromDatabase, getAllPlayers } from '@/services/playerCoreService';
+import { getPlayer, getAllPlayers } from '@/services/playerCoreService';
 import { usePlayerStore } from '@/store/playerStore';
 
 export function usePlayerAuth() {
@@ -25,17 +25,16 @@ export function usePlayerAuth() {
           return;
         }
 
-        // 🔍 tenta pelo playerId
-        let player = await getPlayerFromDatabase(session.playerId);
+        let player = await getPlayer(session.playerId);
 
-        // 🔁 fallback por email
         if (!player) {
           const result = await getAllPlayers();
           const allPlayers = result.items || [];
 
-          player = allPlayers.find(
-            (p) => p.email?.toLowerCase() === session.email?.toLowerCase()
-          );
+          player =
+            allPlayers.find(
+              (p) => p.email?.toLowerCase() === session.email?.toLowerCase()
+            ) || null;
         }
 
         if (!player || !player._id) {
