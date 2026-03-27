@@ -1,4 +1,3 @@
-import { MemberProvider } from '@/integrations';
 import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-router-dom';
 import { ScrollToTop } from '@/lib/scroll-to-top';
 import ErrorPage from '@/integrations/errorHandlers/ErrorPage';
@@ -26,7 +25,6 @@ const ResetInvestmentPage = lazy(() => import('@/components/pages/ResetInvestmen
 const InvestmentSkillTreePage = lazy(() => import('@/components/pages/InvestmentSkillTreePage'));
 const CommercialCenterPage = lazy(() => import('@/components/pages/CommercialCenterPage'));
 const ProfilePage = lazy(() => import('@/components/pages/ProfilePage'));
-const LoginPage = lazy(() => import('@/components/pages/LoginPage'));
 const FinancialHistoryPage = lazy(() => import('@/components/pages/FinancialHistoryPage'));
 const ResetBarracoPage = lazy(() => import('@/components/pages/ResetBarracoPage'));
 const MoneyLaunderingPage = lazy(() => import('@/components/pages/MoneyLaunderingPage'));
@@ -227,13 +225,6 @@ const router = createBrowserRouter(
           },
         },
         {
-          path: 'login',
-          element: <LoginPage />,
-          routeMetadata: {
-            pageIdentifier: 'login',
-          },
-        },
-        {
           path: 'financial-history',
           element: <FinancialHistoryPage />,
           routeMetadata: {
@@ -254,8 +245,6 @@ const router = createBrowserRouter(
 
 export default function AppRouter() {
   return (
-    <MemberProvider>
-      <RouterProvider router={router} />
-    </MemberProvider>
+    <RouterProvider router={router} />
   );
 }

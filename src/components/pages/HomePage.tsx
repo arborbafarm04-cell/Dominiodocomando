@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Chrome, ShieldCheck, Eye, Play, AlertTriangle, UserPlus } from 'lucide-react';
+import { Eye, Play, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { usePlayerAuth, checkAndRestoreSession } from '@/hooks/usePlayerAuth';
+import { checkAndRestoreSession } from '@/hooks/usePlayerAuth';
 import { usePlayerStore } from '@/store/playerStore';
-import PlayerRegistration from '@/components/PlayerRegistration';
-import QuickLoginForm from '@/components/QuickLoginForm';
+import LocalLoginForm from '@/components/LocalLoginForm';
 
 const VIDEO_BG =
   'https://video.wixstatic.com/video/50f4bf_570bf5fe87734b1cb3523fd958acce0e/720p/mp4/file.mp4';
@@ -14,11 +13,9 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [stage, setStage] = useState<'intro' | 'login'>('intro');
   const [textIndex, setTextIndex] = useState(0);
-  const [showRegistration, setShowRegistration] = useState(false);
   const [autoAdvance, setAutoAdvance] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 
-  const { isAuthenticated, isLoading } = usePlayerAuth();
   const setPlayer = usePlayerStore((state) => state.setPlayer);
 
   const phrases = [
@@ -52,13 +49,6 @@ export default function HomePage() {
 
     restoreSession();
   }, [navigate, setPlayer]);
-
-  useEffect(() => {
-    if (isCheckingSession) return;
-    if (!isLoading && isAuthenticated) {
-      navigate('/star-map');
-    }
-  }, [isAuthenticated, isLoading, navigate, isCheckingSession]);
 
   useEffect(() => {
     if (stage !== 'intro' || isCheckingSession) return;
@@ -213,38 +203,7 @@ export default function HomePage() {
                 </div>
 
                 <div className="grid gap-4">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setShowRegistration(true)}
-                    className="flex items-center gap-4 bg-cyan-600 p-4 font-black uppercase tracking-tighter text-white transition-transform hover:bg-cyan-500"
-                  >
-                    <UserPlus size={20} /> Criar Perfil
-                  </motion.button>
-
-                  <QuickLoginForm />
-
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      window.location.href = '/api/auth/login';
-                    }}
-                    className="flex items-center gap-4 bg-white p-4 font-black uppercase tracking-tighter text-black transition-transform hover:bg-gray-200"
-                  >
-                    <Chrome size={20} /> Google Access
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      console.log('Facebook login clicked');
-                    }}
-                    className="flex items-center gap-4 bg-[#1877F2] p-4 font-black uppercase tracking-tighter text-white transition-transform hover:bg-[#165ec7]"
-                  >
-                    <ShieldCheck size={20} /> Facebook Secure
-                  </motion.button>
+                  <LocalLoginForm />
 
                   <div className="relative py-4">
                     <div className="absolute inset-0 flex items-center">
@@ -288,18 +247,6 @@ export default function HomePage() {
           <div>Lat: -23.5505 | Lon: -46.6333</div>
         </div>
       </motion.div>
-
-      <AnimatePresence>
-        {showRegistration && (
-          <PlayerRegistration
-            onClose={() => setShowRegistration(false)}
-            onSuccess={() => {
-              setShowRegistration(false);
-              navigate('/star-map');
-            }}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }

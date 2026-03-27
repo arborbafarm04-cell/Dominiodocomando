@@ -99,24 +99,15 @@ export default function Header() {
               </Button>
             </>
           ) : (
-            <>
-              <Button
-                onClick={() => navigate('/')}
-                variant="ghost"
-                size="sm"
-                className="text-secondary hover:text-white hover:bg-secondary/10"
-              >
-                <Home className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Início</span>
-              </Button>
-              <Button
-                onClick={() => navigate('/login')}
-                size="sm"
-                className="bg-primary hover:bg-primary/80 text-white"
-              >
-                Entrar
-              </Button>
-            </>
+            <Button
+              onClick={() => navigate('/')}
+              variant="ghost"
+              size="sm"
+              className="text-secondary hover:text-white hover:bg-secondary/10"
+            >
+              <Home className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Início</span>
+            </Button>
           )}
         </motion.div>
       </div>
