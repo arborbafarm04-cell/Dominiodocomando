@@ -112,7 +112,7 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x06080d);
-    scene.fog = new THREE.Fog(0x0b1017, 40, 140);
+    scene.fog = new THREE.Fog(0x09111a, 28, 120);
 
     const width = containerRef.current.clientWidth;
     const height = containerRef.current.clientHeight;
@@ -131,13 +131,15 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.55;
     containerRef.current.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.85);
     scene.add(ambientLight);
 
-    const moonLight = new THREE.DirectionalLight(0xd7ecff, 2.4);
-    moonLight.position.set(22, 40, 12);
+    const moonLight = new THREE.DirectionalLight(0xcfe8ff, 3.8);
+    moonLight.position.set(25, 50, 20);
     moonLight.castShadow = true;
     moonLight.shadow.mapSize.width = 2048;
     moonLight.shadow.mapSize.height = 2048;
@@ -149,13 +151,25 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     moonLight.shadow.bias = -0.00012;
     scene.add(moonLight);
 
-    const warmLight = new THREE.DirectionalLight(0xffd48a, 1.5);
-    warmLight.position.set(-18, 20, -8);
-    scene.add(warmLight);
+    const blueFillLight = new THREE.DirectionalLight(0x00d9ff, 1.5);
+    blueFillLight.position.set(-28, 18, -18);
+    scene.add(blueFillLight);
 
-    const rimLight = new THREE.DirectionalLight(0x3ddcff, 0.9);
-    rimLight.position.set(0, 18, -30);
+    const warmFillLight = new THREE.DirectionalLight(0xffb347, 2.2);
+    warmFillLight.position.set(16, 14, 12);
+    scene.add(warmFillLight);
+
+    const rimLight = new THREE.DirectionalLight(0x7ae7ff, 1.25);
+    rimLight.position.set(0, 20, -35);
     scene.add(rimLight);
+
+    const centerGlow = new THREE.PointLight(0x00eaff, 3.0, 28, 2);
+    centerGlow.position.set(0, 5, 0);
+    scene.add(centerGlow);
+
+    const warmCenterAccent = new THREE.PointLight(0xff9a3d, 1.6, 18, 2);
+    warmCenterAccent.position.set(0, 3, 0);
+    scene.add(warmCenterAccent);
 
     const aaa3dSystem = new AAA3DVisualSystem(scene, camera, renderer);
     aaa3dSystemRef.current = aaa3dSystem;
@@ -265,15 +279,19 @@ const createGroundCanvas = (mode: 'dirt' | 'asphalt') => {
     const cityMaterial = new THREE.MeshStandardMaterial({
       map: asphaltTexture,
       color: 0x43474d,
-      roughness: 0.92,
-      metalness: 0.02,
+      roughness: 0.62,
+      metalness: 0.22,
+      emissive: new THREE.Color(0x0f1115),
+      emissiveIntensity: 0.22,
     });
 
     const favelaMaterial = new THREE.MeshStandardMaterial({
       map: dirtTexture,
       color: 0x6b5e4a,
-      roughness: 0.96,
-      metalness: 0,
+      roughness: 0.95,
+      metalness: 0.02,
+      emissive: new THREE.Color(0x120d08),
+      emissiveIntensity: 0.08,
     });
 
     const cityTileCount = CITY_COLUMNS * gridHeight;
@@ -298,8 +316,10 @@ const createGroundCanvas = (mode: 'dirt' | 'asphalt') => {
       new THREE.MeshStandardMaterial({
         map: asphaltTexture,
         color: 0x2f343b,
-        roughness: 0.94,
-        metalness: 0.01,
+        roughness: 0.58,
+        metalness: 0.28,
+        emissive: new THREE.Color(0x11151b),
+        emissiveIntensity: 0.18,
       })
     );
     asphaltStrip.rotation.x = -Math.PI / 2;
@@ -310,6 +330,24 @@ const createGroundCanvas = (mode: 'dirt' | 'asphalt') => {
     );
     asphaltStrip.receiveShadow = true;
     scene.add(asphaltStrip);
+
+    const cityGlowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(CITY_COLUMNS * tileSize, gridTotalHeight),
+      new THREE.MeshBasicMaterial({
+        color: 0x00bfff,
+        transparent: true,
+        opacity: 0.06,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+      })
+    );
+    cityGlowPlane.rotation.x = -Math.PI / 2;
+    cityGlowPlane.position.set(
+      startX + (CITY_COLUMNS * tileSize) / 2,
+      0.02,
+      startZ + gridTotalHeight / 2
+    );
+    scene.add(cityGlowPlane);
 
     const favelaBase = new THREE.Mesh(
       new THREE.PlaneGeometry((gridWidth - CITY_COLUMNS) * tileSize, gridTotalHeight),
@@ -328,6 +366,20 @@ const createGroundCanvas = (mode: 'dirt' | 'asphalt') => {
     );
     favelaBase.receiveShadow = true;
     scene.add(favelaBase);
+
+    const centerDisc = new THREE.Mesh(
+      new THREE.CircleGeometry(6, 32),
+      new THREE.MeshBasicMaterial({
+        color: 0x00d9ff,
+        transparent: true,
+        opacity: 0.08,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+      })
+    );
+    centerDisc.rotation.x = -Math.PI / 2;
+    centerDisc.position.set(0, 0.03, 0);
+    scene.add(centerDisc);
 
     const dummy = new THREE.Object3D();
     let cityIndex = 0;
@@ -423,13 +475,13 @@ const gridLinesGeometry = new THREE.BufferGeometry();
         new THREE.MeshStandardMaterial({
           color: 0xffd27a,
           emissive: 0xffbb55,
-          emissiveIntensity: 1.2,
+          emissiveIntensity: 3.2,
         })
       );
       lamp.position.set(0, 3.15, 0);
       postGroup.add(lamp);
 
-      const pointLight = new THREE.PointLight(0xffd48a, 1.6, 11, 2);
+      const pointLight = new THREE.PointLight(0xffd48a, 3.8, 20, 2);
       pointLight.position.set(0, 3.1, 0);
       postGroup.add(pointLight);
 
@@ -536,7 +588,7 @@ const gridLinesGeometry = new THREE.BufferGeometry();
       model.rotation.y = rotateY;
     };
 
-    const applyModelLook = (model: THREE.Group, emissiveIntensity = 0.18) => {
+    const applyModelLook = (model: THREE.Group, emissiveIntensity = 0.3) => {
       model.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           child.castShadow = true;
@@ -544,8 +596,8 @@ const gridLinesGeometry = new THREE.BufferGeometry();
 
           if (child.material instanceof THREE.MeshStandardMaterial) {
             child.material.emissiveIntensity = emissiveIntensity;
-            child.material.metalness = Math.max(0, child.material.metalness - 0.2);
-            child.material.roughness = Math.min(1, child.material.roughness + 0.15);
+            child.material.metalness = Math.max(0, child.material.metalness - 0.12);
+            child.material.roughness = Math.min(1, child.material.roughness + 0.08);
           }
         }
       });
