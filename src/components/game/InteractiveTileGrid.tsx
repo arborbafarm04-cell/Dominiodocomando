@@ -112,8 +112,7 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x06080d);
-    // BLOCO 9 — FOG (PROFUNDO)
-    scene.fog = new THREE.Fog(0x0a0f18, 30, 120);
+    scene.fog = new THREE.Fog(0x09111a, 28, 120);
 
     const width = containerRef.current.clientWidth;
     const height = containerRef.current.clientHeight;
@@ -122,15 +121,8 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     const startX = -gridTotalWidth / 2;
     const startZ = -gridTotalHeight / 2;
 
-    const camera = new THREE.PerspectiveCamera(
-      60,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-
-    // NOVA CÂMERA (mais próxima e cinematográfica)
-    camera.position.set(6, 16, 18);
+    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+    camera.position.set(0, 30, 26);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -143,12 +135,11 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     renderer.toneMappingExposure = 1.55;
     containerRef.current.appendChild(renderer.domElement);
 
-    // BLOCO 7 — LUZ GLOBAL (ESSENCIAL)
-    const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.85);
     scene.add(ambientLight);
 
-    const moonLight = new THREE.DirectionalLight(0xcfe8ff, 3.5);
-    moonLight.position.set(20, 40, 20);
+    const moonLight = new THREE.DirectionalLight(0xcfe8ff, 3.8);
+    moonLight.position.set(25, 50, 20);
     moonLight.castShadow = true;
     moonLight.shadow.mapSize.width = 2048;
     moonLight.shadow.mapSize.height = 2048;
@@ -160,15 +151,17 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     moonLight.shadow.bias = -0.00012;
     scene.add(moonLight);
 
-    const blueLight = new THREE.DirectionalLight(0x00eaff, 1.5);
-    blueLight.position.set(-20, 10, -10);
-    scene.add(blueLight);
+    const blueFillLight = new THREE.DirectionalLight(0x00d9ff, 1.5);
+    blueFillLight.position.set(-28, 18, -18);
+    scene.add(blueFillLight);
 
-    const warmLight = new THREE.DirectionalLight(0xffa64d, 2);
-    warmLight.position.set(10, 10, 10);
-    scene.add(warmLight);
+    const warmFillLight = new THREE.DirectionalLight(0xffb347, 2.2);
+    warmFillLight.position.set(16, 14, 12);
+    scene.add(warmFillLight);
 
-    // ... keep existing code (rimLight and other lights)
+    const rimLight = new THREE.DirectionalLight(0x7ae7ff, 1.25);
+    rimLight.position.set(0, 20, -35);
+    scene.add(rimLight);
 
     const centerGlow = new THREE.PointLight(0x00eaff, 3.0, 28, 2);
     centerGlow.position.set(0, 5, 0);
@@ -178,204 +171,27 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     warmCenterAccent.position.set(0, 3, 0);
     scene.add(warmCenterAccent);
 
-    // TAREFA 1 — CRIAR BASE DE TERRENO (SUBSTITUIR GRID VISUAL)
-    const terrain = new THREE.Mesh(
-      new THREE.BoxGeometry(80, 8, 80),
-      new THREE.MeshStandardMaterial({
-        color: 0x5a4c3b,
-        roughness: 1,
-        metalness: 0.05,
-      })
-    );
-    terrain.position.y = -4;
-    terrain.castShadow = true;
-    terrain.receiveShadow = true;
-    scene.add(terrain);
-
-    // TAREFA 2 — CRIAR TOPO DO TERRENO (ONDE FICA O GRID)
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(80, 80, 32, 32),
-      new THREE.MeshStandardMaterial({
-        color: 0x6b5e4a,
-        roughness: 0.95,
-      })
-    );
-    ground.rotation.x = -Math.PI / 2;
-    
-    // ADICIONAR relevo leve
-    const pos = ground.geometry.attributes.position;
-    for (let i = 0; i < pos.count; i++) {
-      const y = Math.random() * 0.8;
-      pos.setY(i, y);
-    }
-    ground.geometry.computeVertexNormals();
-    ground.castShadow = true;
-    ground.receiveShadow = true;
-    scene.add(ground);
-
-    // TAREFA 4 — CRIAR BORDA DE MORRO (EFEITO PENHASCO)
-    const cliffMaterial = new THREE.MeshStandardMaterial({
-      color: 0x4a3d2e,
-      roughness: 1,
-    });
-
-    // Parede frontal
-    const cliffFront = new THREE.Mesh(
-      new THREE.BoxGeometry(80, 10, 2),
-      cliffMaterial
-    );
-    cliffFront.position.set(0, 3, 40);
-    cliffFront.castShadow = true;
-    cliffFront.receiveShadow = true;
-    scene.add(cliffFront);
-
-    // Parede traseira
-    const cliffBack = new THREE.Mesh(
-      new THREE.BoxGeometry(80, 10, 2),
-      cliffMaterial
-    );
-    cliffBack.position.set(0, 3, -40);
-    cliffBack.castShadow = true;
-    cliffBack.receiveShadow = true;
-    scene.add(cliffBack);
-
-    // Parede esquerda
-    const cliffLeft = new THREE.Mesh(
-      new THREE.BoxGeometry(2, 10, 80),
-      cliffMaterial
-    );
-    cliffLeft.position.set(-40, 3, 0);
-    cliffLeft.castShadow = true;
-    cliffLeft.receiveShadow = true;
-    scene.add(cliffLeft);
-
-    // Parede direita
-    const cliffRight = new THREE.Mesh(
-      new THREE.BoxGeometry(2, 10, 80),
-      cliffMaterial
-    );
-    cliffRight.position.set(40, 3, 0);
-    cliffRight.castShadow = true;
-    cliffRight.receiveShadow = true;
-    scene.add(cliffRight);
-
-    // TAREFA 5 — ADICIONAR CIDADE AO FUNDO (REALISTA)
-    const cityGroup = new THREE.Group();
-
-    for (let i = 0; i < 40; i++) {
-      const h = 8 + Math.random() * 30;
-
-      const building = new THREE.Mesh(
-        new THREE.BoxGeometry(2, h, 2),
-        new THREE.MeshStandardMaterial({
-          color: 0x1a2230,
-          emissive: 0x111827,
-          emissiveIntensity: 0.4,
-        })
-      );
-
-      building.position.set(
-        -40 + Math.random() * 80,
-        h / 2,
-        -50
-      );
-
-      building.castShadow = true;
-      building.receiveShadow = true;
-      cityGroup.add(building);
-    }
-
-    scene.add(cityGroup);
-
-    // TAREFA 6 — ADICIONAR LUZ DE CIDADE AO FUNDO
-    const cityGlow = new THREE.PointLight(0xffaa55, 4, 200);
-    cityGlow.position.set(0, 20, -60);
-    scene.add(cityGlow);
-
     const aaa3dSystem = new AAA3DVisualSystem(scene, camera, renderer);
     aaa3dSystemRef.current = aaa3dSystem;
-
-    // BLOCO 2 — SKYLINE (ACABA COM O FUNDO PRETO)
-    const skylineGroup = new THREE.Group();
-
-    for (let i = 0; i < 25; i++) {
-      const height = 10 + Math.random() * 25;
-
-      const building = new THREE.Mesh(
-        new THREE.BoxGeometry(2 + Math.random() * 2, height, 2 + Math.random() * 2),
-        new THREE.MeshStandardMaterial({
-          color: 0x111826,
-          roughness: 1,
-          metalness: 0,
-          emissive: 0x05080f,
-          emissiveIntensity: 0.2,
-        })
-      );
-
-      building.position.set(
-        -60 + i * 5,
-        height / 2,
-        -40
-      );
-
-      skylineGroup.add(building);
-    }
-
-    scene.add(skylineGroup);
-
-    // ... keep existing code (createUrbanSkyline function)
-
-    // BLOCO 3 — GLOW URBANO (ATMOSFERA)
-    const createGlow = (color: number, x: number) => {
-      const glow = new THREE.Mesh(
-        new THREE.PlaneGeometry(80, 40),
-        new THREE.MeshBasicMaterial({
-          color,
-          transparent: true,
-          opacity: 0.12,
-          blending: THREE.AdditiveBlending,
-          side: THREE.DoubleSide,
-        })
-      );
-
-      glow.position.set(x, 20, -30);
-      scene.add(glow);
-    };
-
-    // cidade (frio)
-    createGlow(0x00cfff, -10);
-
-    // favela (quente)
-    createGlow(0xff7a2f, 20);
-
-    // central leve
-    createGlow(0x00eaff, 0);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = true;
     controls.enableZoom = true;
     controls.enableRotate = true;
     controls.target.set(0, 0, 0);
-    
-    // BLOCO 1 — CÂMERA CINEMATOGRÁFICA (ESSENCIAL)
+    controls.maxPolarAngle = Math.PI / 2.08;
+    controls.minPolarAngle = Math.PI / 5;
+    controls.minDistance = 16;
+    controls.maxDistance = 70;
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-
-    controls.minDistance = 12;
-    controls.maxDistance = 38;
-
-    controls.minPolarAngle = Math.PI / 4.5;
-    controls.maxPolarAngle = Math.PI / 2.2;
-    
-    // ... keep existing code (zoomSpeed, rotateSpeed, azimuth angles)
+    controls.dampingFactor = 0.08;
     controls.zoomSpeed = 1.15;
     controls.rotateSpeed = 0.75;
     controls.minAzimuthAngle = -Infinity;
     controls.maxAzimuthAngle = Infinity;
     controls.update();
     controlsRef.current = controls;
-
-    const createGroundCanvas = (mode: 'dirt' | 'asphalt') => {
+const createGroundCanvas = (mode: 'dirt' | 'asphalt') => {
       const canvas = document.createElement('canvas');
       canvas.width = 512;
       canvas.height = 512;
@@ -460,24 +276,22 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
 
     const tileGeometry = new THREE.BoxGeometry(tileSize * 0.92, tileSize * 0.08, tileSize * 0.92);
 
-    // BLOCO 5 — ASFALTO MAIS VIVO (CIDADE)
     const cityMaterial = new THREE.MeshStandardMaterial({
       map: asphaltTexture,
-      color: 0x3a3f46,
-      roughness: 0.55,
-      metalness: 0.28,
-      emissive: 0x11151a,
-      emissiveIntensity: 0.25,
+      color: 0x43474d,
+      roughness: 0.62,
+      metalness: 0.22,
+      emissive: new THREE.Color(0x0f1115),
+      emissiveIntensity: 0.22,
     });
 
-    // BLOCO 6 — FAVELA MAIS ORGÂNICA
     const favelaMaterial = new THREE.MeshStandardMaterial({
       map: dirtTexture,
-      color: 0x5a4c3b,
+      color: 0x6b5e4a,
       roughness: 0.95,
-      metalness: 0.05,
-      emissive: 0x120d08,
-      emissiveIntensity: 0.12,
+      metalness: 0.02,
+      emissive: new THREE.Color(0x120d08),
+      emissiveIntensity: 0.08,
     });
 
     const cityTileCount = CITY_COLUMNS * gridHeight;
@@ -501,11 +315,11 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       new THREE.PlaneGeometry(CITY_COLUMNS * tileSize, gridTotalHeight),
       new THREE.MeshStandardMaterial({
         map: asphaltTexture,
-        color: 0x1f2329,
-        roughness: 0.45,
-        metalness: 0.4,
-        emissive: new THREE.Color(0x0a0f15),
-        emissiveIntensity: 0.25,
+        color: 0x2f343b,
+        roughness: 0.58,
+        metalness: 0.28,
+        emissive: new THREE.Color(0x11151b),
+        emissiveIntensity: 0.18,
       })
     );
     asphaltStrip.rotation.x = -Math.PI / 2;
@@ -516,23 +330,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
     );
     asphaltStrip.receiveShadow = true;
     scene.add(asphaltStrip);
-
-    // BLOCO 4 — RODOVIA ENTRE CIDADE E FAVELA
-    const road = new THREE.Mesh(
-      new THREE.PlaneGeometry(4, gridHeight * tileSize),
-      new THREE.MeshStandardMaterial({
-        color: 0x1a1d22,
-        roughness: 0.6,
-        metalness: 0.3,
-        emissive: 0x0a0f14,
-        emissiveIntensity: 0.2,
-      })
-    );
-
-    road.rotation.x = -Math.PI / 2;
-    road.position.set(0, 0.02, 0);
-
-    scene.add(road);
 
     const cityGlowPlane = new THREE.Mesh(
       new THREE.PlaneGeometry(CITY_COLUMNS * tileSize, gridTotalHeight),
@@ -556,11 +353,9 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       new THREE.PlaneGeometry((gridWidth - CITY_COLUMNS) * tileSize, gridTotalHeight),
       new THREE.MeshStandardMaterial({
         map: dirtTexture,
-        color: 0x7a6d52,
+        color: 0x655642,
         roughness: 0.98,
         metalness: 0,
-        emissive: new THREE.Color(0x2a1f15),
-        emissiveIntensity: 0.15,
       })
     );
     favelaBase.rotation.x = -Math.PI / 2;
@@ -637,11 +432,11 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
 
     scene.add(cityMesh);
     scene.add(favelaMesh);
-    const gridLinesGeometry = new THREE.BufferGeometry();
+const gridLinesGeometry = new THREE.BufferGeometry();
     const gridLinesMaterial = new THREE.LineBasicMaterial({
       color: 0x8ec6ff,
       transparent: true,
-      opacity: 0.08,
+      opacity: 0.15,
     });
     const gridLinesPoints: number[] = [];
 
@@ -758,54 +553,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       addGrassTuft(startX + gx * tileSize + tileSize / 2, startZ + gz * tileSize + tileSize / 2);
     }
 
-    // TAREFA 7 — MELHORAR O CHÃO (Detritos e variação visual)
-    const addDebris = (x: number, z: number) => {
-      const debrisGroup = new THREE.Group();
-      const debrisSize = 0.15 + Math.random() * 0.1;
-      const debrisMaterial = new THREE.MeshStandardMaterial({
-        color: new THREE.Color().setHSL(0, 0, 0.15 + Math.random() * 0.1),
-        roughness: 0.95,
-        metalness: 0,
-      });
-
-      const debris = new THREE.Mesh(
-        new THREE.BoxGeometry(debrisSize, debrisSize * 0.3, debrisSize),
-        debrisMaterial
-      );
-      debris.rotation.z = Math.random() * Math.PI;
-      debrisGroup.add(debris);
-      debrisGroup.position.set(x, 0.08, z);
-      scene.add(debrisGroup);
-    };
-
-    // Adicionar detritos na favela
-    for (let i = 0; i < 60; i++) {
-      const gx = CITY_COLUMNS + Math.floor(Math.random() * (gridWidth - CITY_COLUMNS));
-      const gz = Math.floor(Math.random() * gridHeight);
-      addDebris(startX + gx * tileSize + tileSize / 2, startZ + gz * tileSize + tileSize / 2);
-    }
-
-    // TAREFA 8 — JANELAS E VIDA NOS PRÉDIOS (Point lights para simular atividade)
-    const addBuildingLights = (groupRef: React.MutableRefObject<THREE.Group | null>) => {
-      if (!groupRef.current) return;
-
-      const lightCount = 1 + Math.floor(Math.random() * 2);
-      for (let i = 0; i < lightCount; i++) {
-        const light = new THREE.PointLight(
-          Math.random() > 0.5 ? 0xffdd99 : 0x00ccff,
-          1.2 + Math.random() * 0.8,
-          12,
-          2
-        );
-        light.position.set(
-          (Math.random() - 0.5) * 2,
-          2 + Math.random() * 3,
-          (Math.random() - 0.5) * 2
-        );
-        groupRef.current.add(light);
-      }
-    };
-
     const gltfLoader = new GLTFLoader();
 
     const blockTiles = (startGridX: number, startGridZ: number, sizeX: number, sizeZ: number) => {
@@ -900,15 +647,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
             aaa3dSystemRef.current.addGroundShadow(group, Math.max(sizeX, sizeZ));
           }
 
-          // BLOCO 8 — PRÉDIOS COM VIDA
-          const light = new THREE.PointLight(0xffffff, 1.2, 6);
-          light.position.set(0, 2, 0);
-          group.add(light);
-
-          const neon = new THREE.PointLight(0x00eaff, 0.8, 5);
-          neon.position.set(0, 1.5, 0);
-          group.add(neon);
-
           onLoaded?.(group);
         },
         undefined,
@@ -918,7 +656,7 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       );
     };
 
-    // CIDADE - ESQUERDA
+// CIDADE - ESQUERDA
     addBuilding({
       url: CITY_PUBLIC_URL,
       gridX: 1,
@@ -929,7 +667,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       clickable: true,
       onLoaded: (group) => {
         publicBuildingGroupRef.current = group;
-        addBuildingLights(publicBuildingGroupRef);
       },
     });
 
@@ -941,9 +678,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       sizeZ: 4,
       rotateY: Math.PI / 2,
       clickable: false,
-      onLoaded: (group) => {
-        addBuildingLights({ current: group });
-      },
     });
 
     addBuilding({
@@ -956,7 +690,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       clickable: true,
       onLoaded: (group) => {
         delegaciaGroupRef.current = group;
-        addBuildingLights(delegaciaGroupRef);
       },
     });
 
@@ -970,7 +703,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       clickable: true,
       onLoaded: (group) => {
         luxuryStoreGroupRef.current = group;
-        addBuildingLights(luxuryStoreGroupRef);
       },
     });
 
@@ -984,7 +716,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       clickable: true,
       onLoaded: (group) => {
         casinoGroupRef.current = group;
-        addBuildingLights(casinoGroupRef);
       },
     });
 
@@ -998,7 +729,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       clickable: true,
       onLoaded: (group) => {
         viaturaGroupRef.current = group;
-        addBuildingLights(viaturaGroupRef);
       },
     });
 
@@ -1011,9 +741,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       sizeZ: 4,
       rotateY: -Math.PI / 2,
       clickable: false,
-      onLoaded: (group) => {
-        addBuildingLights({ current: group });
-      },
     });
 
     addBuilding({
@@ -1026,7 +753,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       clickable: true,
       onLoaded: (group) => {
         favelaCenterGroupRef.current = group;
-        addBuildingLights(favelaCenterGroupRef);
       },
     });
 
@@ -1038,9 +764,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       sizeZ: 4,
       rotateY: -Math.PI / 2,
       clickable: false,
-      onLoaded: (group) => {
-        addBuildingLights({ current: group });
-      },
     });
 
     addBuilding({
@@ -1053,7 +776,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       clickable: true,
       onLoaded: (group) => {
         commercialGroupRef.current = group;
-        addBuildingLights(commercialGroupRef);
       },
     });
 
@@ -1068,7 +790,6 @@ const InteractiveTileGrid: React.FC<InteractiveTileGridProps> = ({
       clickable: true,
       onLoaded: (group) => {
         qgGroupRef.current = group;
-        addBuildingLights(qgGroupRef);
       },
     });
 
