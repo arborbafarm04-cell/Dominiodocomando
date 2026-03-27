@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import InteractiveTileGrid from '@/components/game/InteractiveTileGrid';
@@ -6,38 +6,33 @@ import { useEnsurePlayerLot } from '@/hooks/useEnsurePlayerLot';
 import { usePlayerLot } from '@/hooks/usePlayerLot';
 import { useNavigate } from 'react-router-dom';
 import { usePlayerStore } from '@/store/playerStore';
-import { loadPlayerFromDatabase } from '@/services/playerDataService';
 import { usePlayerAuth } from '@/hooks/usePlayerAuth';
 
 export default function StarMapPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // 🔥 AGUARDAR reidratação da autenticação
-  const { isLoading: isAuthLoading } = usePlayerAuth();
+  const { isLoading: isAuthLoading, isAuthenticated } = usePlayerAuth();
   const player = usePlayerStore((state) => state.player);
 
   useEnsurePlayerLot(40, 20);
   const lot = usePlayerLot();
 
-  const [showLuxuryNotification, setShowLuxuryNotification] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
+const [showLuxuryNotification, setShowLuxuryNotification] = useState(false);
   const [showQGNotification, setShowQGNotification] = useState(false);
   const [showGiroNotification, setShowGiroNotification] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(true);
-
-  const hasLoadedPlayerRef = useRef(false);
 
   const handleLuxuryStoreClick = () => {
     setShowLuxuryNotification(true);
     setTimeout(() => {
       setShowLuxuryNotification(false);
       navigate('/luxury-showroom');
-    }, 1500);
+    }, 1200);
   };
 
   const handleQGClick = () => {
     setShowQGNotification(true);
-    setTimeout(() => setShowQGNotification(false), 3000);
+    setTimeout(() => setShowQGNotification(false), 2000);
   };
 
   const handleGiroClick = () => {
@@ -45,175 +40,65 @@ export default function StarMapPage() {
     setTimeout(() => {
       setShowGiroNotification(false);
       navigate('/giro-no-asfalto');
-    }, 1500);
+    }, 1200);
   };
+useEffect(() => {
+    if (isAuthLoading) return;
 
-  // 🔥 CORREÇÃO: Aguardar reidratação ANTES de verificar player
-  useEffect(() => {
-    // Se ainda está carregando autenticação, não fazer nada
-    if (isAuthLoading) {
-      return;
-    }
-
-    // Autenticação completou - verificar se há player
-    if (!player?._id) {
-      navigate('/login');
+    if (!isAuthenticated || !player?._id) {
+      navigate('/');
       return;
     }
 
     setIsPageLoading(false);
-  }, [isAuthLoading, player?._id, navigate]);
-
-  useEffect(() => {
-    const hydratePlayer = async () => {
-      if (hasLoadedPlayerRef.current) return;
-      if (!player?._id) return;
-
-      hasLoadedPlayerRef.current = true;
-      await loadPlayerFromDatabase(player._id);
-    };
-
-    hydratePlayer();
-  }, [player?._id]);
-
-  useEffect(() => {
-    const canvas = document.getElementById('starfield-canvas') as HTMLCanvasElement | null;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    interface Star {
-      x: number;
-      y: number;
-      radius: number;
-      opacity: number;
-      pulseSpeed: number;
-      pulsePhase: number;
-    }
-
-    const stars: Star[] = [];
-    const starCount = 200;
-
-    for (let i = 0; i < starCount; i++) {
-      stars.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 1.5,
-        opacity: Math.random() * 0.5 + 0.3,
-        pulseSpeed: Math.random() * 0.02 + 0.005,
-        pulsePhase: Math.random() * Math.PI * 2,
-      });
-    }
-
-    let animationFrameId = 0;
-    let time = 0;
-const animate = () => {
-      time += 1;
-
-      ctx.fillStyle = 'rgba(15, 20, 30, 1)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      stars.forEach((star) => {
-        const pulse = Math.sin(time * star.pulseSpeed + star.pulsePhase) * 0.5 + 0.5;
-        const finalOpacity = star.opacity * (pulse * 0.7 + 0.3);
-
-        ctx.fillStyle = `rgba(255, 255, 255, ${finalOpacity})`;
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius * (pulse * 0.5 + 0.7), 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = `rgba(0, 234, 255, ${finalOpacity * 0.3})`;
-        ctx.lineWidth = 0.5;
-        ctx.stroke();
-      });
-
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', resizeCanvas);
-    };
-  }, []);
-
-  if (isPageLoading) {
+  }, [isAuthLoading, isAuthenticated, player?._id, navigate]);
+if (isPageLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-white text-lg font-heading">Carregando mapa...</div>
+      <div className="w-full h-screen flex items-center justify-center bg-black text-white text-lg">
+        Carregando mapa...
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="relative w-full h-screen bg-background overflow-hidden">
-      <canvas
-        id="starfield-canvas"
-        className="fixed top-0 left-0 w-full h-full z-0"
-        style={{ display: 'block' }}
-      />
+    <div className="w-full h-screen bg-black relative overflow-hidden">
 
-      <div className="fixed top-0 left-0 w-full h-full z-0 bg-gradient-to-b from-transparent via-transparent to-background/50" />
+      {/* 🌃 GRADIENTE AMBIENTE */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-[#0a0a0a] to-black z-0" />
 
-      <div className="relative z-10 w-full h-screen flex flex-col">
-        <Header />
+      {/* 🌆 GLOW CENTRAL */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,234,255,0.15),transparent_70%)] z-0" />
 
-        <div className="flex-1 w-full h-full overflow-hidden relative">
-          <InteractiveTileGrid
-            gridWidth={40}
-            gridHeight={20}
-            tileSize={1}
-            onLuxuryStoreClick={handleLuxuryStoreClick}
-            onQGClick={handleQGClick}
-            onGiroClick={handleGiroClick}
-            customObjects={
-              lot
-                ? [
-                    {
-                      position: { x: 0, z: 0 },
-                      gridX: lot.gridX || 0,
-                      gridZ: lot.gridZ || 0,
-                      size: 2,
-                      model: null,
-                      isClickable: true,
-                      modelUrl:
-                        'https://static.wixstatic.com/3d/50f4bf_a1a58716fad74a4999b6a3aba5cddf58.glb',
-                    },
-                  ]
-                : []
-            }
-          />
-{showLuxuryNotification && (
-            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end px-6 py-3 rounded-lg shadow-lg animate-pulse">
-              <p className="text-white font-heading text-lg">🏢 Loja de Luxo 3D Clicada!</p>
-            </div>
-          )}
+      <Header />
 
-          {showQGNotification && (
-            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-subtitle-neon-blue to-player-info-glow-blue px-6 py-3 rounded-lg shadow-lg animate-pulse">
-              <p className="text-white font-heading text-lg">🏛️ Quartel General Clicado!</p>
-            </div>
-          )}
-
-          {showGiroNotification && (
-            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end px-6 py-3 rounded-lg shadow-lg animate-pulse">
-              <p className="text-white font-heading text-lg">🎰 Giro no Asfalto Clicado!</p>
-            </div>
-          )}
-        </div>
-
-        <Footer />
+      {/* 🧠 MAPA */}
+      <div className="absolute inset-0 z-10">
+        <InteractiveTileGrid
+          onLuxuryStoreClick={handleLuxuryStoreClick}
+          onQGClick={handleQGClick}
+          onGiroClick={handleGiroClick}
+        />
       </div>
+{/* 💬 NOTIFICAÇÕES */}
+      {showLuxuryNotification && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-yellow-500 text-black px-6 py-2 rounded-lg font-bold shadow-lg z-20">
+          Entrando na Loja de Luxo...
+        </div>
+      )}
+
+      {showQGNotification && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg z-20">
+          QG do Comando
+        </div>
+      )}
+
+      {showGiroNotification && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-green-500 text-black px-6 py-2 rounded-lg font-bold shadow-lg z-20">
+          Giro no Asfalto...
+        </div>
+      )}
+
+      <Footer />
     </div>
   );
 }
