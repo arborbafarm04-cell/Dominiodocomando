@@ -15,6 +15,7 @@ import {
   deletePlayer as deletePlayerFromDatabase,
   getAllPlayers,
 } from './playerCoreService';
+import { multiplayerAuthService } from './multiplayerAuthService';
 
 function buildNewPlayerData(playerId: string, email: string, playerName: string): Partial<Players> {
   const now = new Date().toISOString();
@@ -68,10 +69,22 @@ export async function savePlayer(player: Partial<Players>) {
     });
   }
 
-  return savePlayerInDatabase({
+  const savedPlayer = await savePlayerInDatabase({
     ...existingPlayer,
     ...player,
   });
+
+  // Sincronizar dados do jogador com multiplayerAuthService
+  try {
+    await multiplayerAuthService.syncPlayerData({
+      playerId: savedPlayer._id,
+      playerData: savedPlayer,
+    });
+  } catch (error) {
+    console.warn('Falha ao sincronizar dados do jogador em multiplayer:', error);
+  }
+
+  return savedPlayer;
 }
 
 export async function updatePlayer(playerId: string, updates: Partial<Players>) {
@@ -81,10 +94,22 @@ export async function updatePlayer(playerId: string, updates: Partial<Players>) 
     throw new Error(`Player ${playerId} not found`);
   }
 
-  return savePlayerInDatabase({
+  const updatedPlayer = await savePlayerInDatabase({
     ...existingPlayer,
     ...updates,
   });
+
+  // Sincronizar dados do jogador com multiplayerAuthService
+  try {
+    await multiplayerAuthService.syncPlayerData({
+      playerId: updatedPlayer._id,
+      playerData: updatedPlayer,
+    });
+  } catch (error) {
+    console.warn('Falha ao sincronizar dados do jogador em multiplayer:', error);
+  }
+
+  return updatedPlayer;
 }
 
 export async function loadPlayers() {
@@ -120,6 +145,17 @@ export async function registerLocalPlayer(email: string, password: string, playe
 
   await registerCredentials(normalizedEmail, password, createdPlayer._id);
   await createSession(createdPlayer._id, normalizedEmail);
+
+  // Integração com multiplayerAuthService
+  try {
+    await multiplayerAuthService.registerMultiplayerSession({
+      playerId: createdPlayer._id,
+      playerName: playerName.trim(),
+      email: normalizedEmail,
+    });
+  } catch (error) {
+    console.warn('Falha ao registrar sessão de multiplayer:', error);
+  }
 
   return createdPlayer;
 }
@@ -161,11 +197,29 @@ export async function loginLocalPlayer(email: string, password: string) {
     lastLoginAt: now,
   });
 
+  // Integração com multiplayerAuthService
+  try {
+    await multiplayerAuthService.authenticateMultiplayerSession({
+      playerId: updatedPlayer._id,
+      playerName: updatedPlayer.playerName || 'Player',
+      email: normalizedEmail,
+    });
+  } catch (error) {
+    console.warn('Falha ao autenticar sessão de multiplayer:', error);
+  }
+
   return updatedPlayer;
 }
 
 export async function logoutLocalPlayer() {
   await destroySession();
+
+  // Integração com multiplayerAuthService
+  try {
+    await multiplayerAuthService.terminateMultiplayerSession();
+  } catch (error) {
+    console.warn('Falha ao encerrar sessão de multiplayer:', error);
+  }
 }
 
 export async function getCurrentLocalPlayer() {
