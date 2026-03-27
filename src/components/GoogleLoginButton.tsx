@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useMember } from '@/integrations';
 import { useNavigate } from 'react-router-dom';
 import { registerPlayer, getPlayerById } from '@/services/playerService';
-import { resetPlayerSession } from '@/services/sessionResetService';
 import { usePlayerStore } from '@/store/playerStore';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -28,13 +27,12 @@ export default function GoogleLoginButton() {
 
   useEffect(() => {
     const handleGoogleAuth = async () => {
+      // ✅ CORREÇÃO: Não resetar sessão aqui - deixar que usePlayerAuth faça isso
+      // Apenas processar o novo login do Google
       if (!member || !member.loginEmail || hasHandled) return;
 
       try {
         setHasHandled(true);
-
-        // 🔥 RESET TOTAL (obrigatório pra multiplayer)
-        await resetPlayerSession();
 
         const email = member.loginEmail.trim().toLowerCase();
 

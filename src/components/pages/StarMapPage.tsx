@@ -7,11 +7,14 @@ import { usePlayerLot } from '@/hooks/usePlayerLot';
 import { useNavigate } from 'react-router-dom';
 import { usePlayerStore } from '@/store/playerStore';
 import { loadPlayerFromDatabase } from '@/services/playerDataService';
+import { usePlayerAuth } from '@/hooks/usePlayerAuth';
 
 export default function StarMapPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
+  // 🔥 AGUARDAR reidratação da autenticação
+  const { isLoading: isAuthLoading } = usePlayerAuth();
   const player = usePlayerStore((state) => state.player);
 
   useEnsurePlayerLot(40, 20);
@@ -45,14 +48,21 @@ export default function StarMapPage() {
     }, 1500);
   };
 
+  // 🔥 CORREÇÃO: Aguardar reidratação ANTES de verificar player
   useEffect(() => {
+    // Se ainda está carregando autenticação, não fazer nada
+    if (isAuthLoading) {
+      return;
+    }
+
+    // Autenticação completou - verificar se há player
     if (!player?._id) {
       navigate('/login');
       return;
     }
 
     setIsPageLoading(false);
-  }, [player?._id, navigate]);
+  }, [isAuthLoading, player?._id, navigate]);
 
   useEffect(() => {
     const hydratePlayer = async () => {
