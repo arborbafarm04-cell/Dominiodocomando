@@ -14,15 +14,13 @@ export default function StarMapPage() {
 
   const player = usePlayerStore((state) => state.player);
 
-  // 🔥 Garante lote automático
   useEnsurePlayerLot(40, 20);
-
-  // 🔥 Pega lote do jogador
   const lot = usePlayerLot();
 
   const [showLuxuryNotification, setShowLuxuryNotification] = useState(false);
   const [showQGNotification, setShowQGNotification] = useState(false);
   const [showGiroNotification, setShowGiroNotification] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
   const hasLoadedPlayerRef = useRef(false);
 
@@ -47,14 +45,15 @@ export default function StarMapPage() {
     }, 1500);
   };
 
-  // 🔐 Auth gate baseado em playerStore
   useEffect(() => {
     if (!player?._id) {
       navigate('/login');
+      return;
     }
+
+    setIsPageLoading(false);
   }, [player?._id, navigate]);
 
-  // 🔄 Rehidrata player
   useEffect(() => {
     const hydratePlayer = async () => {
       if (hasLoadedPlayerRef.current) return;
@@ -67,7 +66,6 @@ export default function StarMapPage() {
     hydratePlayer();
   }, [player?._id]);
 
-  // 🌌 Background
   useEffect(() => {
     const canvas = document.getElementById('starfield-canvas') as HTMLCanvasElement | null;
     if (!canvas) return;
@@ -83,14 +81,16 @@ export default function StarMapPage() {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    const stars: Array<{
+    interface Star {
       x: number;
       y: number;
       radius: number;
       opacity: number;
       pulseSpeed: number;
       pulsePhase: number;
-    }> = [];
+    }
+
+    const stars: Star[] = [];
     const starCount = 200;
 
     for (let i = 0; i < starCount; i++) {
@@ -106,8 +106,7 @@ export default function StarMapPage() {
 
     let animationFrameId = 0;
     let time = 0;
-
-    const animate = () => {
+const animate = () => {
       time += 1;
 
       ctx.fillStyle = 'rgba(15, 20, 30, 1)';
@@ -117,10 +116,14 @@ export default function StarMapPage() {
         const pulse = Math.sin(time * star.pulseSpeed + star.pulsePhase) * 0.5 + 0.5;
         const finalOpacity = star.opacity * (pulse * 0.7 + 0.3);
 
-        ctx.fillStyle = `rgba(255,255,255,${finalOpacity})`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${finalOpacity})`;
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius * (pulse * 0.5 + 0.7), 0, Math.PI * 2);
         ctx.fill();
+
+        ctx.strokeStyle = `rgba(0, 234, 255, ${finalOpacity * 0.3})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
       });
 
       animationFrameId = requestAnimationFrame(animate);
@@ -134,7 +137,7 @@ export default function StarMapPage() {
     };
   }, []);
 
-  if (!player?._id) {
+  if (isPageLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-white text-lg font-heading">Carregando mapa...</div>
@@ -147,7 +150,10 @@ export default function StarMapPage() {
       <canvas
         id="starfield-canvas"
         className="fixed top-0 left-0 w-full h-full z-0"
+        style={{ display: 'block' }}
       />
+
+      <div className="fixed top-0 left-0 w-full h-full z-0 bg-gradient-to-b from-transparent via-transparent to-background/50" />
 
       <div className="relative z-10 w-full h-screen flex flex-col">
         <Header />
@@ -164,7 +170,7 @@ export default function StarMapPage() {
               lot
                 ? [
                     {
-                      position: { x: 0, z: 0 }, // ⚠️ posição será corrigida no grid
+                      position: { x: 0, z: 0 },
                       gridX: lot.gridX || 0,
                       gridZ: lot.gridZ || 0,
                       size: 2,
@@ -177,22 +183,21 @@ export default function StarMapPage() {
                 : []
             }
           />
-
-          {showLuxuryNotification && (
-            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-orange-600 px-6 py-3 rounded-lg">
-              Loja de Luxo
+{showLuxuryNotification && (
+            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end px-6 py-3 rounded-lg shadow-lg animate-pulse">
+              <p className="text-white font-heading text-lg">🏢 Loja de Luxo 3D Clicada!</p>
             </div>
           )}
 
           {showQGNotification && (
-            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-blue-500 px-6 py-3 rounded-lg">
-              QG
+            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-subtitle-neon-blue to-player-info-glow-blue px-6 py-3 rounded-lg shadow-lg animate-pulse">
+              <p className="text-white font-heading text-lg">🏛️ Quartel General Clicado!</p>
             </div>
           )}
 
           {showGiroNotification && (
-            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 px-6 py-3 rounded-lg">
-              Giro no Asfalto
+            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-logo-gradient-start to-logo-gradient-end px-6 py-3 rounded-lg shadow-lg animate-pulse">
+              <p className="text-white font-heading text-lg">🎰 Giro no Asfalto Clicado!</p>
             </div>
           )}
         </div>
