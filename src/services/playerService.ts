@@ -136,7 +136,7 @@ export async function registerLocalPlayer(email: string, password: string, playe
  *
  * Step 1: Reset old session
  * Step 2: Validate email and password
- * Step 3: Load player data from database
+ * Step 3: Load player data from database (with fallback)
  * Step 4: Create authenticated session
  * Step 5: Update last login timestamp
  * Step 6: Return player data
@@ -147,13 +147,24 @@ export async function loginLocalPlayer(email: string, password: string) {
   await resetPlayerSession();
 
   const playerId = await validateCredentials(normalizedEmail, password);
-  const player = await getPlayerFromDatabase(playerId);
+  let player = await getPlayerFromDatabase(playerId);
 
+  // Fallback: se não encontrar por playerId, buscar por email normalizado
   if (!player) {
-    throw new Error('Jogador não encontrado no banco de dados');
+    const allPlayers = await getAllPlayers();
+    const playerByEmail = allPlayers.items?.find(
+      (p) => p.email?.toLowerCase() === normalizedEmail
+    );
+
+    if (playerByEmail) {
+      player = playerByEmail;
+    } else {
+      throw new Error('Jogador não encontrado no banco de dados');
+    }
   }
 
-  await createSession(playerId, normalizedEmail);
+  // Usar o _id real do player encontrado
+  await createSession(player._id, normalizedEmail);
 
   const now = new Date().toISOString();
   const updatedPlayer = await savePlayerInDatabase({
