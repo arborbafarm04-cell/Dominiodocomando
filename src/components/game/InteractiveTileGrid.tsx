@@ -271,8 +271,32 @@ const createGroundCanvas = (mode: 'dirt' | 'asphalt') => {
       return texture;
     };
 
-    const dirtTexture = makeTexture(createGroundCanvas('dirt'));
     const asphaltTexture = makeTexture(createGroundCanvas('asphalt'));
+    
+    // Load dirt texture from image
+    let dirtTexture = makeTexture(createGroundCanvas('dirt'));
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load(
+      'https://static.wixstatic.com/media/50f4bf_b6cbdd149dc941c49befb54b23abb86a~mv2.jpeg',
+      (loadedTexture) => {
+        loadedTexture.magFilter = THREE.LinearFilter;
+        loadedTexture.minFilter = THREE.LinearMipmapLinearFilter;
+        loadedTexture.wrapS = THREE.RepeatWrapping;
+        loadedTexture.wrapT = THREE.RepeatWrapping;
+        loadedTexture.repeat.set(4, 4);
+        dirtTexture = loadedTexture;
+        
+        // Update favela mesh material
+        if (favelaMeshRef.current && favelaMeshRef.current.material instanceof THREE.MeshStandardMaterial) {
+          (favelaMeshRef.current.material as THREE.MeshStandardMaterial).map = loadedTexture;
+          (favelaMeshRef.current.material as THREE.MeshStandardMaterial).needsUpdate = true;
+        }
+      },
+      undefined,
+      (error) => {
+        console.warn('Erro ao carregar textura de barro:', error);
+      }
+    );
 
     const tileGeometry = new THREE.BoxGeometry(tileSize * 0.92, tileSize * 0.08, tileSize * 0.92);
 
@@ -365,6 +389,7 @@ const createGroundCanvas = (mode: 'dirt' | 'asphalt') => {
       startZ + gridTotalHeight / 2
     );
     favelaBase.receiveShadow = true;
+    favelaBase.userData.isFavelaBase = true;
     scene.add(favelaBase);
 
     const centerDisc = new THREE.Mesh(
