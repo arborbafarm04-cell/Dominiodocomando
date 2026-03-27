@@ -337,6 +337,8 @@ const createGroundCanvas = (mode: 'dirt' | 'asphalt') => {
       metalness: 0.22,
       emissive: new THREE.Color(0x0f1115),
       emissiveIntensity: 0.22,
+      transparent: true,
+      opacity: 0,
     });
 
     const favelaMaterial = new THREE.MeshStandardMaterial({
@@ -346,6 +348,8 @@ const createGroundCanvas = (mode: 'dirt' | 'asphalt') => {
       metalness: 0.02,
       emissive: new THREE.Color(0x120d08),
       emissiveIntensity: 0.08,
+      transparent: true,
+      opacity: 0,
     });
 
     const cityTileCount = CITY_COLUMNS * gridHeight;
