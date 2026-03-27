@@ -328,7 +328,7 @@ const createGroundCanvas = (mode: 'dirt' | 'asphalt') => {
       }
     );
 
-    const tileGeometry = new THREE.BoxGeometry(tileSize * 0.92, tileSize * 0.08, tileSize * 0.92);
+    const tileGeometry = new THREE.BoxGeometry(tileSize * 0.92, tileSize * 0.35, tileSize * 0.92);
 
     const cityMaterial = new THREE.MeshStandardMaterial({
       map: asphaltTexture,
