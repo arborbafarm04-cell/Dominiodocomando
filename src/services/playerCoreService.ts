@@ -60,8 +60,6 @@ export async function createPlayer(playerData: Partial<Players>): Promise<Player
 
     level: playerData.level ?? 1,
     progress: playerData.progress ?? 0,
-    xp: playerData.xp ?? 0,
-    power: playerData.power ?? 0,
 
     dirtyMoney: playerData.dirtyMoney ?? 0,
     cleanMoney: playerData.cleanMoney ?? 0,
